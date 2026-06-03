@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Search, Plus, Map as MapIcon, List, Download, Save, ArrowLeft } from "lucide-react";
+import { Filter, Search, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video } from "lucide-react";
 import { MAPS } from "@/data/maps";
 import { LINEUPS } from "@/data/lineups";
 import { TYPE_META } from "@/lib/constants";
@@ -27,6 +27,7 @@ export default function Page() {
   const [type, setType] = useState("ALL");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
+  const [activeSpot, setActiveSpot] = useState(null);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
   const [admin, setAdmin] = useState(false);
@@ -61,6 +62,25 @@ export default function Page() {
       }),
     [lineups, activeMap, side, type, query]
   );
+
+  // group lineups by landing spot (target); the pin sits on the landing point
+  const spots = useMemo(() => {
+    const m = new Map();
+    filtered.forEach((l) => {
+      if (!m.has(l.target)) m.set(l.target, { target: l.target, x: l.x, y: l.y, lineups: [] });
+      m.get(l.target).lineups.push(l);
+    });
+    return [...m.values()];
+  }, [filtered]);
+
+  useEffect(() => { setActiveSpot(null); }, [activeMap, side, type, query, screen]);
+
+  const formMapId = editing ? editing.map : activeMap;
+  const formSpots = useMemo(() => {
+    const m = new Map();
+    lineups.filter((l) => l.map === formMapId).forEach((l) => { if (!m.has(l.target)) m.set(l.target, { target: l.target, x: l.x, y: l.y }); });
+    return [...m.values()];
+  }, [lineups, formMapId]);
 
   // animate the content stage whenever the screen changes (zoom in/out)
   useEffect(() => {
@@ -276,20 +296,41 @@ export default function Page() {
 
             {view === "map" ? (
               <div className="ub-mapview">
-                <TacticalMap map={mapMeta} lineups={filtered} onPin={setSelected} zoomable />
+                <TacticalMap map={mapMeta} spots={spots} activeSpot={activeSpot}
+                  onSelectSpot={setActiveSpot} onPin={setSelected} zoomable />
                 <div className="ub-maplegend">
-                  <div className="ub-legend-title">{filtered.length} pins · click for lineup</div>
-                  {Object.entries(TYPE_META).map(([key, t]) => {
-                    const n = filtered.filter((l) => l.type === key).length;
-                    return (
-                      <div key={key} className="ub-legend-row" style={{ opacity: n ? 1 : 0.35 }}>
-                        <span className="ub-legend-dot" style={{ background: t.color }} />
-                        <NadeIcon type={key} size={14} /> {t.label}
-                        <span className="ub-legend-n">{n}</span>
+                  {activeSpot ? (
+                    <div className="ub-spotpanel">
+                      <button className="ub-spotback" onClick={() => setActiveSpot(null)}><ArrowLeft size={14} /> All spots</button>
+                      <div className="ub-spot-h">{activeSpot}</div>
+                      <div className="ub-spot-sub">{(spots.find((s) => s.target === activeSpot)?.lineups.length) || 0} lineups · pick where you throw from</div>
+                      <div className="ub-spot-list">
+                        {(spots.find((s) => s.target === activeSpot)?.lineups || []).map((l) => (
+                          <button key={l.id} className="ub-spot-variant" onClick={() => setSelected(l)}>
+                            <span className="ub-spot-vicon" style={{ color: TYPE_META[l.type].color }}><NadeIcon type={l.type} size={15} /></span>
+                            <span className="ub-spot-vtext"><strong>{l.spawn || l.from}</strong><small>{l.throwType} · {l.difficulty}</small></span>
+                            {l.video && <Video size={13} className="ub-spot-vvid" />}
+                          </button>
+                        ))}
                       </div>
-                    );
-                  })}
-                  {admin && <div className="ub-legend-admin">Admin on · click a pin to edit or delete.</div>}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="ub-legend-title">{spots.length} spots · {filtered.length} lineups</div>
+                      {Object.entries(TYPE_META).map(([key, t]) => {
+                        const n = filtered.filter((l) => l.type === key).length;
+                        return (
+                          <div key={key} className="ub-legend-row" style={{ opacity: n ? 1 : 0.35 }}>
+                            <span className="ub-legend-dot" style={{ background: t.color }} />
+                            <NadeIcon type={key} size={14} /> {t.label}
+                            <span className="ub-legend-n">{n}</span>
+                          </div>
+                        );
+                      })}
+                      <div className="ub-legend-hint">Spots with a number hold several lineups — click to see all throws.</div>
+                      {admin && <div className="ub-legend-admin">Admin on · click a pin to edit or delete.</div>}
+                    </>
+                  )}
                 </div>
               </div>
             ) : filtered.length === 0 ? (
@@ -315,6 +356,7 @@ export default function Page() {
           onClose={() => { setAdding(false); setEditing(null); }}
           onSave={saveLineup}
           token={adminToken}
+          existingSpots={formSpots}
         />
       )}
       {showExport && <ExportModal lineups={lineups} onClose={() => setShowExport(false)} />}

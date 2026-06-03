@@ -22,11 +22,8 @@ function Uploader({ accept, token, onUploaded }) {
       if (!tok) { setBusy(false); return; }
       const res = await upload(file.name, file, { access: "public", handleUploadUrl: "/api/upload", clientPayload: tok });
       onUploaded(res.url);
-    } catch {
-      setErr("Upload failed — paste a URL");
-    } finally {
-      setBusy(false); e.target.value = "";
-    }
+    } catch { setErr("Upload failed — paste a URL"); }
+    finally { setBusy(false); e.target.value = ""; }
   }
   return (
     <>
@@ -39,15 +36,17 @@ function Uploader({ accept, token, onUploaded }) {
   );
 }
 
-export default function AddLineupForm({ map, onClose, onSave, initial, token }) {
+export default function AddLineupForm({ map, onClose, onSave, initial, token, existingSpots = [] }) {
   const editing = !!initial;
   const [f, setF] = useState(
     initial
-      ? { target: initial.target, from: initial.from, side: initial.side, type: initial.type,
-          throwType: initial.throwType, difficulty: initial.difficulty, tip: initial.tip || "",
-          video: initial.video || "", x: initial.x, y: initial.y }
-      : { target: "", from: "", side: "T", type: "smoke", throwType: "Jump-throw", difficulty: "Easy", tip: "", video: "", x: null, y: null }
+      ? { target: initial.target, from: initial.from, spawn: initial.spawn || "", side: initial.side, type: initial.type,
+          throwType: initial.throwType, difficulty: initial.difficulty, tip: initial.tip || "", video: initial.video || "",
+          x: initial.x, y: initial.y, fromX: initial.fromX ?? null, fromY: initial.fromY ?? null }
+      : { target: "", from: "", spawn: "", side: "T", type: "smoke", throwType: "Jump-throw", difficulty: "Easy", tip: "", video: "",
+          x: null, y: null, fromX: null, fromY: null }
   );
+  const [placing, setPlacing] = useState(initial && initial.x != null ? "throw" : "land");
   const [steps, setSteps] = useState(
     initial ? initial.steps.map((s) => ({ label: s.label, caption: s.caption, img: s.img || "" }))
             : [{ label: "Setup", caption: "", img: "" }]
@@ -59,13 +58,27 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token }) 
   const upStep = (i, k, v) => setSteps((p) => p.map((s, j) => (j === i ? { ...s, [k]: v } : s)));
   const addStep = () => steps.length < 3 && setSteps((p) => [...p, { label: "Aim", caption: "", img: "" }]);
   const rmStep = (i) => setSteps((p) => p.filter((_, j) => j !== i));
-  const valid = f.target && f.from && f.x != null;
+  const valid = f.target && f.from && f.x != null && f.fromX != null;
+
+  function onPlace({ x, y }) {
+    if (placing === "land") {
+      setF((p) => ({ ...p, x, y }));
+      if (f.fromX == null) setPlacing("throw");
+    } else {
+      setF((p) => ({ ...p, fromX: x, fromY: y }));
+    }
+  }
+  function pickSpot(target) {
+    if (!target) { setF((p) => ({ ...p, target: "", x: null, y: null })); setPlacing("land"); return; }
+    const s = existingSpots.find((e) => e.target === target);
+    if (s) { setF((p) => ({ ...p, target: s.target, x: s.x, y: s.y })); setPlacing("throw"); }
+  }
 
   function build() {
     return {
-      map: map.id, side: f.side, type: f.type, target: f.target, from: f.from,
-      throwType: f.throwType, difficulty: f.difficulty, x: f.x, y: f.y, tip: f.tip || null,
-      video: f.video || null,
+      map: map.id, side: f.side, type: f.type, target: f.target, from: f.from, spawn: f.spawn || null,
+      throwType: f.throwType, difficulty: f.difficulty, x: f.x, y: f.y, fromX: f.fromX, fromY: f.fromY,
+      tip: f.tip || null, video: f.video || null,
       steps: steps.map((s) => ({ label: s.label, img: s.img || null, caption: s.caption })),
     };
   }
@@ -78,6 +91,10 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token }) 
   async function copy() {
     try { await navigator.clipboard.writeText(snippet); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
   }
+
+  const hint = placing === "land"
+    ? "Step 1 — click where the nade LANDS."
+    : "Step 2 — click where you THROW from.";
 
   return (
     <div className="ub-overlay" onClick={onClose}>
@@ -100,15 +117,36 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token }) 
         ) : (
           <div className="ub-form-grid">
             <div className="ub-form-map">
-              <div className="ub-form-maphint">Click on the map to place the lineup. Use + / − to zoom.</div>
-              <TacticalMap map={map} lineups={[]} addMode zoomable draftPos={f.x != null ? { x: f.x, y: f.y } : null}
-                onMapClick={({ x, y }) => setF((p) => ({ ...p, x, y }))} onPin={() => {}} />
+              <div className="ub-place-tabs">
+                <button type="button" className={placing === "land" ? "on" : ""} onClick={() => setPlacing("land")}>
+                  1 · Landing {f.x != null && <Check size={12} />}
+                </button>
+                <button type="button" className={placing === "throw" ? "on" : ""} onClick={() => setPlacing("throw")}>
+                  2 · Throw {f.fromX != null && <Check size={12} />}
+                </button>
+              </div>
+              <div className="ub-form-maphint">{hint} Use + / − to zoom.</div>
+              <TacticalMap map={map} addMode zoomable
+                draftLand={f.x != null ? { x: f.x, y: f.y } : null}
+                draftThrow={f.fromX != null ? { x: f.fromX, y: f.fromY } : null}
+                onMapClick={onPlace} />
             </div>
             <div className="ub-form-fields">
-              <label className="ub-field"><span>Target (where it lands)</span>
-                <input value={f.target} onChange={(e) => up("target", e.target.value)} placeholder="e.g. CT, Window…" /></label>
-              <label className="ub-field"><span>From (where you stand)</span>
-                <input value={f.from} onChange={(e) => up("from", e.target.value)} placeholder="e.g. T Ramp" /></label>
+              {existingSpots.length > 0 && (
+                <label className="ub-field"><span>Spot</span>
+                  <select value={existingSpots.some((s) => s.target === f.target) ? f.target : ""} onChange={(e) => pickSpot(e.target.value)}>
+                    <option value="">New spot…</option>
+                    {existingSpots.map((s) => <option key={s.target} value={s.target}>{s.target}</option>)}
+                  </select></label>
+              )}
+              <label className="ub-field"><span>Target / spot name (where it lands)</span>
+                <input value={f.target} onChange={(e) => up("target", e.target.value)} placeholder="e.g. Window, CT, Jungle…" /></label>
+              <div className="ub-field-row">
+                <label className="ub-field"><span>From (where you stand)</span>
+                  <input value={f.from} onChange={(e) => up("from", e.target.value)} placeholder="e.g. T Ramp" /></label>
+                <label className="ub-field"><span>Spawn (optional)</span>
+                  <input value={f.spawn} onChange={(e) => up("spawn", e.target.value)} placeholder="e.g. T Spawn close" /></label>
+              </div>
               <div className="ub-field-row">
                 <label className="ub-field"><span>Side</span>
                   <select value={f.side} onChange={(e) => up("side", e.target.value)}><option>T</option><option>CT</option></select></label>
@@ -148,7 +186,7 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token }) 
               </div>
 
               <button className="ub-btn-primary ub-submit" onClick={submit} disabled={!valid}>
-                {!valid ? (f.x == null ? "Click the map first" : "Fill in target & from") : editing ? "Save changes" : "Save lineup"}
+                {f.x == null ? "Click the landing spot" : f.fromX == null ? "Click the throw spot" : !f.target || !f.from ? "Fill in spot & from" : editing ? "Save changes" : "Save lineup"}
               </button>
             </div>
           </div>
@@ -169,9 +207,10 @@ function buildSnippet(o) {
   type: ${JSON.stringify(o.type)},
   target: ${JSON.stringify(o.target)},
   from: ${JSON.stringify(o.from)},
+  spawn: ${o.spawn ? JSON.stringify(o.spawn) : "null"},
   throwType: ${JSON.stringify(o.throwType)},
   difficulty: ${JSON.stringify(o.difficulty)},
-  x: ${o.x}, y: ${o.y},
+  x: ${o.x}, y: ${o.y}, fromX: ${o.fromX}, fromY: ${o.fromY},
   tip: ${o.tip ? JSON.stringify(o.tip) : "null"},
   video: ${o.video ? JSON.stringify(o.video) : "null"},
   steps: [
