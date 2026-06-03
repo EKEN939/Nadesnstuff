@@ -17,8 +17,6 @@ export default function Landing({ maps, lineups, onPick, onOpenLineup }) {
     <div className="nl-landing">
       <div className="nl-hero">
         <Logo variant="full" />
-        <p className="nl-tag">Grenade lineups for Counter-Strike 2</p>
-        <p className="nl-sub">Smokes, flashes, mollys and HE — pick a map to start.</p>
         <div className="nl-tally">
           {Object.entries(TYPE_META).map(([key, t]) => (
             <span key={key} className="nl-tallyitem" style={{ color: t.color }}>
