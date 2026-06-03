@@ -1,7 +1,7 @@
 "use client";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { animate } from "animejs";
-import { X, ArrowRight, ImageOff, Pencil, Trash2 } from "lucide-react";
+import { X, ArrowRight, ImageOff, Pencil, Trash2, Link2, Check } from "lucide-react";
 import { TYPE_META, DIFF_COLOR } from "@/lib/constants";
 import NadeIcon from "./NadeIcon";
 
@@ -25,6 +25,15 @@ function VideoPlayer({ url }) {
 export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete }) {
   const t = TYPE_META[lineup.type];
   const boxRef = useRef(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  function copyLink() {
+    if (typeof window === "undefined") return;
+    const url = window.location.origin + window.location.pathname + "?map=" + lineup.map + "&lineup=" + lineup.id;
+    navigator.clipboard?.writeText(url)
+      .then(() => { setLinkCopied(true); setTimeout(() => setLinkCopied(false), 1500); })
+      .catch(() => {});
+  }
 
   useEffect(() => {
     if (boxRef.current) {
@@ -45,6 +54,9 @@ export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete }
             <span className="ub-dot">·</span><span className="ub-throw">{lineup.throwType}</span>
             <span className="ub-throw" style={{ color: DIFF_COLOR[lineup.difficulty] }}>{lineup.difficulty}</span>
           </div>
+          <button className="ub-sharebtn" onClick={copyLink}>
+            {linkCopied ? <><Check size={13} /> Link copied</> : <><Link2 size={13} /> Copy link</>}
+          </button>
         </div>
 
         {lineup.video && <VideoPlayer url={lineup.video} />}

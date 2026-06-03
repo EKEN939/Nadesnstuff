@@ -36,6 +36,16 @@ export default function Page() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const stageRef = useRef(null);
+  const deepRef = useRef(undefined);
+  if (deepRef.current === undefined) {
+    deepRef.current = null;
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search);
+      const m = p.get("map");
+      const l = parseInt(p.get("lineup"), 10);
+      if (m && ACTIVE_MAPS.some((x) => x.id === m)) deepRef.current = { map: m, lineup: Number.isNaN(l) ? null : l };
+    }
+  }
 
   const filtered = useMemo(
     () =>
@@ -65,21 +75,23 @@ export default function Page() {
     });
   }, [screen]);
 
-  function transitionTo(next, id) {
+  function transitionTo(next, id, selectLineup) {
     if (transitioning) return;
     const stage = stageRef.current;
-    if (!stage) { if (id) setActiveMap(id); setScreen(next); return; }
+    const finish = () => { if (id) setActiveMap(id); window.scrollTo(0, 0); setScreen(next); if (selectLineup) setSelected(selectLineup); };
+    if (!stage) { finish(); return; }
     setTransitioning(true);
     animate(stage, {
       opacity: [1, 0],
       scale: [1, next === "map" ? 1.08 : 0.96],
       duration: 260,
       ease: "in(2)",
-      onComplete: () => { if (id) setActiveMap(id); window.scrollTo(0, 0); setScreen(next); },
+      onComplete: finish,
     });
   }
   const openMap = (id) => transitionTo("map", id);
-  const goLanding = () => transitionTo("landing");
+  const goLanding = () => { setSelected(null); transitionTo("landing"); };
+  const openLineup = (l) => transitionTo("map", l.map, l);
 
   useEffect(() => {
     if (view !== "list" || screen !== "map") return;
@@ -121,9 +133,28 @@ export default function Page() {
     try { const t = localStorage.getItem("nns_admin_token"); if (t) setAdminToken(t); } catch {}
     fetch("/api/lineups")
       .then((r) => r.json())
-      .then((d) => { if (Array.isArray(d.lineups)) setLineups(d.lineups); setLiveConfigured(!!d.configured); })
+      .then((d) => {
+        const list = Array.isArray(d.lineups) ? d.lineups : LINEUPS;
+        setLineups(list); setLiveConfigured(!!d.configured);
+        const dp = deepRef.current;
+        if (dp) {
+          setActiveMap(dp.map); setScreen("map");
+          if (dp.lineup != null) {
+            const l = list.find((x) => x.id === dp.lineup && x.map === dp.map);
+            if (l) setSelected(l);
+          }
+        }
+      })
       .catch(() => {});
   }, []);
+
+  // keep the URL in sync so links are shareable
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let url = window.location.pathname;
+    if (screen === "map") url += "?map=" + activeMap + (selected ? "&lineup=" + selected.id : "");
+    window.history.replaceState(null, "", url);
+  }, [screen, activeMap, selected]);
 
   const mapMeta = ACTIVE_MAPS.find((m) => m.id === activeMap) || ACTIVE_MAPS[0];
 
@@ -188,7 +219,7 @@ export default function Page() {
 
       <div className="nns-stage" ref={stageRef}>
         {screen === "landing" ? (
-          <Landing maps={MAPS} lineups={lineups} onPick={openMap} />
+          <Landing maps={MAPS} lineups={lineups} onPick={openMap} onOpenLineup={openLineup} />
         ) : (
           <>
             <button className="ub-back" onClick={goLanding}><ArrowLeft size={15} /> All maps</button>
@@ -283,6 +314,7 @@ export default function Page() {
           initial={editing}
           onClose={() => { setAdding(false); setEditing(null); }}
           onSave={saveLineup}
+          token={adminToken}
         />
       )}
       {showExport && <ExportModal lineups={lineups} onClose={() => setShowExport(false)} />}

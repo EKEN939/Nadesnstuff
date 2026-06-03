@@ -1,10 +1,45 @@
 "use client";
 import { useState } from "react";
-import { X, Plus, Copy, Check } from "lucide-react";
+import { X, Plus, Copy, Check, Upload } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 import { TYPE_META } from "@/lib/constants";
 import TacticalMap from "./TacticalMap";
 
-export default function AddLineupForm({ map, onClose, onSave, initial }) {
+function Uploader({ accept, token, onUploaded }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  async function onChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBusy(true); setErr("");
+    try {
+      let tok = token;
+      if (!tok) { try { tok = localStorage.getItem("nns_admin_token") || ""; } catch {} }
+      if (!tok) {
+        tok = (typeof window !== "undefined" && window.prompt("Admin token (same as ADMIN_TOKEN in Vercel):")) || "";
+        if (tok) { try { localStorage.setItem("nns_admin_token", tok); } catch {} }
+      }
+      if (!tok) { setBusy(false); return; }
+      const res = await upload(file.name, file, { access: "public", handleUploadUrl: "/api/upload", clientPayload: tok });
+      onUploaded(res.url);
+    } catch {
+      setErr("Upload failed — paste a URL");
+    } finally {
+      setBusy(false); e.target.value = "";
+    }
+  }
+  return (
+    <>
+      <label className="ub-upload" title="Upload a file">
+        <Upload size={13} /> {busy ? "Uploading…" : "Upload"}
+        <input type="file" accept={accept} onChange={onChange} hidden disabled={busy} />
+      </label>
+      {err && <span className="ub-uploaderr">{err}</span>}
+    </>
+  );
+}
+
+export default function AddLineupForm({ map, onClose, onSave, initial, token }) {
   const editing = !!initial;
   const [f, setF] = useState(
     initial
@@ -55,7 +90,7 @@ export default function AddLineupForm({ map, onClose, onSave, initial }) {
 
         {snippet ? (
           <div className="ub-snippet">
-            <p className="ub-snippet-intro">Added. Paste this into <code>data/lineups.js</code> to keep it permanently:</p>
+            <p className="ub-snippet-intro">Added. Paste this into <code>data/lineups.js</code> to keep it permanently (or use "Save live"):</p>
             <textarea readOnly value={snippet} onClick={(e) => e.target.select()} />
             <div className="ub-snippet-actions">
               <button className="ub-btn-primary" onClick={copy}>{copied ? <><Check size={15} /> Copied</> : <><Copy size={15} /> Copy code</>}</button>
@@ -88,8 +123,11 @@ export default function AddLineupForm({ map, onClose, onSave, initial }) {
                 <label className="ub-field"><span>Difficulty</span>
                   <select value={f.difficulty} onChange={(e) => up("difficulty", e.target.value)}><option>Easy</option><option>Medium</option><option>Hard</option></select></label>
               </div>
-              <label className="ub-field"><span>Video URL (optional — mp4 or YouTube)</span>
-                <input value={f.video} onChange={(e) => up("video", e.target.value)} placeholder="https://…" /></label>
+              <label className="ub-field"><span>Video (mp4/YouTube URL — or upload)</span>
+                <div className="ub-uploadrow">
+                  <input value={f.video} onChange={(e) => up("video", e.target.value)} placeholder="https://…" />
+                  <Uploader accept="video/*" token={token} onUploaded={(url) => up("video", url)} />
+                </div></label>
               <label className="ub-field"><span>Instruction (optional)</span>
                 <textarea rows={2} value={f.tip} onChange={(e) => up("tip", e.target.value)} placeholder="Short description of the throw…" /></label>
 
@@ -100,7 +138,10 @@ export default function AddLineupForm({ map, onClose, onSave, initial }) {
                   <div key={i} className="ub-step-edit">
                     <select value={s.label} onChange={(e) => upStep(i, "label", e.target.value)}><option>Setup</option><option>Aim</option><option>Result</option></select>
                     <input value={s.caption} onChange={(e) => upStep(i, "caption", e.target.value)} placeholder="Caption" />
-                    <input value={s.img} onChange={(e) => upStep(i, "img", e.target.value)} placeholder="Image URL (optional)" />
+                    <div className="ub-imgcell">
+                      <input value={s.img} onChange={(e) => upStep(i, "img", e.target.value)} placeholder="Image URL" />
+                      <Uploader accept="image/*" token={token} onUploaded={(url) => upStep(i, "img", url)} />
+                    </div>
                     {steps.length > 1 && <button type="button" className="ub-step-rm" onClick={() => rmStep(i)}><X size={13} /></button>}
                   </div>
                 ))}

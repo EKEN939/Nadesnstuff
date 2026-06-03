@@ -77,3 +77,19 @@ Utan dessa variabler fungerar sajten precis som forut (laser `data/lineups.js`),
 och "Spara live"-knappen visas inte - anvand "Exportera" da.
 
 Lokalt test: kopiera `env.example` till `.env.local` och fyll i vardena.
+
+## File uploads (optional)
+
+The "Add lineup" form has Upload buttons for the video and step images. They upload
+straight to Vercel Blob and fill in the URL for you. To enable:
+
+1. In Vercel → Storage → create a **Blob** store and connect it (sets `BLOB_READ_WRITE_TOKEN`).
+2. Make sure `ADMIN_TOKEN` is set (the upload route checks it before allowing uploads).
+3. Redeploy.
+
+Without a Blob store the Upload buttons just fail gracefully — paste a URL instead.
+
+## Shareable links
+
+Opening a lineup updates the URL to `/?map=<map>&lineup=<id>`, and the detail view has a
+**Copy link** button. Anyone opening that link lands directly on that lineup.
