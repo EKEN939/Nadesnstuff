@@ -1,11 +1,6 @@
-// Aktiva kartor. Lagg din egen radar-bild i /public/radars/ och peka ut den i `radar`.
-// Lamna radar: null for att visa schematisk skiss (data/radars.js).
+// Active maps. Drop a radar image in /public/radars/ and point to it with `radar`.
+// Leave radar: null to show the stylized schematic (data/radars.js).
+// Add more maps later by adding entries here.
 export const MAPS = [
-  { id: "mirage",  name: "Mirage",  radar: "/radars/mirage.png" },
-  { id: "inferno", name: "Inferno", radar: null /* "/radars/inferno.png" */ },
-  { id: "dust2",   name: "Dust II", radar: null },
-  { id: "nuke",    name: "Nuke",    radar: null },
-  { id: "ancient", name: "Ancient", radar: null },
-  { id: "anubis",  name: "Anubis",  radar: null },
-  { id: "vertigo", name: "Vertigo", radar: null },
+  { id: "mirage", name: "Mirage", radar: "/radars/mirage.png" },
 ];

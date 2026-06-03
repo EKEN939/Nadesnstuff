@@ -1,24 +1,24 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Search, Plus, Map as MapIcon, List, MapPin, Download, Save } from "lucide-react";
+import { Filter, Search, Plus, Map as MapIcon, List, Download, Save } from "lucide-react";
 import { MAPS } from "@/data/maps";
 import { LINEUPS } from "@/data/lineups";
 import { TYPE_META } from "@/lib/constants";
-import { TYPE_ICON } from "@/lib/icons";
+import Logo from "@/components/Logo";
+import NadeIcon from "@/components/NadeIcon";
 import TacticalMap from "@/components/TacticalMap";
 import LineupCard from "@/components/LineupCard";
 import LineupModal from "@/components/LineupModal";
 import AddLineupForm from "@/components/AddLineupForm";
 import ExportModal from "@/components/ExportModal";
 
-// Hemligt kortkommando: skriv detta ord (nar du inte star i ett falt) for att
-// las upp redigeringslaget. Byt till nagot bara du kanner till.
+// Secret keyboard shortcut: type this word (when not in a field) to unlock editing.
 const ADMIN_KEY = "admin";
 
 export default function Page() {
   const [lineups, setLineups] = useState(LINEUPS);
-  const [activeMap, setActiveMap] = useState("mirage");
+  const [activeMap, setActiveMap] = useState(MAPS[0].id);
   const [view, setView] = useState("map");
   const [side, setSide] = useState("ALL");
   const [type, setType] = useState("ALL");
@@ -90,19 +90,13 @@ export default function Page() {
       setLineups((prev) => [...prev, { ...data, id: newId, map: activeMap }]);
     }
   }
-  function removeLineup(id) {
-    setLineups((prev) => prev.filter((l) => l.id !== id));
-    setSelected(null);
-  }
-  function startEdit(lineup) {
-    setSelected(null);
-    setEditing(lineup);
-  }
+  function removeLineup(id) { setLineups((prev) => prev.filter((l) => l.id !== id)); setSelected(null); }
+  function startEdit(lineup) { setSelected(null); setEditing(lineup); }
 
   async function saveLive() {
     let token = adminToken;
     if (!token) {
-      token = (typeof window !== "undefined" && window.prompt("Admin-token (samma som ADMIN_TOKEN i Vercel):")) || "";
+      token = (typeof window !== "undefined" && window.prompt("Admin token (same as ADMIN_TOKEN in Vercel):")) || "";
       if (!token) return;
       setAdminToken(token);
       try { localStorage.setItem("nns_admin_token", token); } catch {}
@@ -115,51 +109,42 @@ export default function Page() {
         body: JSON.stringify({ lineups }),
       });
       if (res.status === 401) {
-        setSaveMsg("Fel token"); setAdminToken("");
+        setSaveMsg("Wrong token"); setAdminToken("");
         try { localStorage.removeItem("nns_admin_token"); } catch {}
-      } else if (!res.ok) {
-        setSaveMsg("Kunde inte spara");
-      } else {
-        setSaveMsg("Sparat ✓");
-      }
-    } catch {
-      setSaveMsg("Nätverksfel");
-    } finally {
-      setSaving(false);
-      setTimeout(() => setSaveMsg(""), 3000);
-    }
+      } else if (!res.ok) { setSaveMsg("Could not save"); }
+      else { setSaveMsg("Saved ✓"); }
+    } catch { setSaveMsg("Network error"); }
+    finally { setSaving(false); setTimeout(() => setSaveMsg(""), 3000); }
   }
 
   return (
     <div className="ub-wrap">
       <header className="ub-header">
-        <div className="ub-logo">
-          <MapPin size={20} strokeWidth={2.2} />
-          <span className="ub-logo-text">nades<span className="ub-accent">'n'</span>stuff</span>
-        </div>
+        <Logo variant="compact" />
         <div className="ub-headbtns">
           {admin && <span className="ub-adminflag">admin</span>}
           {admin && saveMsg && <span className="ub-savemsg">{saveMsg}</span>}
           {admin && liveConfigured && (
             <button className="ub-toolbtn" onClick={saveLive} disabled={saving}>
-              <Save size={15} /> {saving ? "Sparar…" : "Spara live"}
+              <Save size={15} /> {saving ? "Saving…" : "Save live"}
             </button>
           )}
           {admin && (
-            <button className="ub-toolbtn" onClick={() => setShowExport(true)} title="Exportera alla lineups till data/lineups.js">
-              <Download size={15} /> Exportera
+            <button className="ub-toolbtn" onClick={() => setShowExport(true)} title="Export all lineups to data/lineups.js">
+              <Download size={15} /> Export
             </button>
           )}
           {admin && (
-            <button className="ub-addbtn" onClick={() => setAdding(true)}><Plus size={15} /> Lägg till lineup</button>
+            <button className="ub-addbtn" onClick={() => setAdding(true)}><Plus size={15} /> Add lineup</button>
           )}
         </div>
       </header>
 
       <div className="ub-hero">
-        <div>
-          <div className="ub-hero-kicker">Aktiv karta</div>
+        <div className="ub-hero-left">
+          <div className="ub-hero-kicker">Active map</div>
           <h1 className="ub-hero-title">{mapMeta.name}</h1>
+          <p className="ub-hero-tag">Grenade lineups for Counter-Strike 2</p>
         </div>
         <div className="ub-hero-count">
           <span className="ub-count-num">{filtered.length}</span>
@@ -167,78 +152,74 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="ub-maprail">
-        {MAPS.map((m) => {
-          const count = lineups.filter((l) => l.map === m.id).length;
-          return (
-            <button key={m.id} className={`ub-mapcard ${activeMap === m.id ? "active" : ""}`} onClick={() => setActiveMap(m.id)}>
-              <span className="ub-mapcard-name">{m.name}</span>
-              <span className="ub-mapcard-count">{count}</span>
-            </button>
-          );
-        })}
-      </div>
+      {MAPS.length > 1 && (
+        <div className="ub-maprail">
+          {MAPS.map((m) => {
+            const count = lineups.filter((l) => l.map === m.id).length;
+            return (
+              <button key={m.id} className={`ub-mapcard ${activeMap === m.id ? "active" : ""}`} onClick={() => setActiveMap(m.id)}>
+                <span className="ub-mapcard-name">{m.name}</span>
+                <span className="ub-mapcard-count">{count}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div className="ub-controls">
         <div className="ub-filtergroup">
           <Filter size={14} className="ub-filter-icon" />
           {["ALL", "T", "CT"].map((s) => (
-            <button key={s} className={`ub-pill ${side === s ? "active" : ""}`} onClick={() => setSide(s)}>{s === "ALL" ? "Alla sidor" : s}</button>
+            <button key={s} className={`ub-pill ${side === s ? "active" : ""}`} onClick={() => setSide(s)}>{s === "ALL" ? "All sides" : s}</button>
           ))}
         </div>
         <div className="ub-filtergroup">
-          <button className={`ub-pill ${type === "ALL" ? "active" : ""}`} onClick={() => setType("ALL")}>Alla typer</button>
-          {Object.entries(TYPE_META).map(([key, t]) => {
-            const Icon = TYPE_ICON[key];
-            return (
-              <button key={key} className={`ub-pill ub-pill-type ${type === key ? "active" : ""}`} onClick={() => setType(key)} style={type === key ? { borderColor: t.color, color: t.color } : undefined}>
-                <Icon size={13} style={{ color: t.color }} />{t.label}
-              </button>
-            );
-          })}
+          <button className={`ub-pill ${type === "ALL" ? "active" : ""}`} onClick={() => setType("ALL")}>All types</button>
+          {Object.entries(TYPE_META).map(([key, t]) => (
+            <button key={key} className={`ub-pill ub-pill-type ${type === key ? "active" : ""}`} onClick={() => setType(key)} style={type === key ? { borderColor: t.color, color: t.color } : undefined}>
+              <NadeIcon type={key} size={14} />{t.label}
+            </button>
+          ))}
         </div>
         <div className="ub-viewtoggle">
-          <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}><MapIcon size={14} /> Karta</button>
-          <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}><List size={14} /> Lista</button>
+          <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}><MapIcon size={14} /> Map</button>
+          <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}><List size={14} /> List</button>
         </div>
         <div className="ub-search">
           <Search size={14} />
-          <input placeholder="Sok position..." value={query} onChange={(e) => setQuery(e.target.value)} />
+          <input placeholder="Search position…" value={query} onChange={(e) => setQuery(e.target.value)} />
         </div>
       </div>
 
       {view === "map" ? (
         <div className="ub-mapview">
-          <TacticalMap map={mapMeta} lineups={filtered} onPin={setSelected} />
+          <TacticalMap map={mapMeta} lineups={filtered} onPin={setSelected} zoomable />
           <div className="ub-maplegend">
-            <div className="ub-legend-title">{filtered.length} pins · klicka for lineup</div>
+            <div className="ub-legend-title">{filtered.length} pins · click for lineup</div>
             {Object.entries(TYPE_META).map(([key, t]) => {
-              const Icon = TYPE_ICON[key];
               const n = filtered.filter((l) => l.type === key).length;
               return (
                 <div key={key} className="ub-legend-row" style={{ opacity: n ? 1 : 0.35 }}>
                   <span className="ub-legend-dot" style={{ background: t.color }} />
-                  <Icon size={13} style={{ color: t.color }} /> {t.label}
+                  <NadeIcon type={key} size={14} /> {t.label}
                   <span className="ub-legend-n">{n}</span>
                 </div>
               );
             })}
-            {admin && <div className="ub-legend-admin">Admin på · klicka en pin för att redigera eller ta bort.</div>}
+            {admin && <div className="ub-legend-admin">Admin on · click a pin to edit or delete.</div>}
           </div>
         </div>
       ) : filtered.length === 0 ? (
         <div className="ub-empty">
-          <MapPin size={28} />
-          <p>Inga lineups har an.</p>
-          <span>Klicka "Lagg till lineup" for att skapa en pa {mapMeta.name}.</span>
+          <MapIcon size={28} />
+          <p>No lineups here yet.</p>
+          {admin && <span>Click "Add lineup" to create one on {mapMeta.name}.</span>}
         </div>
       ) : (
         <div className="ub-grid">
           {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => setSelected(l)} />)}
         </div>
       )}
-
-      <footer className="ub-footer">nades'n'stuff · prototyp. Tillagda lineups lever i sessionen tills du sparar dem i data/lineups.js.</footer>
 
       {selected && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} />}
       {(adding || editing) && (
