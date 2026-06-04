@@ -8,8 +8,20 @@ export default function LineupCard({ lineup, index = 0, onClick, fav, onToggleFa
   const thumb = lineup.steps?.find((s) => s.img)?.img || null;
   return (
     <button className={`ub-card ${learned ? "learned" : ""}`} style={{ animationDelay: `${index * 45}ms` }} onClick={onClick}>
-      {thumb && (
+      {thumb ? (
         <div className="ub-card-thumb"><img src={thumb} alt={lineup.target} /></div>
+      ) : (
+        <div className="ub-card-thumb ub-card-minimap">
+          <img src={`/radars/${lineup.map}.png`} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" className="ub-mini-svg" aria-hidden="true">
+            {lineup.fromX != null && lineup.x != null && (
+              <line x1={lineup.fromX} y1={lineup.fromY} x2={lineup.x} y2={lineup.y} className="ub-mini-line" style={{ stroke: t.color }} />
+            )}
+            {lineup.fromX != null && <circle cx={lineup.fromX} cy={lineup.fromY} r="1.7" className="ub-mini-from" />}
+            {lineup.x != null && <circle cx={lineup.x} cy={lineup.y} r="2.7" className="ub-mini-land" style={{ fill: t.color }} />}
+          </svg>
+          <span className="ub-mini-tag">lands here</span>
+        </div>
       )}
       <div className="ub-card-top">
         <div className="ub-typebadge" style={{ color: t.color }}><NadeIcon type={lineup.type} size={16} /><span>{t.label}</span></div>
