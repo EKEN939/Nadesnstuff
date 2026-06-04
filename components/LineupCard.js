@@ -5,7 +5,7 @@ import NadeIcon from "./NadeIcon";
 
 export default function LineupCard({ lineup, index = 0, onClick, fav, onToggleFav, learned, mapName }) {
   const t = TYPE_META[lineup.type];
-  const thumb = lineup.steps?.find((s) => s.img)?.img || null;
+  const thumb = lineup.preview || lineup.steps?.find((s) => s.img)?.img || null;
   return (
     <button className={`ub-card ${learned ? "learned" : ""}`} style={{ animationDelay: `${index * 45}ms` }} onClick={onClick}>
       {thumb ? (

@@ -42,9 +42,9 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
     initial
       ? { target: initial.target, from: initial.from, spawn: initial.spawn || "", side: initial.side, type: initial.type,
           throwType: initial.throwType, difficulty: initial.difficulty, tip: initial.tip || "", video: initial.video || "",
-          x: initial.x, y: initial.y, fromX: initial.fromX ?? null, fromY: initial.fromY ?? null, loc: initial.loc || "" }
+          x: initial.x, y: initial.y, fromX: initial.fromX ?? null, fromY: initial.fromY ?? null, loc: initial.loc || "", preview: initial.preview || "" }
       : { target: "", from: "", spawn: "", side: "T", type: "smoke", throwType: "Jump-throw", difficulty: "Easy", tip: "", video: "",
-          x: null, y: null, fromX: null, fromY: null, loc: "" }
+          x: null, y: null, fromX: null, fromY: null, loc: "", preview: "" }
   );
   const [placing, setPlacing] = useState(initial && initial.x != null ? "throw" : "land");
   const [steps, setSteps] = useState(
@@ -78,7 +78,7 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
     return {
       map: map.id, side: f.side, type: f.type, target: f.target, from: f.from, spawn: f.spawn || null,
       throwType: f.throwType, difficulty: f.difficulty, x: f.x, y: f.y, fromX: f.fromX, fromY: f.fromY,
-      tip: f.tip || null, video: f.video || null, loc: f.loc || null,
+      tip: f.tip || null, video: f.video || null, loc: f.loc || null, preview: f.preview || null,
       steps: steps.map((s) => ({ label: s.label, img: s.img || null, caption: s.caption })),
     };
   }
@@ -166,6 +166,12 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
                   <input value={f.video} onChange={(e) => up("video", e.target.value)} placeholder="https://…" />
                   <Uploader accept="video/*" token={token} onUploaded={(url) => up("video", url)} />
                 </div></label>
+              <label className="ub-field"><span>Preview image — smoke in place (optional)</span>
+                <div className="ub-uploadrow">
+                  <input value={f.preview} onChange={(e) => up("preview", e.target.value)} placeholder="https://… screenshot of the landed smoke" />
+                  <Uploader accept="image/*" token={token} onUploaded={(url) => up("preview", url)} />
+                </div>
+                <small className="ub-field-hint">An in-game screenshot of the smoke landed/active — shows as the card thumbnail.</small></label>
               <label className="ub-field"><span>Instruction (optional)</span>
                 <textarea rows={2} value={f.tip} onChange={(e) => up("tip", e.target.value)} placeholder="Short description of the throw…" /></label>
               <label className="ub-field"><span>Teleport (optional)</span>
@@ -217,6 +223,7 @@ function buildSnippet(o) {
   tip: ${o.tip ? JSON.stringify(o.tip) : "null"},
   video: ${o.video ? JSON.stringify(o.video) : "null"},
   loc: ${o.loc ? JSON.stringify(o.loc) : "null"},
+  preview: ${o.preview ? JSON.stringify(o.preview) : "null"},
   steps: [
 ${steps}
   ],
