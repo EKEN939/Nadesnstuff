@@ -20,7 +20,6 @@ function Uploader({ accept, token, onUploaded }) {
         access: "public",
         handleUploadUrl: "/api/upload",
         clientPayload: tok,
-        multipart: true,
         onUploadProgress: (p) => setPct(Math.round(p?.percentage || 0)),
       });
       onUploaded(res.url);
