@@ -143,7 +143,7 @@ export default function TacticalMap({
       {!addMode && (
         <div className="ub-hud" aria-hidden="true">
           <i /><i /><i /><i />
-          <span className="ub-hud-label">{map.name.toUpperCase()} // {spots.length} SPOT{spots.length !== 1 ? "S" : ""}</span>
+          <span className="ub-hud-label">{map.name} · {spots.length} spot{spots.length !== 1 ? "s" : ""}</span>
         </div>
       )}
     </div>
