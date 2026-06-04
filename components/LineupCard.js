@@ -3,7 +3,7 @@ import { MapPin, ArrowRight, Footprints, ChevronRight, Video, Star, CheckCircle2
 import { TYPE_META, DIFF_COLOR } from "@/lib/constants";
 import NadeIcon from "./NadeIcon";
 
-export default function LineupCard({ lineup, index = 0, onClick, fav, onToggleFav, learned }) {
+export default function LineupCard({ lineup, index = 0, onClick, fav, onToggleFav, learned, mapName }) {
   const t = TYPE_META[lineup.type];
   const thumb = lineup.steps?.find((s) => s.img)?.img || null;
   return (
@@ -14,6 +14,7 @@ export default function LineupCard({ lineup, index = 0, onClick, fav, onToggleFa
       <div className="ub-card-top">
         <div className="ub-typebadge" style={{ color: t.color }}><NadeIcon type={lineup.type} size={16} /><span>{t.label}</span></div>
         <div className="ub-card-flags">
+          {mapName && <span className="ub-card-map">{mapName}</span>}
           {learned && <span className="ub-learnflag" title="Learned"><CheckCircle2 size={13} /></span>}
           <span className={`ub-fav ${fav ? "on" : ""}`} role="button" tabIndex={0} title="Favorite"
             onClick={(e) => { e.stopPropagation(); onToggleFav?.(); }}><Star size={14} fill={fav ? "currentColor" : "none"} /></span>

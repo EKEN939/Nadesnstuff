@@ -42,9 +42,9 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
     initial
       ? { target: initial.target, from: initial.from, spawn: initial.spawn || "", side: initial.side, type: initial.type,
           throwType: initial.throwType, difficulty: initial.difficulty, tip: initial.tip || "", video: initial.video || "",
-          x: initial.x, y: initial.y, fromX: initial.fromX ?? null, fromY: initial.fromY ?? null }
+          x: initial.x, y: initial.y, fromX: initial.fromX ?? null, fromY: initial.fromY ?? null, loc: initial.loc || "" }
       : { target: "", from: "", spawn: "", side: "T", type: "smoke", throwType: "Jump-throw", difficulty: "Easy", tip: "", video: "",
-          x: null, y: null, fromX: null, fromY: null }
+          x: null, y: null, fromX: null, fromY: null, loc: "" }
   );
   const [placing, setPlacing] = useState(initial && initial.x != null ? "throw" : "land");
   const [steps, setSteps] = useState(
@@ -78,7 +78,7 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
     return {
       map: map.id, side: f.side, type: f.type, target: f.target, from: f.from, spawn: f.spawn || null,
       throwType: f.throwType, difficulty: f.difficulty, x: f.x, y: f.y, fromX: f.fromX, fromY: f.fromY,
-      tip: f.tip || null, video: f.video || null,
+      tip: f.tip || null, video: f.video || null, loc: f.loc || null,
       steps: steps.map((s) => ({ label: s.label, img: s.img || null, caption: s.caption })),
     };
   }
@@ -168,6 +168,9 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
                 </div></label>
               <label className="ub-field"><span>Instruction (optional)</span>
                 <textarea rows={2} value={f.tip} onChange={(e) => up("tip", e.target.value)} placeholder="Short description of the throw…" /></label>
+              <label className="ub-field"><span>Teleport (optional)</span>
+                <input value={f.loc} onChange={(e) => up("loc", e.target.value)} placeholder="setpos 123 456 78;setang 1 2 3" />
+                <small className="ub-field-hint">Stand on the throw spot in CS2, type <code>getpos</code> in console, and paste the printed line here. Then anyone can teleport exactly to this spot.</small></label>
 
               <div className="ub-steps-edit">
                 <div className="ub-steps-head"><span>Still images ({steps.length}/3)</span>
@@ -213,6 +216,7 @@ function buildSnippet(o) {
   x: ${o.x}, y: ${o.y}, fromX: ${o.fromX}, fromY: ${o.fromY},
   tip: ${o.tip ? JSON.stringify(o.tip) : "null"},
   video: ${o.video ? JSON.stringify(o.video) : "null"},
+  loc: ${o.loc ? JSON.stringify(o.loc) : "null"},
   steps: [
 ${steps}
   ],

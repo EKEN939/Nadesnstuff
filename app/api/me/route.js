@@ -9,7 +9,7 @@ export async function GET() {
   try { session = await auth(); } catch {}
   if (!session?.user?.id) return NextResponse.json({ error: "unauth" }, { status: 401 });
   const data = await readUser(session.user.id);
-  return NextResponse.json({ favs: data?.favs || [], learned: data?.learned || [] });
+  return NextResponse.json({ favs: data?.favs || [], learned: data?.learned || [], collections: data?.collections || [] });
 }
 
 export async function PUT(req) {
@@ -22,6 +22,7 @@ export async function PUT(req) {
   await writeUser(session.user.id, {
     favs: Array.isArray(body?.favs) ? body.favs : [],
     learned: Array.isArray(body?.learned) ? body.learned : [],
+    collections: Array.isArray(body?.collections) ? body.collections : [],
   });
   return NextResponse.json({ ok: true });
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video, Star, LogIn, LogOut } from "lucide-react";
+import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2 } from "lucide-react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { MAPS } from "@/data/maps";
 import { LINEUPS } from "@/data/lineups";
@@ -12,6 +12,7 @@ import Landing from "@/components/Landing";
 import TacticalMap from "@/components/TacticalMap";
 import LineupCard from "@/components/LineupCard";
 import LineupModal from "@/components/LineupModal";
+import LibraryPanel from "@/components/LibraryPanel";
 import AddLineupForm from "@/components/AddLineupForm";
 import ExportModal from "@/components/ExportModal";
 
@@ -34,6 +35,9 @@ export default function Page() {
   const [throwFilter, setThrowFilter] = useState("ALL");
   const [videoOnly, setVideoOnly] = useState(false);
   const [sortBy, setSortBy] = useState("default");
+  const [collections, setCollections] = useState([]);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [libraryView, setLibraryView] = useState(null);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
   const [admin, setAdmin] = useState(false);
@@ -84,20 +88,47 @@ export default function Page() {
 
   useEffect(() => {
     if (session?.user) {
-      fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) { setFavs(d.favs || []); setLearned(d.learned || []); } }).catch(() => {});
+      fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) { setFavs(d.favs || []); setLearned(d.learned || []); setCollections(d.collections || []); } }).catch(() => {});
     } else {
-      try { setFavs(JSON.parse(localStorage.getItem("nns_favs") || "[]")); setLearned(JSON.parse(localStorage.getItem("nns_learned") || "[]")); } catch {}
+      try {
+        setFavs(JSON.parse(localStorage.getItem("nns_favs") || "[]"));
+        setLearned(JSON.parse(localStorage.getItem("nns_learned") || "[]"));
+        setCollections(JSON.parse(localStorage.getItem("nns_collections") || "[]"));
+      } catch {}
     }
   }, [session]);
-  function syncUser(nf, nl) {
+  function saveUser(f, l, c) {
     if (session?.user) {
-      fetch("/api/me", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ favs: nf, learned: nl }) }).catch(() => {});
+      fetch("/api/me", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ favs: f, learned: l, collections: c }) }).catch(() => {});
     } else {
-      try { localStorage.setItem("nns_favs", JSON.stringify(nf)); localStorage.setItem("nns_learned", JSON.stringify(nl)); } catch {}
+      try {
+        localStorage.setItem("nns_favs", JSON.stringify(f));
+        localStorage.setItem("nns_learned", JSON.stringify(l));
+        localStorage.setItem("nns_collections", JSON.stringify(c));
+      } catch {}
     }
   }
-  const toggleFav = (id) => { const nf = favs.includes(id) ? favs.filter((x) => x !== id) : [...favs, id]; setFavs(nf); syncUser(nf, learned); };
-  const toggleLearned = (id) => { const nl = learned.includes(id) ? learned.filter((x) => x !== id) : [...learned, id]; setLearned(nl); syncUser(favs, nl); };
+  const toggleFav = (id) => { const nf = favs.includes(id) ? favs.filter((x) => x !== id) : [...favs, id]; setFavs(nf); saveUser(nf, learned, collections); };
+  const toggleLearned = (id) => { const nl = learned.includes(id) ? learned.filter((x) => x !== id) : [...learned, id]; setLearned(nl); saveUser(favs, nl, collections); };
+  function createCollection(name, initialItem) {
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const nc = [...collections, { id, name: name || "Untitled", items: initialItem ? [initialItem] : [] }];
+    setCollections(nc); saveUser(favs, learned, nc); return id;
+  }
+  const renameCollection = (id, name) => { const nc = collections.map((c) => (c.id === id ? { ...c, name } : c)); setCollections(nc); saveUser(favs, learned, nc); };
+  const deleteCollection = (id) => { const nc = collections.filter((c) => c.id !== id); setCollections(nc); saveUser(favs, learned, nc); };
+  const toggleInCollection = (lineupId, colId) => {
+    const nc = collections.map((c) => (c.id === colId ? { ...c, items: c.items.includes(lineupId) ? c.items.filter((x) => x !== lineupId) : [...c.items, lineupId] } : c));
+    setCollections(nc); saveUser(favs, learned, nc);
+  };
+  useEffect(() => {
+    if (!profileOpen) return;
+    const onDoc = (e) => { if (!e.target.closest("[data-profile]")) setProfileOpen(false); };
+    const onEsc = (e) => { if (e.key === "Escape") setProfileOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onEsc);
+    return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onEsc); };
+  }, [profileOpen]);
 
   useEffect(() => { setActiveSpot(null); }, [activeMap, side, type, screen, throwFilter, videoOnly, onlyFavs, sortBy]);
 
@@ -270,9 +301,32 @@ export default function Page() {
         </button>
         <div className="ub-headbtns">
           {session?.user ? (
-            <button className="ub-toolbtn" onClick={() => signOut()} title="Log out">
-              <LogOut size={15} /> {(session.user.name || "Account").split("#")[0]}
-            </button>
+            <div className="ub-profilewrap" data-profile>
+              <button className="ub-toolbtn ub-profilebtn" onClick={() => setProfileOpen((o) => !o)}>
+                {session.user.image && <img src={session.user.image} alt="" className="ub-avatar" />}
+                {(session.user.name || "Account").split("#")[0]}
+                <ChevronDown size={14} />
+              </button>
+              {profileOpen && (
+                <div className="ub-profilemenu">
+                  <div className="ub-pm-head">
+                    {session.user.image && <img src={session.user.image} alt="" className="ub-avatar lg" />}
+                    <div>
+                      <div className="ub-pm-name">{(session.user.name || "Account").split("#")[0]}</div>
+                      <div className="ub-pm-sub">{favs.length} favs · {learned.length} learned</div>
+                    </div>
+                  </div>
+                  <button className="ub-pm-item" onClick={() => { setLibraryView("favs"); setProfileOpen(false); }}><Star size={15} /> Favourites</button>
+                  <button className="ub-pm-item" onClick={() => { setLibraryView("learned"); setProfileOpen(false); }}><CheckCircle2 size={15} /> Learned</button>
+                  <button className="ub-pm-item" onClick={() => { setLibraryView("collections"); setProfileOpen(false); }}><Folder size={15} /> Collections</button>
+                  {admin && <div className="ub-pm-div" />}
+                  {admin && <button className="ub-pm-item" onClick={() => { setAdding(true); setProfileOpen(false); }}><Plus size={15} /> Add lineup</button>}
+                  {admin && <button className="ub-pm-item" onClick={() => { setShowExport(true); setProfileOpen(false); }}><Download size={15} /> Export</button>}
+                  <div className="ub-pm-div" />
+                  <button className="ub-pm-item" onClick={() => signOut()}><LogOut size={15} /> Log out</button>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="ub-loginwrap">
               <button className="ub-toolbtn ub-discord" onClick={() => signIn("discord")}>
@@ -427,7 +481,16 @@ export default function Page() {
         )}
       </div>
 
-      {selected && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} />}
+      {selected && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} />}
+      {libraryView && (
+        <LibraryPanel
+          view={libraryView} setView={setLibraryView} onClose={() => setLibraryView(null)}
+          lineups={lineups} favs={favs} learned={learned} collections={collections} maps={MAPS}
+          onOpenLineup={(l) => { setActiveMap(l.map); setScreen("map"); setSelected(l); }}
+          toggleFav={toggleFav} createCollection={createCollection}
+          renameCollection={renameCollection} deleteCollection={deleteCollection}
+        />
+      )}
       {(adding || editing) && (
         <AddLineupForm
           map={editing ? (ACTIVE_MAPS.find((m) => m.id === editing.map) || mapMeta) : mapMeta}

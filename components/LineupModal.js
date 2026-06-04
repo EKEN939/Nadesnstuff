@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import { animate } from "animejs";
-import { X, ArrowRight, ImageOff, Pencil, Trash2, Link2, Check, Star, ChevronLeft, ChevronRight, Crosshair, Terminal, CheckCircle2 } from "lucide-react";
+import { X, ArrowRight, ImageOff, Pencil, Trash2, Link2, Check, Star, ChevronLeft, ChevronRight, Crosshair, Terminal, CheckCircle2, Folder, Plus, MapPin } from "lucide-react";
 import { TYPE_META, DIFF_COLOR } from "@/lib/constants";
 import NadeIcon from "./NadeIcon";
 
@@ -25,14 +25,16 @@ function VideoPlayer({ url }) {
   );
 }
 
-export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete, fav, onToggleFav, learned, onToggleLearned }) {
+export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete, fav, onToggleFav, learned, onToggleLearned, collections = [], toggleInCollection, createCollection }) {
   const t = TYPE_META[lineup.type];
   const boxRef = useRef(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [copied, setCopied] = useState("");
+  const [colOpen, setColOpen] = useState(false);
+  const [newCol, setNewCol] = useState("");
   const steps = lineup.steps || [];
   const [step, setStep] = useState(0);
-  useEffect(() => { setStep(0); }, [lineup.id]);
+  useEffect(() => { setStep(0); setColOpen(false); }, [lineup.id]);
 
   function copyLink() {
     if (typeof window === "undefined") return;
@@ -74,6 +76,30 @@ export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete, 
           </div>
         </div>
 
+        {toggleInCollection && (
+          <div className="ub-savecol" data-savecol>
+            <button className={`ub-learnbtn ${colOpen ? "on" : ""}`} onClick={() => setColOpen((o) => !o)}><Folder size={14} /> Save to collection</button>
+            {colOpen && (
+              <div className="ub-savecol-pop">
+                {collections.length === 0 && <div className="ub-savecol-empty">No collections yet — make one below.</div>}
+                {collections.map((c) => {
+                  const inIt = c.items.includes(lineup.id);
+                  return (
+                    <button key={c.id} className={`ub-savecol-item ${inIt ? "on" : ""}`} onClick={() => toggleInCollection(lineup.id, c.id)}>
+                      <span className="ub-savecol-check">{inIt && <Check size={13} />}</span> {c.name}
+                    </button>
+                  );
+                })}
+                <div className="ub-savecol-new">
+                  <input placeholder="New collection…" value={newCol} onChange={(e) => setNewCol(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && newCol.trim()) { createCollection(newCol.trim(), lineup.id); setNewCol(""); } }} />
+                  <button className="ub-icobtn" disabled={!newCol.trim()} onClick={() => { createCollection(newCol.trim(), lineup.id); setNewCol(""); }}><Plus size={15} /></button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {lineup.video && <VideoPlayer url={lineup.video} />}
         {lineup.tip && <div className="ub-tip"><span className="ub-tip-label">Instruction</span>{lineup.tip}</div>}
 
@@ -111,6 +137,11 @@ export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete, 
             <button className="ub-btn-ghost" onClick={() => copy(JUMPTHROW_BIND, "bind")}>
               {copied === "bind" ? <><Check size={14} /> Copied</> : <><Terminal size={14} /> Copy jumpthrow bind (ALT)</>}
             </button>
+            {lineup.loc && (
+              <button className="ub-btn-ghost" onClick={() => copy("sv_cheats 1;" + lineup.loc, "tp")}>
+                {copied === "tp" ? <><Check size={14} /> Copied</> : <><MapPin size={14} /> Copy teleport to spot</>}
+              </button>
+            )}
           </div>
         </div>
 
