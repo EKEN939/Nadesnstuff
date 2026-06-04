@@ -5,9 +5,10 @@
 // Mark a map `comingSoon: true` to show it dimmed/locked on the landing (not selectable).
 export const MAPS = [
   { id: "mirage", name: "Mirage", radar: "/radars/mirage.png" },
-  { id: "inferno", name: "Inferno", radar: null },
-  { id: "cache", name: "Cache", radar: null },
-  { id: "ancient", name: "Ancient", radar: null },
-  { id: "dust2", name: "Dust II", radar: null, comingSoon: true },
+  { id: "inferno", name: "Inferno", radar: "/radars/inferno.png" },
+  { id: "dust2", name: "Dust II", radar: "/radars/dust2.png" },
+  { id: "cache", name: "Cache", radar: "/radars/cache.png" },
+  { id: "ancient", name: "Ancient", radar: "/radars/ancient.png" },
+  { id: "overpass", name: "Overpass", radar: "/radars/overpass.png" },
   { id: "nuke", name: "Nuke", radar: null, comingSoon: true },
 ];
