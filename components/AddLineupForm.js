@@ -7,23 +7,31 @@ import TacticalMap from "./TacticalMap";
 
 function Uploader({ accept, token, onUploaded }) {
   const [busy, setBusy] = useState(false);
+  const [pct, setPct] = useState(0);
   const [err, setErr] = useState("");
   async function onChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setBusy(true); setErr("");
+    setBusy(true); setErr(""); setPct(0);
     try {
       let tok = token;
       if (!tok) { try { tok = localStorage.getItem("nns_admin_token") || ""; } catch {} }
-      const res = await upload(file.name, file, { access: "public", handleUploadUrl: "/api/upload", clientPayload: tok });
+      const res = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/upload",
+        clientPayload: tok,
+        multipart: true,
+        onUploadProgress: (p) => setPct(Math.round(p?.percentage || 0)),
+      });
       onUploaded(res.url);
     } catch (error) { setErr("Upload failed — " + (error?.message || "paste a URL instead")); }
-    finally { setBusy(false); e.target.value = ""; }
+    finally { setBusy(false); setPct(0); e.target.value = ""; }
   }
+  const label = !busy ? "Upload" : pct >= 100 ? "Finishing…" : pct > 0 ? `Uploading ${pct}%` : "Starting…";
   return (
     <>
       <label className="ub-upload" title="Upload a file">
-        <Upload size={13} /> {busy ? "Uploading…" : "Upload"}
+        <Upload size={13} /> {label}
         <input type="file" accept={accept} onChange={onChange} hidden disabled={busy} />
       </label>
       {err && <span className="ub-uploaderr">{err}</span>}
