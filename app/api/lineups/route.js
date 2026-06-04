@@ -14,7 +14,8 @@ export async function GET() {
 export async function PUT(req) {
   const header = req.headers.get("authorization") || "";
   const token = header.replace(/^Bearer\s+/i, "");
-  const session = await auth();
+  let session = null;
+  try { session = await auth(); } catch {}
   const adminIds = (process.env.ADMIN_DISCORD_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
   const sessionAdmin = session?.user?.id && adminIds.includes(session.user.id);
   const tokenOk = process.env.ADMIN_TOKEN && token === process.env.ADMIN_TOKEN;
