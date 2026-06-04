@@ -15,14 +15,9 @@ function Uploader({ accept, token, onUploaded }) {
     try {
       let tok = token;
       if (!tok) { try { tok = localStorage.getItem("nns_admin_token") || ""; } catch {} }
-      if (!tok) {
-        tok = (typeof window !== "undefined" && window.prompt("Admin token (same as ADMIN_TOKEN in Vercel):")) || "";
-        if (tok) { try { localStorage.setItem("nns_admin_token", tok); } catch {} }
-      }
-      if (!tok) { setBusy(false); return; }
       const res = await upload(file.name, file, { access: "public", handleUploadUrl: "/api/upload", clientPayload: tok });
       onUploaded(res.url);
-    } catch { setErr("Upload failed — paste a URL"); }
+    } catch (error) { setErr("Upload failed — " + (error?.message || "paste a URL instead")); }
     finally { setBusy(false); e.target.value = ""; }
   }
   return (
