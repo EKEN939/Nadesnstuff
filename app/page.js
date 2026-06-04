@@ -13,6 +13,7 @@ import LineupCard from "@/components/LineupCard";
 import LineupModal from "@/components/LineupModal";
 import AddLineupForm from "@/components/AddLineupForm";
 import ExportModal from "@/components/ExportModal";
+import DemoHub from "@/components/DemoHub";
 
 const ADMIN_KEY = "admin";
 const ACTIVE_MAPS = MAPS.filter((m) => !m.comingSoon);
@@ -28,6 +29,8 @@ export default function Page() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
   const [activeSpot, setActiveSpot] = useState(null);
+  const [room, setRoom] = useState(null);
+  const [isHost, setIsHost] = useState(false);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
   const [admin, setAdmin] = useState(false);
@@ -42,9 +45,14 @@ export default function Page() {
     deepRef.current = null;
     if (typeof window !== "undefined") {
       const p = new URLSearchParams(window.location.search);
-      const m = p.get("map");
-      const l = parseInt(p.get("lineup"), 10);
-      if (m && ACTIVE_MAPS.some((x) => x.id === m)) deepRef.current = { map: m, lineup: Number.isNaN(l) ? null : l };
+      const roomCode = p.get("room");
+      if (roomCode) deepRef.current = { screen: "demo", room: roomCode };
+      else if (p.get("demo") != null) deepRef.current = { screen: "demo" };
+      else {
+        const m = p.get("map");
+        const l = parseInt(p.get("lineup"), 10);
+        if (m && ACTIVE_MAPS.some((x) => x.id === m)) deepRef.current = { map: m, lineup: Number.isNaN(l) ? null : l };
+      }
     }
   }
 
@@ -112,6 +120,9 @@ export default function Page() {
   const openMap = (id) => transitionTo("map", id);
   const goLanding = () => { setSelected(null); transitionTo("landing"); };
   const openLineup = (l) => transitionTo("map", l.map, l);
+  const goDemo = () => transitionTo("demo");
+  function createRoom() { const code = Math.random().toString(36).slice(2, 7).toUpperCase(); setRoom(code); setIsHost(true); }
+  function leaveRoom() { setRoom(null); setIsHost(false); }
 
   useEffect(() => {
     if (view !== "list" || screen !== "map") return;
@@ -143,7 +154,7 @@ export default function Page() {
       if (selected) return setSelected(null);
       if (adding || editing) { setAdding(false); setEditing(null); return; }
       if (showExport) return setShowExport(false);
-      if (screen === "map") goLanding();
+      if (screen !== "landing") goLanding();
     };
     window.addEventListener("keydown", onEsc);
     return () => window.removeEventListener("keydown", onEsc);
@@ -157,7 +168,10 @@ export default function Page() {
         const list = Array.isArray(d.lineups) ? d.lineups : LINEUPS;
         setLineups(list); setLiveConfigured(!!d.configured);
         const dp = deepRef.current;
-        if (dp) {
+        if (dp && dp.screen === "demo") {
+          setScreen("demo");
+          if (dp.room) { setRoom(dp.room); setIsHost(false); }
+        } else if (dp && dp.map) {
           setActiveMap(dp.map); setScreen("map");
           if (dp.lineup != null) {
             const l = list.find((x) => x.id === dp.lineup && x.map === dp.map);
@@ -173,8 +187,9 @@ export default function Page() {
     if (typeof window === "undefined") return;
     let url = window.location.pathname;
     if (screen === "map") url += "?map=" + activeMap + (selected ? "&lineup=" + selected.id : "");
+    else if (screen === "demo") url += "?demo=1" + (room ? "&room=" + room : "");
     window.history.replaceState(null, "", url);
-  }, [screen, activeMap, selected]);
+  }, [screen, activeMap, selected, room]);
 
   const mapMeta = ACTIVE_MAPS.find((m) => m.id === activeMap) || ACTIVE_MAPS[0];
 
@@ -218,6 +233,10 @@ export default function Page() {
         <button className="ub-logobtn" onClick={() => screen !== "landing" && goLanding()} aria-label="Home">
           <Logo variant="compact" />
         </button>
+        <nav className="ub-nav">
+          <button className={screen !== "demo" ? "on" : ""} onClick={goLanding}>Maps</button>
+          <button className={screen === "demo" ? "on" : ""} onClick={goDemo}>Demo Hub</button>
+        </nav>
         <div className="ub-headbtns">
           {admin && <span className="ub-adminflag">admin</span>}
           {admin && saveMsg && <span className="ub-savemsg">{saveMsg}</span>}
@@ -240,6 +259,8 @@ export default function Page() {
       <div className="nns-stage" ref={stageRef}>
         {screen === "landing" ? (
           <Landing maps={MAPS} lineups={lineups} onPick={openMap} onOpenLineup={openLineup} />
+        ) : screen === "demo" ? (
+          <DemoHub room={room} isHost={isHost} configured={liveConfigured} onCreateRoom={createRoom} onLeaveRoom={leaveRoom} />
         ) : (
           <>
             <button className="ub-back" onClick={goLanding}><ArrowLeft size={15} /> All maps</button>
