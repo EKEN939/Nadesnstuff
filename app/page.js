@@ -274,9 +274,15 @@ export default function Page() {
               <LogOut size={15} /> {(session.user.name || "Account").split("#")[0]}
             </button>
           ) : (
-            <button className="ub-toolbtn ub-discord" onClick={() => signIn("discord")}>
-              <LogIn size={15} /> Login with Discord
-            </button>
+            <div className="ub-loginwrap">
+              <button className="ub-toolbtn ub-discord" onClick={() => signIn("discord")}>
+                <LogIn size={15} /> Login with Discord
+              </button>
+              <span className="ub-logininfo" role="tooltip">
+                <strong>Sign-in is only for saving your stuff.</strong>
+                Your favourites and learned lineups get saved to your profile and synced across devices. We only see your Discord name and avatar — we never post anything, and can't read your servers, messages or friends.
+              </span>
+            </div>
           )}
           {admin && <span className="ub-adminflag">admin</span>}
           {admin && saveMsg && <span className="ub-savemsg">{saveMsg}</span>}

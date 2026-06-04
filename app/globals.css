@@ -405,3 +405,9 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 
 .ub-discord{border-color:rgba(88,101,242,.5);color:#aab1f5;}
 .ub-discord:hover{border-color:#5865F2;}
+
+/* discord login privacy tooltip */
+.ub-loginwrap{position:relative;}
+.ub-logininfo{position:absolute;top:calc(100% + 8px);right:0;width:250px;display:flex;flex-direction:column;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;font-size:12px;line-height:1.45;color:var(--muted);opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .15s,transform .15s;z-index:50;box-shadow:0 12px 28px rgba(0,0,0,.55);}
+.ub-logininfo strong{color:var(--text);font-size:12.5px;}
+.ub-loginwrap:hover .ub-logininfo,.ub-loginwrap:focus-within .ub-logininfo{opacity:1;transform:translateY(0);}
