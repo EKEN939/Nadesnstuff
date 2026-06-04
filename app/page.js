@@ -13,7 +13,9 @@ import LineupCard from "@/components/LineupCard";
 import LineupModal from "@/components/LineupModal";
 import AddLineupForm from "@/components/AddLineupForm";
 import ExportModal from "@/components/ExportModal";
-import DemoHub from "@/components/DemoHub";
+import dynamic from "next/dynamic";
+
+const DemoHub = dynamic(() => import("@/components/DemoHub"), { ssr: false });
 
 const ADMIN_KEY = "admin";
 const ACTIVE_MAPS = MAPS.filter((m) => !m.comingSoon);

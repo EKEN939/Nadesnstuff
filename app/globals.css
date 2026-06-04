@@ -299,3 +299,25 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .dh-speed button:disabled{opacity:.5;cursor:not-allowed;}
 .dh-foot{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap;}
 .dh-note code{color:var(--accent);}
+
+/* demo hub: 2d/3d + roster */
+.dh-main{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;}
+.dh-left{flex:1 1 520px;min-width:0;}
+.dh-viewtoggle{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.dh-viewtoggle button{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:7px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Manrope',sans-serif;transition:all .15s;}
+.dh-viewtoggle button.on{border-color:var(--accent);color:var(--accent);background:#241b17;}
+.dh-viewtoggle button:disabled{opacity:.5;cursor:default;}
+.dh-povlabel{font-size:12px;color:var(--muted);margin-left:auto;}
+.dh-scene{width:100%;border:1px solid var(--border);border-radius:14px;overflow:hidden;line-height:0;background:#16181b;}
+.dh-scene canvas{display:block;width:100%;height:auto;}
+.dh-dot.sel{width:17px;height:17px;box-shadow:0 0 0 3px rgba(240,106,59,.5),0 1px 5px rgba(0,0,0,.6);z-index:4;}
+.dh-roster{flex:0 0 220px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.dh-rosterhead{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.dh-team{margin-bottom:14px;}
+.dh-teamname{font-family:'Archivo',sans-serif;font-weight:800;font-size:13px;letter-spacing:1px;margin-bottom:6px;}
+.dh-player{display:flex;align-items:center;gap:8px;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:13px;cursor:pointer;margin-bottom:6px;font-family:'Manrope',sans-serif;transition:all .12s;}
+.dh-player:hover:not(:disabled){border-color:#3b4046;}
+.dh-player.sel{border-color:var(--accent);background:#241b17;color:var(--accent);}
+.dh-player:disabled{cursor:default;opacity:.85;}
+.dh-pdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+.dh-peye{margin-left:auto;color:var(--accent);}
