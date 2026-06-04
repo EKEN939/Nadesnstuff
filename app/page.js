@@ -198,23 +198,12 @@ export default function Page() {
 
   const mapMeta = ACTIVE_MAPS.find((m) => m.id === activeMap) || ACTIVE_MAPS[0];
 
-  function saveLineup(data, id) {
-    if (id != null) {
-      setLineups((prev) => prev.map((l) => (l.id === id ? { ...data, id, map: l.map } : l)));
-      setEditing(null);
-    } else {
-      const newId = Math.max(0, ...lineups.map((l) => l.id)) + 1;
-      setLineups((prev) => [...prev, { ...data, id: newId, map: activeMap }]);
-    }
-  }
-  function removeLineup(id) { setLineups((prev) => prev.filter((l) => l.id !== id)); setSelected(null); }
-  function startEdit(lineup) { setSelected(null); setEditing(lineup); }
-
-  async function saveLive() {
+  async function persist(list) {
+    if (!liveConfigured) { setSaveMsg("Local only — storage not set up"); setTimeout(() => setSaveMsg(""), 3000); return; }
     let token = adminToken;
     if (!token) {
       token = (typeof window !== "undefined" && window.prompt("Admin token (same as ADMIN_TOKEN in Vercel):")) || "";
-      if (!token) return;
+      if (!token) { setSaveMsg("Not saved — token needed"); setTimeout(() => setSaveMsg(""), 3000); return; }
       setAdminToken(token);
       try { localStorage.setItem("nns_admin_token", token); } catch {}
     }
@@ -223,7 +212,7 @@ export default function Page() {
       const res = await fetch("/api/lineups", {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-        body: JSON.stringify({ lineups }),
+        body: JSON.stringify({ lineups: list }),
       });
       if (res.status === 401) { setSaveMsg("Wrong token"); setAdminToken(""); try { localStorage.removeItem("nns_admin_token"); } catch {} }
       else if (!res.ok) { setSaveMsg("Could not save"); }
@@ -231,6 +220,17 @@ export default function Page() {
     } catch { setSaveMsg("Network error"); }
     finally { setSaving(false); setTimeout(() => setSaveMsg(""), 3000); }
   }
+  const saveLive = () => persist(lineups);
+
+  function saveLineup(data, id) {
+    let next;
+    if (id != null) { next = lineups.map((l) => (l.id === id ? { ...data, id, map: l.map } : l)); setEditing(null); }
+    else { const newId = Math.max(0, ...lineups.map((l) => l.id)) + 1; next = [...lineups, { ...data, id: newId, map: activeMap }]; }
+    setLineups(next);
+    persist(next);
+  }
+  function removeLineup(id) { const next = lineups.filter((l) => l.id !== id); setLineups(next); setSelected(null); persist(next); }
+  function startEdit(lineup) { setSelected(null); setEditing(lineup); }
 
   return (
     <div className="ub-wrap">
