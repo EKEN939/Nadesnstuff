@@ -17,6 +17,19 @@ export default function TacticalMap({
   const active = spots.find((s) => s.target === activeSpot) || null;
   useEffect(() => { setImgOk(true); }, [map.id]);
 
+  const scrollRef = useRef(null);
+  const drag = useRef(null);
+  const movedRef = useRef(false);
+  useEffect(() => {
+    const el = scrollRef.current; if (!el) return;
+    el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+    el.scrollTop = (el.scrollHeight - el.clientHeight) / 2;
+  }, [zoom]);
+  function onPointerDown(e) { if (addMode || zoom <= 1) return; const el = scrollRef.current; drag.current = { x: e.clientX, y: e.clientY, l: el.scrollLeft, t: el.scrollTop }; movedRef.current = false; }
+  function onPointerMove(e) { if (!drag.current) return; const dx = e.clientX - drag.current.x, dy = e.clientY - drag.current.y; if (Math.abs(dx) + Math.abs(dy) > 4) movedRef.current = true; const el = scrollRef.current; el.scrollLeft = drag.current.l - dx; el.scrollTop = drag.current.t - dy; }
+  function endDrag() { drag.current = null; }
+  function onClickCapture(e) { if (movedRef.current) { e.stopPropagation(); e.preventDefault(); movedRef.current = false; } }
+
   useEffect(() => {
     if (addMode || !ref.current) return;
     const dots = ref.current.querySelectorAll(".ub-pin .ub-pin-dot");
@@ -45,7 +58,8 @@ export default function TacticalMap({
           <button type="button" aria-label="Zoom out" onClick={() => setZoom((z) => Math.max(1, +(z - 0.5).toFixed(1)))} disabled={zoom <= 1}><Minus size={15} /></button>
         </div>
       )}
-      <div className="ub-mapscroll">
+      <div ref={scrollRef} className={`ub-mapscroll ${zoom > 1 ? "zoomed" : ""}`}
+        onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerLeave={endDrag} onClickCapture={onClickCapture}>
         <div ref={ref} className={`ub-map ${addMode ? "addmode" : ""} ${imgOk ? "has-img" : ""}`} style={{ width: `${zoom * 100}%` }} onClick={handleClick}>
           {imgOk ? (
             <img className="ub-map-img" src={radarSrc} alt={`${map.name} radar`} draggable={false} onError={() => setImgOk(false)} />
