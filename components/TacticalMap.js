@@ -49,7 +49,7 @@ export default function TacticalMap({
     });
     ref.current.querySelectorAll(".ub-proj").forEach((c) => {
       const d = c.dataset;
-      animate(c, { cx: [+d.x1, +d.x2], cy: [+d.y1, +d.y2], duration: 1200, delay: 300, ease: "inOut(2)", loop: true });
+      animate(c, { cx: [+d.x1, +d.x2], cy: [+d.y1, +d.y2], duration: 2600, delay: 500, ease: "inOut(2)", loop: true });
     });
   }, [activeSpot]);
 
