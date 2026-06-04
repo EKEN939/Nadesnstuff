@@ -47,6 +47,10 @@ export default function TacticalMap({
       p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
       animate(p, { strokeDashoffset: [len, 0], duration: 600, ease: "out(2)" });
     });
+    ref.current.querySelectorAll(".ub-proj").forEach((c) => {
+      const d = c.dataset;
+      animate(c, { cx: [+d.x1, +d.x2], cy: [+d.y1, +d.y2], duration: 1200, delay: 300, ease: "inOut(2)", loop: true });
+    });
   }, [activeSpot]);
 
   function handleClick(e) {
@@ -91,6 +95,9 @@ export default function TacticalMap({
               {lineEnds.map(({ l, x1, y1, x2, y2 }) => (
                 <path key={l.id} d={linePath(x1, y1, x2, y2)} className="ub-arc" style={{ "--ac": TYPE_META[l.type].color }} />
               ))}
+              {lineEnds.map(({ l, x1, y1, x2, y2 }) => (
+                <circle key={"p" + l.id} className="ub-proj" r="1.3" cx={x1} cy={y1} style={{ "--c": TYPE_META[l.type].color }} data-x1={x1} data-y1={y1} data-x2={x2} data-y2={y2} />
+              ))}
               {showDraftLine && (
                 <path d={linePath(draftThrow.x, draftThrow.y, draftLand.x, draftLand.y)} className="ub-arc draft" />
               )}
@@ -104,7 +111,7 @@ export default function TacticalMap({
             const color = iconType ? TYPE_META[iconType].color : "#ececec";
             const dim = activeSpot && s.target !== activeSpot;
             return (
-              <button key={s.target} className={`ub-pin ub-spinpin ${dim ? "dim" : ""}`} style={{ left: `${s.x}%`, top: `${s.y}%`, "--pin": color }}
+              <button key={s.target} className={`ub-pin ub-spinpin ${dim ? "dim" : ""} ${activeSpot && s.target === activeSpot ? "act" : ""}`} style={{ left: `${s.x}%`, top: `${s.y}%`, "--pin": color }}
                 onClick={(e) => { e.stopPropagation(); s.lineups.length > 1 ? onSelectSpot(s.target) : onPin(s.lineups[0]); }}
                 title={`${s.target} (${s.lineups.length})`}>
                 {iconType ? <span className="ub-pin-marker"><NadeIcon type={iconType} size={14} /></span> : <span className="ub-pin-dot" />}

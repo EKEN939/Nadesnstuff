@@ -4,7 +4,7 @@ export const metadata = {
   metadataBase: new URL("https://nadesnstuff.vercel.app"),
   title: "nades'n'stuff — CS2 grenade lineups",
   description: "Grenade lineups per map for Counter-Strike 2. Smokes, flashes, mollys and HE.",
-  icons: { icon: "/logo.png" },
+  icons: { icon: "/logo.png", apple: "/icon-192.png" },
   openGraph: {
     title: "nades'n'stuff — CS2 grenade lineups",
     description: "Smokes, flashes, mollys and HE — lineups per map for Counter-Strike 2.",
@@ -21,7 +21,7 @@ export const metadata = {
   },
 };
 
-export const viewport = { width: "device-width", initialScale: 1 };
+export const viewport = { width: "device-width", initialScale: 1, themeColor: "#16181b" };
 
 export default function RootLayout({ children }) {
   return (

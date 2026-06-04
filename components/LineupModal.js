@@ -1,9 +1,12 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import { animate } from "animejs";
-import { X, ArrowRight, ImageOff, Pencil, Trash2, Link2, Check, Star } from "lucide-react";
+import { X, ArrowRight, ImageOff, Pencil, Trash2, Link2, Check, Star, ChevronLeft, ChevronRight, Crosshair, Terminal, CheckCircle2 } from "lucide-react";
 import { TYPE_META, DIFF_COLOR } from "@/lib/constants";
 import NadeIcon from "./NadeIcon";
+
+const PRACTICE_CMDS = "sv_cheats 1;sv_infinite_ammo 1;ammo_grenade_limit_total 5;mp_warmup_end;mp_freezetime 0;mp_roundtime 60;mp_roundtime_defuse 60;sv_grenade_trajectory 1;sv_grenade_trajectory_time 10;cl_grenadepreview 1;bot_kick;mp_limitteams 0;mp_autoteambalance 0;sv_showimpacts 1";
+const JUMPTHROW_BIND = 'alias "+jthrow" "-attack;-attack2;+jump";alias "-jthrow" "-jump";bind "alt" "+jthrow"';
 
 function VideoPlayer({ url }) {
   const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
@@ -22,24 +25,28 @@ function VideoPlayer({ url }) {
   );
 }
 
-export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete, fav, onToggleFav }) {
+export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete, fav, onToggleFav, learned, onToggleLearned }) {
   const t = TYPE_META[lineup.type];
   const boxRef = useRef(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [copied, setCopied] = useState("");
+  const steps = lineup.steps || [];
+  const [step, setStep] = useState(0);
+  useEffect(() => { setStep(0); }, [lineup.id]);
 
   function copyLink() {
     if (typeof window === "undefined") return;
     const url = window.location.origin + window.location.pathname + "?map=" + lineup.map + "&lineup=" + lineup.id;
-    navigator.clipboard?.writeText(url)
-      .then(() => { setLinkCopied(true); setTimeout(() => setLinkCopied(false), 1500); })
-      .catch(() => {});
+    navigator.clipboard?.writeText(url).then(() => { setLinkCopied(true); setTimeout(() => setLinkCopied(false), 1500); }).catch(() => {});
+  }
+  function copy(text, key) {
+    navigator.clipboard?.writeText(text).then(() => { setCopied(key); setTimeout(() => setCopied(""), 1600); }).catch(() => {});
   }
 
   useEffect(() => {
-    if (boxRef.current) {
-      animate(boxRef.current, { opacity: [0, 1], translateY: [14, 0], duration: 300, ease: "out(3)" });
-    }
+    if (boxRef.current) animate(boxRef.current, { opacity: [0, 1], translateY: [14, 0], duration: 300, ease: "out(3)" });
   }, []);
+  const cur = steps[step];
 
   return (
     <div className="ub-overlay" onClick={onClose}>
@@ -54,38 +61,58 @@ export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete, 
             <span className="ub-dot">·</span><span className="ub-throw">{lineup.throwType}</span>
             <span className="ub-throw" style={{ color: DIFF_COLOR[lineup.difficulty] }}>{lineup.difficulty}</span>
           </div>
-          <button className="ub-sharebtn" onClick={copyLink}>
-            {linkCopied ? <><Check size={13} /> Link copied</> : <><Link2 size={13} /> Copy link</>}
-          </button>
-          <button className={`ub-fav ub-modalfav ${fav ? "on" : ""}`} onClick={onToggleFav} aria-label="Favorite" title="Favorite">
-            <Star size={16} fill={fav ? "currentColor" : "none"} />
-          </button>
+          <div className="ub-modal-headbtns">
+            <button className="ub-sharebtn" onClick={copyLink}>
+              {linkCopied ? <><Check size={13} /> Link copied</> : <><Link2 size={13} /> Copy link</>}
+            </button>
+            <button className={`ub-learnbtn ${learned ? "on" : ""}`} onClick={onToggleLearned}>
+              <CheckCircle2 size={14} /> {learned ? "Learned" : "Mark learned"}
+            </button>
+            <button className={`ub-fav ub-modalfav ${fav ? "on" : ""}`} onClick={onToggleFav} aria-label="Favorite" title="Favorite">
+              <Star size={16} fill={fav ? "currentColor" : "none"} />
+            </button>
+          </div>
         </div>
 
         {lineup.video && <VideoPlayer url={lineup.video} />}
-
         {lineup.tip && <div className="ub-tip"><span className="ub-tip-label">Instruction</span>{lineup.tip}</div>}
 
-        {lineup.steps?.length > 0 && (
-          <>
-            <div className="ub-steps-label">Still images</div>
-            <div className="ub-steps">
-              {lineup.steps.map((s, i) => (
-                <div className="ub-step" key={i}>
-                  <div className="ub-step-imgwrap">
-                    {s.img ? (
-                      <img src={s.img} alt={s.label} />
-                    ) : (
-                      <div className="ub-placeholder"><ImageOff size={24} /><span>{s.label}</span><small>add your own image</small></div>
-                    )}
-                    <span className="ub-step-num">{String(i + 1).padStart(2, "0")}</span>
-                  </div>
-                  <div className="ub-step-cap"><strong>{s.label}</strong>{s.caption}</div>
-                </div>
-              ))}
+        {steps.length > 0 && (
+          <div className="ub-guide">
+            <div className="ub-guide-head">
+              <span className="ub-guide-step" style={{ color: t.color }}>{cur.label}</span>
+              <span className="ub-guide-count">{step + 1} / {steps.length}</span>
             </div>
-          </>
+            <div className="ub-guide-imgwrap">
+              {cur.img ? <img src={cur.img} alt={cur.label} /> : <div className="ub-placeholder"><ImageOff size={26} /><span>{cur.label}</span><small>add an image when editing</small></div>}
+              {steps.length > 1 && (
+                <>
+                  <button className="ub-guide-nav left" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0} aria-label="Previous"><ChevronLeft size={20} /></button>
+                  <button className="ub-guide-nav right" onClick={() => setStep((s) => Math.min(steps.length - 1, s + 1))} disabled={step === steps.length - 1} aria-label="Next"><ChevronRight size={20} /></button>
+                </>
+              )}
+            </div>
+            {cur.caption && <div className="ub-guide-cap">{cur.caption}</div>}
+            {steps.length > 1 && (
+              <div className="ub-guide-dots">
+                {steps.map((_, i) => <button key={i} className={`ub-guide-dot ${i === step ? "on" : ""}`} onClick={() => setStep(i)} aria-label={`Step ${i + 1}`} />)}
+              </div>
+            )}
+          </div>
         )}
+
+        <div className="ub-practice">
+          <div className="ub-practice-h"><Crosshair size={14} /> Practice this lineup</div>
+          <p className="ub-practice-sub">Start a private server, paste in console, then rehearse the throw.</p>
+          <div className="ub-practice-btns">
+            <button className="ub-btn-ghost" onClick={() => copy(PRACTICE_CMDS, "cfg")}>
+              {copied === "cfg" ? <><Check size={14} /> Copied</> : <><Terminal size={14} /> Copy practice config</>}
+            </button>
+            <button className="ub-btn-ghost" onClick={() => copy(JUMPTHROW_BIND, "bind")}>
+              {copied === "bind" ? <><Check size={14} /> Copied</> : <><Terminal size={14} /> Copy jumpthrow bind (ALT)</>}
+            </button>
+          </div>
+        </div>
 
         {admin && (
           <div className="ub-modal-actions">

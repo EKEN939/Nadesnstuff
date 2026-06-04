@@ -29,6 +29,10 @@ export default function Page() {
   const [activeSpot, setActiveSpot] = useState(null);
   const [favs, setFavs] = useState([]);
   const [onlyFavs, setOnlyFavs] = useState(false);
+  const [learned, setLearned] = useState([]);
+  const [throwFilter, setThrowFilter] = useState("ALL");
+  const [videoOnly, setVideoOnly] = useState(false);
+  const [sortBy, setSortBy] = useState("default");
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
   const [admin, setAdmin] = useState(false);
@@ -49,17 +53,22 @@ export default function Page() {
     }
   }
 
-  const filtered = useMemo(
-    () =>
-      lineups.filter((l) => {
-        if (l.map !== activeMap) return false;
-        if (side !== "ALL" && l.side !== side) return false;
-        if (type !== "ALL" && l.type !== type) return false;
-        if (onlyFavs && !favs.includes(l.id)) return false;
-        return true;
-      }),
-    [lineups, activeMap, side, type, onlyFavs, favs]
-  );
+  const filtered = useMemo(() => {
+    let list = lineups.filter((l) => {
+      if (l.map !== activeMap) return false;
+      if (side !== "ALL" && l.side !== side) return false;
+      if (type !== "ALL" && l.type !== type) return false;
+      if (onlyFavs && !favs.includes(l.id)) return false;
+      if (throwFilter !== "ALL" && l.throwType !== throwFilter) return false;
+      if (videoOnly && !l.video) return false;
+      return true;
+    });
+    if (sortBy === "difficulty") {
+      const order = { Easy: 0, Medium: 1, Hard: 2 };
+      list = [...list].sort((a, b) => (order[a.difficulty] ?? 9) - (order[b.difficulty] ?? 9));
+    }
+    return list;
+  }, [lineups, activeMap, side, type, onlyFavs, favs, throwFilter, videoOnly, sortBy]);
 
   // group lineups by landing spot (target); the pin sits on the landing point
   const spots = useMemo(() => {
@@ -73,8 +82,10 @@ export default function Page() {
 
   useEffect(() => { try { setFavs(JSON.parse(localStorage.getItem("nns_favs") || "[]")); } catch {} }, []);
   const toggleFav = (id) => setFavs((prev) => { const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]; try { localStorage.setItem("nns_favs", JSON.stringify(next)); } catch {} return next; });
+  useEffect(() => { try { setLearned(JSON.parse(localStorage.getItem("nns_learned") || "[]")); } catch {} }, []);
+  const toggleLearned = (id) => setLearned((prev) => { const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]; try { localStorage.setItem("nns_learned", JSON.stringify(next)); } catch {} return next; });
 
-  useEffect(() => { setActiveSpot(null); }, [activeMap, side, type, screen]);
+  useEffect(() => { setActiveSpot(null); }, [activeMap, side, type, screen, throwFilter, videoOnly, onlyFavs, sortBy]);
 
   const formMapId = editing ? editing.map : activeMap;
   const formSpots = useMemo(() => {
@@ -197,6 +208,9 @@ export default function Page() {
   }, [screen, activeMap, selected]);
 
   const mapMeta = ACTIVE_MAPS.find((m) => m.id === activeMap) || ACTIVE_MAPS[0];
+  const throwTypes = useMemo(() => [...new Set(lineups.filter((l) => l.map === activeMap).map((l) => l.throwType))], [lineups, activeMap]);
+  const mapAll = lineups.filter((l) => l.map === activeMap);
+  const mapLearned = mapAll.filter((l) => learned.includes(l.id)).length;
 
   async function persist(list) {
     if (!liveConfigured) { setSaveMsg("Local only — storage not set up"); setTimeout(() => setSaveMsg(""), 3000); return; }
@@ -312,6 +326,19 @@ export default function Page() {
                 <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}><List size={14} /> List</button>
               </div>
             </div>
+            {throwTypes.length > 0 && (
+              <div className="ub-controls ub-controls2">
+                <select className="ub-select" value={throwFilter} onChange={(e) => setThrowFilter(e.target.value)}>
+                  <option value="ALL">Any throw</option>
+                  {throwTypes.map((tt) => <option key={tt} value={tt}>{tt}</option>)}
+                </select>
+                <button className={`ub-pill ${videoOnly ? "active" : ""}`} onClick={() => setVideoOnly((v) => !v)}><Video size={13} /> Video only</button>
+                <select className="ub-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                  <option value="default">Newest</option>
+                  <option value="difficulty">By difficulty</option>
+                </select>
+              </div>
+            )}
 
             {view === "map" ? (
               <div className="ub-mapview">
@@ -336,6 +363,8 @@ export default function Page() {
                   ) : (
                     <>
                       <div className="ub-legend-title">{spots.length} spots · {filtered.length} lineups</div>
+                      {mapAll.length > 0 && <div className="ub-legend-prog"><span style={{ width: `${Math.round((mapLearned / mapAll.length) * 100)}%` }} /></div>}
+                      {mapAll.length > 0 && <div className="ub-legend-progtext">{mapLearned}/{mapAll.length} learned</div>}
                       {Object.entries(TYPE_META).map(([key, t]) => {
                         const n = filtered.filter((l) => l.type === key).length;
                         return (
@@ -359,15 +388,15 @@ export default function Page() {
                 {admin && <span>Click "Add lineup" to create one on {mapMeta.name}.</span>}
               </div>
             ) : (
-              <div className="ub-grid">
-                {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => setSelected(l)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} />)}
+              <div className="ub-grid" key={`${side}-${type}-${throwFilter}-${videoOnly}-${sortBy}-${onlyFavs}`}>
+                {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => setSelected(l)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} onToggleLearned={() => toggleLearned(l.id)} />)}
               </div>
             )}
           </>
         )}
       </div>
 
-      {selected && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} />}
+      {selected && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} />}
       {(adding || editing) && (
         <AddLineupForm
           map={editing ? (ACTIVE_MAPS.find((m) => m.id === editing.map) || mapMeta) : mapMeta}
