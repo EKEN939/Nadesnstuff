@@ -37,13 +37,8 @@ export default function TacticalMap({
     if (dots.length) animate(dots, { scale: [0, 1], opacity: [0, 1], duration: 340, delay: stagger(26), ease: "outBack" });
   }, [spots, map.id, addMode, zoom]);
 
-  function arcPath(x1, y1, x2, y2) {
-    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
-    const dx = x2 - x1, dy = y2 - y1, dist = Math.hypot(dx, dy) || 1;
-    const lift = Math.min(30, dist * 0.4);
-    let nx = -dy / dist, ny = dx / dist;
-    if (ny > 0) { nx = -nx; ny = -ny; }
-    return `M ${x1} ${y1} Q ${(mx + nx * lift).toFixed(2)} ${(my + ny * lift).toFixed(2)} ${x2} ${y2}`;
+  function linePath(x1, y1, x2, y2) {
+    return `M ${x1} ${y1} L ${x2} ${y2}`;
   }
   useEffect(() => {
     if (addMode || !ref.current) return;
@@ -94,10 +89,10 @@ export default function TacticalMap({
           {(lineEnds.length > 0 || showDraftLine) && (
             <svg className="ub-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               {lineEnds.map(({ l, x1, y1, x2, y2 }) => (
-                <path key={l.id} d={arcPath(x1, y1, x2, y2)} className="ub-arc" style={{ "--ac": TYPE_META[l.type].color }} />
+                <path key={l.id} d={linePath(x1, y1, x2, y2)} className="ub-arc" style={{ "--ac": TYPE_META[l.type].color }} />
               ))}
               {showDraftLine && (
-                <path d={arcPath(draftThrow.x, draftThrow.y, draftLand.x, draftLand.y)} className="ub-arc draft" />
+                <path d={linePath(draftThrow.x, draftThrow.y, draftLand.x, draftLand.y)} className="ub-arc draft" />
               )}
             </svg>
           )}
