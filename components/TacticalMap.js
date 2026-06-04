@@ -11,8 +11,11 @@ export default function TacticalMap({
 }) {
   const ref = useRef(null);
   const [zoom, setZoom] = useState(1);
+  const [imgOk, setImgOk] = useState(true);
   const zones = MAP_ZONES[map.id] || [];
+  const radarSrc = map.radar || "/radars/" + map.id + ".png";
   const active = spots.find((s) => s.target === activeSpot) || null;
+  useEffect(() => { setImgOk(true); }, [map.id]);
 
   useEffect(() => {
     if (addMode || !ref.current) return;
@@ -43,9 +46,9 @@ export default function TacticalMap({
         </div>
       )}
       <div className="ub-mapscroll">
-        <div ref={ref} className={`ub-map ${addMode ? "addmode" : ""} ${map.radar ? "has-img" : ""}`} style={{ width: `${zoom * 100}%` }} onClick={handleClick}>
-          {map.radar ? (
-            <img className="ub-map-img" src={map.radar} alt={`${map.name} radar`} draggable={false} />
+        <div ref={ref} className={`ub-map ${addMode ? "addmode" : ""} ${imgOk ? "has-img" : ""}`} style={{ width: `${zoom * 100}%` }} onClick={handleClick}>
+          {imgOk ? (
+            <img className="ub-map-img" src={radarSrc} alt={`${map.name} radar`} draggable={false} onError={() => setImgOk(false)} />
           ) : (
             <div className="ub-map-schema">
               {zones.map((z, i) => (

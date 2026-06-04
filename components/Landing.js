@@ -1,8 +1,15 @@
 "use client";
+import { useState } from "react";
 import { Lock, ArrowRight } from "lucide-react";
 import Logo from "./Logo";
 import NadeIcon from "./NadeIcon";
 import { TYPE_META } from "@/lib/constants";
+
+function MapThumb({ m }) {
+  const [ok, setOk] = useState(true);
+  const src = m.radar || "/radars/" + m.id + ".png";
+  return ok ? <img src={src} alt={`${m.name} radar`} onError={() => setOk(false)} /> : <div className="nl-thumbgrid" />;
+}
 
 export default function Landing({ maps, lineups, onPick, onOpenLineup }) {
   const total = lineups.length;
@@ -44,7 +51,7 @@ export default function Landing({ maps, lineups, onPick, onOpenLineup }) {
           }
           return (
             <button key={m.id} className="nl-card" onClick={() => onPick(m.id)}>
-              <div className="nl-thumb">{m.radar ? <img src={m.radar} alt={`${m.name} radar`} /> : <div className="nl-thumbgrid" />}</div>
+              <div className="nl-thumb"><MapThumb m={m} /></div>
               <div className="nl-cardbody">
                 <div className="nl-cardtop"><span className="nl-name">{m.name}</span><span className="nl-count">{count} lineups</span></div>
                 <div className="nl-dots">

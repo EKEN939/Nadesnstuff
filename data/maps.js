@@ -1,6 +1,8 @@
-// Active maps drive the app. Add a radar image in /public/radars/ and point `radar` to it.
+// Active maps drive the app.
+// Radar image: drop a PNG in /public/radars/ named after the map id (e.g. inferno.png).
+// It is auto-detected and used; if no file is present a stylized schematic (data/radars.js)
+// is shown instead. You can also set `radar` to an explicit path to override the convention.
 // Mark a map `comingSoon: true` to show it dimmed/locked on the landing (not selectable).
-// Maps with radar:null render a stylized schematic (see data/radars.js) until you add a real radar.
 export const MAPS = [
   { id: "mirage", name: "Mirage", radar: "/radars/mirage.png" },
   { id: "inferno", name: "Inferno", radar: null },

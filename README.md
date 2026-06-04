@@ -93,3 +93,12 @@ Without a Blob store the Upload buttons just fail gracefully — paste a URL ins
 
 Opening a lineup updates the URL to `/?map=<map>&lineup=<id>`, and the detail view has a
 **Copy link** button. Anyone opening that link lands directly on that lineup.
+
+## Map radar images
+Drop a PNG into `public/radars/` named after the map id — `mirage.png`, `inferno.png`,
+`ancient.png`, etc. It is detected automatically and shown; if there's no file, a stylized
+schematic is shown instead. No code change needed.
+
+If you use SimpleRadar images (free for personal use, download from https://readtldr.gg/simpleradar),
+please credit SimpleRadar / readtldr.gg as the radar source. Their pack covers the common
+competitive maps; some maps (e.g. Cache) may not be available there.
