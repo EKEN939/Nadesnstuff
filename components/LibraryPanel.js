@@ -1,15 +1,25 @@
 "use client";
 import { useState } from "react";
-import { X, Star, CheckCircle2, FolderPlus, Folder, Trash2, ChevronLeft, Pencil } from "lucide-react";
+import { X, Star, CheckCircle2, FolderPlus, Folder, Trash2, ChevronLeft, Pencil, Link2, Check } from "lucide-react";
 import LineupCard from "./LineupCard";
 
 export default function LibraryPanel({
   view, setView, onClose, lineups, favs, learned, collections, maps,
   onOpenLineup, toggleFav, createCollection, renameCollection, deleteCollection,
+  shared, onSaveShared,
 }) {
   const [activeCol, setActiveCol] = useState(null);
   const [newName, setNewName] = useState("");
+  const [shareCopied, setShareCopied] = useState("");
   const mapName = (id) => maps.find((m) => m.id === id)?.name || id;
+  function shareCol(col) {
+    try {
+      const code = btoa(encodeURIComponent(JSON.stringify({ n: col.name, i: col.items })));
+      const url = `${window.location.origin}${window.location.pathname}?c=${encodeURIComponent(code)}`;
+      navigator.clipboard?.writeText(url).then(() => { setShareCopied(col.id); setTimeout(() => setShareCopied(""), 1800); }).catch(() => {});
+    } catch {}
+  }
+  const sharedItems = shared ? lineups.filter((l) => shared.items.map(String).includes(String(l.id))) : [];
 
   const favLineups = lineups.filter((l) => favs.includes(l.id));
   const learnedLineups = lineups.filter((l) => learned.includes(l.id));
@@ -39,6 +49,19 @@ export default function LibraryPanel({
         </div>
 
         <div className="ub-lib-body">
+          {view === "shared" && shared && (
+            <>
+              <div className="ub-shared-head">
+                <div>
+                  <div className="ub-pm-sub">Shared collection</div>
+                  <h3 className="ub-lib-colname">{shared.name}</h3>
+                </div>
+                <button className="ub-btn-primary" onClick={() => onSaveShared?.()}><FolderPlus size={15} /> Save to my collections</button>
+              </div>
+              {sharedItems.length ? <div className="ub-grid">{sharedItems.map(card)}</div>
+                : <div className="ub-lib-empty"><Folder size={26} /><p>None of these lineups are available right now.</p></div>}
+            </>
+          )}
           {view === "favs" && (
             favLineups.length ? <div className="ub-grid">{favLineups.map(card)}</div>
               : <div className="ub-lib-empty"><Star size={26} /><p>No favourites yet. Tap the star on any lineup to save it here.</p></div>
@@ -90,10 +113,16 @@ export default function LibraryPanel({
           {view === "collections" && activeCol && (() => {
             const col = collections.find((c) => c.id === activeCol);
             if (!col) return null;
-            const items = lineups.filter((l) => col.items.includes(l.id));
+            const ids = col.items.map(String);
+            const items = lineups.filter((l) => ids.includes(String(l.id)));
             return (
               <>
-                <button className="ub-back" onClick={() => setActiveCol(null)}><ChevronLeft size={15} /> All collections</button>
+                <div className="ub-colhead">
+                  <button className="ub-back" onClick={() => setActiveCol(null)}><ChevronLeft size={15} /> All collections</button>
+                  <button className="ub-btn-ghost" onClick={() => shareCol(col)}>
+                    {shareCopied === col.id ? <><Check size={14} /> Link copied</> : <><Link2 size={14} /> Share</>}
+                  </button>
+                </div>
                 <h3 className="ub-lib-colname">{col.name}</h3>
                 {items.length ? <div className="ub-grid">{items.map(card)}</div>
                   : <div className="ub-lib-empty"><Folder size={26} /><p>This collection is empty. Open a lineup and use “Save to collection”.</p></div>}

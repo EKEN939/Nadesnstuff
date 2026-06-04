@@ -38,6 +38,7 @@ export default function Page() {
   const [collections, setCollections] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
   const [libraryView, setLibraryView] = useState(null);
+  const [sharedCol, setSharedCol] = useState(null);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
   const [admin, setAdmin] = useState(false);
@@ -96,7 +97,18 @@ export default function Page() {
         setCollections(JSON.parse(localStorage.getItem("nns_collections") || "[]"));
       } catch {}
     }
-  }, [session]);
+  }, [session?.user?.id]);
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const c = params.get("c");
+      if (c) {
+        const data = JSON.parse(decodeURIComponent(atob(c)));
+        if (data && Array.isArray(data.i)) { setSharedCol({ name: data.n || "Shared collection", items: data.i }); setLibraryView("shared"); }
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    } catch {}
+  }, []);
   function saveUser(f, l, c) {
     if (session?.user) {
       fetch("/api/me", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ favs: f, learned: l, collections: c }) }).catch(() => {});
@@ -118,9 +130,20 @@ export default function Page() {
   const renameCollection = (id, name) => { const nc = collections.map((c) => (c.id === id ? { ...c, name } : c)); setCollections(nc); saveUser(favs, learned, nc); };
   const deleteCollection = (id) => { const nc = collections.filter((c) => c.id !== id); setCollections(nc); saveUser(favs, learned, nc); };
   const toggleInCollection = (lineupId, colId) => {
-    const nc = collections.map((c) => (c.id === colId ? { ...c, items: c.items.includes(lineupId) ? c.items.filter((x) => x !== lineupId) : [...c.items, lineupId] } : c));
+    const sid = String(lineupId);
+    const nc = collections.map((c) => (c.id === colId ? { ...c, items: c.items.map(String).includes(sid) ? c.items.filter((x) => String(x) !== sid) : [...c.items, lineupId] } : c));
     setCollections(nc); saveUser(favs, learned, nc);
   };
+  function addCollectionFull(name, items) {
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const nc = [...collections, { id, name: name || "Untitled", items: Array.isArray(items) ? items : [] }];
+    setCollections(nc); saveUser(favs, learned, nc); return id;
+  }
+  function saveShared() {
+    if (!sharedCol) return;
+    addCollectionFull(sharedCol.name, sharedCol.items);
+    setSharedCol(null); setLibraryView("collections");
+  }
   useEffect(() => {
     if (!profileOpen) return;
     const onDoc = (e) => { if (!e.target.closest("[data-profile]")) setProfileOpen(false); };
@@ -486,9 +509,10 @@ export default function Page() {
         <LibraryPanel
           view={libraryView} setView={setLibraryView} onClose={() => setLibraryView(null)}
           lineups={lineups} favs={favs} learned={learned} collections={collections} maps={MAPS}
-          onOpenLineup={(l) => { setActiveMap(l.map); setScreen("map"); setSelected(l); }}
+          onOpenLineup={(l) => { setActiveMap(l.map); setScreen("map"); setSelected(l); setLibraryView(null); }}
           toggleFav={toggleFav} createCollection={createCollection}
           renameCollection={renameCollection} deleteCollection={deleteCollection}
+          shared={sharedCol} onSaveShared={saveShared}
         />
       )}
       {(adding || editing) && (

@@ -480,3 +480,8 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 /* form field hint (teleport getpos) */
 .ub-field-hint{display:block;margin-top:5px;font-size:11.5px;color:var(--muted);line-height:1.45;}
 .ub-field-hint code{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:11px;color:var(--text);}
+
+/* collection header (back + share) and shared-collection view */
+.ub-colhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;}
+.ub-shared-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+.ub-shared-head .ub-lib-colname{margin:2px 0 0;}
