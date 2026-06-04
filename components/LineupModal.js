@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import { animate } from "animejs";
-import { X, ArrowRight, ImageOff, Pencil, Trash2, Link2, Check } from "lucide-react";
+import { X, ArrowRight, ImageOff, Pencil, Trash2, Link2, Check, Star } from "lucide-react";
 import { TYPE_META, DIFF_COLOR } from "@/lib/constants";
 import NadeIcon from "./NadeIcon";
 
@@ -22,7 +22,7 @@ function VideoPlayer({ url }) {
   );
 }
 
-export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete }) {
+export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete, fav, onToggleFav }) {
   const t = TYPE_META[lineup.type];
   const boxRef = useRef(null);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -56,6 +56,9 @@ export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete }
           </div>
           <button className="ub-sharebtn" onClick={copyLink}>
             {linkCopied ? <><Check size={13} /> Link copied</> : <><Link2 size={13} /> Copy link</>}
+          </button>
+          <button className={`ub-fav ub-modalfav ${fav ? "on" : ""}`} onClick={onToggleFav} aria-label="Favorite" title="Favorite">
+            <Star size={16} fill={fav ? "currentColor" : "none"} />
           </button>
         </div>
 

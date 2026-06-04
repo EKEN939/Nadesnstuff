@@ -1,9 +1,9 @@
 "use client";
-import { MapPin, ArrowRight, Footprints, ChevronRight, Video } from "lucide-react";
+import { MapPin, ArrowRight, Footprints, ChevronRight, Video, Star } from "lucide-react";
 import { TYPE_META, DIFF_COLOR } from "@/lib/constants";
 import NadeIcon from "./NadeIcon";
 
-export default function LineupCard({ lineup, index = 0, onClick }) {
+export default function LineupCard({ lineup, index = 0, onClick, fav, onToggleFav }) {
   const t = TYPE_META[lineup.type];
   const thumb = lineup.steps?.find((s) => s.img)?.img || null;
   return (
@@ -14,6 +14,8 @@ export default function LineupCard({ lineup, index = 0, onClick }) {
       <div className="ub-card-top">
         <div className="ub-typebadge" style={{ color: t.color }}><NadeIcon type={lineup.type} size={16} /><span>{t.label}</span></div>
         <div className="ub-card-flags">
+          <span className={`ub-fav ${fav ? "on" : ""}`} role="button" tabIndex={0} title="Favorite"
+            onClick={(e) => { e.stopPropagation(); onToggleFav?.(); }}><Star size={14} fill={fav ? "currentColor" : "none"} /></span>
           {lineup.video && <span className="ub-videoflag"><Video size={12} /></span>}
           <span className={`ub-sidetag side-${lineup.side}`}>{lineup.side}</span>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video } from "lucide-react";
+import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video, Star } from "lucide-react";
 import { MAPS } from "@/data/maps";
 import { LINEUPS } from "@/data/lineups";
 import { TYPE_META } from "@/lib/constants";
@@ -27,6 +27,8 @@ export default function Page() {
   const [type, setType] = useState("ALL");
   const [selected, setSelected] = useState(null);
   const [activeSpot, setActiveSpot] = useState(null);
+  const [favs, setFavs] = useState([]);
+  const [onlyFavs, setOnlyFavs] = useState(false);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
   const [admin, setAdmin] = useState(false);
@@ -53,9 +55,10 @@ export default function Page() {
         if (l.map !== activeMap) return false;
         if (side !== "ALL" && l.side !== side) return false;
         if (type !== "ALL" && l.type !== type) return false;
+        if (onlyFavs && !favs.includes(l.id)) return false;
         return true;
       }),
-    [lineups, activeMap, side, type]
+    [lineups, activeMap, side, type, onlyFavs, favs]
   );
 
   // group lineups by landing spot (target); the pin sits on the landing point
@@ -67,6 +70,9 @@ export default function Page() {
     });
     return [...m.values()];
   }, [filtered]);
+
+  useEffect(() => { try { setFavs(JSON.parse(localStorage.getItem("nns_favs") || "[]")); } catch {} }, []);
+  const toggleFav = (id) => setFavs((prev) => { const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]; try { localStorage.setItem("nns_favs", JSON.stringify(next)); } catch {} return next; });
 
   useEffect(() => { setActiveSpot(null); }, [activeMap, side, type, screen]);
 
@@ -143,6 +149,25 @@ export default function Page() {
     window.addEventListener("keydown", onEsc);
     return () => window.removeEventListener("keydown", onEsc);
   }, [selected, adding, editing, showExport, screen, transitioning]);
+
+  // R = random lineup, arrows = cycle through the current list while a lineup is open
+  useEffect(() => {
+    const onNav = (e) => {
+      const tag = (e.target.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select") return;
+      if (screen !== "map" || adding || editing) return;
+      if ((e.key === "r" || e.key === "R") && filtered.length) {
+        setSelected(filtered[Math.floor(Math.random() * filtered.length)]);
+      } else if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && selected) {
+        const idx = filtered.findIndex((l) => l.id === selected.id);
+        if (idx === -1) return;
+        const ni = e.key === "ArrowRight" ? (idx + 1) % filtered.length : (idx - 1 + filtered.length) % filtered.length;
+        setSelected(filtered[ni]);
+      }
+    };
+    window.addEventListener("keydown", onNav);
+    return () => window.removeEventListener("keydown", onNav);
+  }, [screen, adding, editing, filtered, selected]);
 
   useEffect(() => {
     try { const t = localStorage.getItem("nns_admin_token"); if (t) setAdminToken(t); } catch {}
@@ -279,6 +304,9 @@ export default function Page() {
                   </button>
                 ))}
               </div>
+              <div className="ub-filtergroup">
+                <button className={`ub-pill ${onlyFavs ? "active" : ""}`} onClick={() => setOnlyFavs((v) => !v)}><Star size={13} /> Favorites</button>
+              </div>
               <div className="ub-viewtoggle">
                 <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}><MapIcon size={14} /> Map</button>
                 <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}><List size={14} /> List</button>
@@ -332,14 +360,14 @@ export default function Page() {
               </div>
             ) : (
               <div className="ub-grid">
-                {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => setSelected(l)} />)}
+                {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => setSelected(l)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} />)}
               </div>
             )}
           </>
         )}
       </div>
 
-      {selected && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} />}
+      {selected && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} />}
       {(adding || editing) && (
         <AddLineupForm
           map={editing ? (ACTIVE_MAPS.find((m) => m.id === editing.map) || mapMeta) : mapMeta}

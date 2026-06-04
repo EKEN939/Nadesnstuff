@@ -324,3 +324,41 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .dh-player:disabled{cursor:default;opacity:.85;}
 .dh-pdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
 .dh-peye{margin-left:auto;color:var(--accent);}
+
+/* ---- cooler pack ---- */
+/* trajectory arcs */
+.ub-arc{fill:none;stroke:var(--ac,var(--accent));stroke-width:0.7;stroke-linecap:round;filter:drop-shadow(0 0 1px rgba(0,0,0,.55));}
+.ub-arc.draft{stroke:var(--accent);stroke-dasharray:2 1.6;opacity:.75;}
+
+/* tactical HUD overlay */
+.ub-hud{position:absolute;inset:0;pointer-events:none;border-radius:14px;overflow:hidden;}
+.ub-hud i{position:absolute;width:15px;height:15px;border:2px solid var(--accent);opacity:.65;}
+.ub-hud i:nth-child(1){top:9px;left:9px;border-right:none;border-bottom:none;}
+.ub-hud i:nth-child(2){top:9px;right:9px;border-left:none;border-bottom:none;}
+.ub-hud i:nth-child(3){bottom:9px;left:9px;border-right:none;border-top:none;}
+.ub-hud i:nth-child(4){bottom:9px;right:9px;border-left:none;border-top:none;}
+.ub-hud::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(rgba(255,255,255,.025) 0 1px,transparent 1px 3px);}
+.ub-hud-label{position:absolute;left:13px;bottom:13px;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:1.5px;color:var(--accent);opacity:.9;background:rgba(12,16,18,.55);padding:2px 7px;border-radius:4px;}
+
+/* crosshair feel on the radar */
+.ub-map-img{cursor:crosshair;}
+.ub-mapscroll.zoomed .ub-map-img{cursor:grab;}
+.ub-mapscroll.zoomed:active .ub-map-img{cursor:grabbing;}
+
+/* pin hover preview */
+.ub-pin{z-index:3;}
+.ub-pin:hover{z-index:8;}
+.ub-pin-pop{position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%) translateY(4px);background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:7px 10px;min-width:92px;display:flex;flex-direction:column;gap:2px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .14s,transform .14s;box-shadow:0 8px 20px rgba(0,0,0,.55);}
+.ub-pin-pop strong{font-size:12.5px;color:var(--text);font-weight:700;}
+.ub-pin-pop em{font-size:11px;color:var(--muted);font-style:normal;}
+.ub-pin-poptypes{display:flex;gap:5px;margin-top:3px;color:var(--muted);}
+.ub-pin:hover .ub-pin-pop{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* favorites star */
+.ub-fav{display:inline-flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px;transition:color .15s,transform .15s;}
+.ub-fav:hover{color:#e0b341;transform:scale(1.12);}
+.ub-fav.on{color:#e0b341;}
+.ub-chip.fav.on{border-color:#e0b341;color:#e0b341;background:#241f12;}
+
+.ub-zoom{z-index:9;}
+.ub-modalfav{align-self:flex-start;}

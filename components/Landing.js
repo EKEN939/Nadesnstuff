@@ -1,9 +1,20 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Lock, ArrowRight } from "lucide-react";
 import Logo from "./Logo";
 import NadeIcon from "./NadeIcon";
 import { TYPE_META } from "@/lib/constants";
+
+function CountUp({ n }) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    let raf, start; const dur = 650;
+    const step = (t) => { if (!start) start = t; const p = Math.min(1, (t - start) / dur); setV(Math.round(p * n)); if (p < 1) raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [n]);
+  return <>{v}</>;
+}
 
 function MapThumb({ m }) {
   const [ok, setOk] = useState(true);
@@ -26,11 +37,11 @@ export default function Landing({ maps, lineups, onPick, onOpenLineup }) {
           {Object.entries(TYPE_META).map(([key, t]) => (
             <span key={key} className="nl-tallyitem" style={{ color: t.color }}>
               <NadeIcon type={key} size={15} />
-              {lineups.filter((l) => l.type === key).length}
+              <CountUp n={lineups.filter((l) => l.type === key).length} />
             </span>
           ))}
           <span className="nl-tallydiv" />
-          <span className="nl-tallytotal">{total} lineups · {live} map{live > 1 ? "s" : ""}</span>
+          <span className="nl-tallytotal"><CountUp n={total} /> lineups · {live} map{live > 1 ? "s" : ""}</span>
         </div>
       </div>
 

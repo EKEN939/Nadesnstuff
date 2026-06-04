@@ -37,6 +37,23 @@ export default function TacticalMap({
     if (dots.length) animate(dots, { scale: [0, 1], opacity: [0, 1], duration: 340, delay: stagger(26), ease: "outBack" });
   }, [spots, map.id, addMode, zoom]);
 
+  function arcPath(x1, y1, x2, y2) {
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    const dx = x2 - x1, dy = y2 - y1, dist = Math.hypot(dx, dy) || 1;
+    const lift = Math.min(30, dist * 0.4);
+    let nx = -dy / dist, ny = dx / dist;
+    if (ny > 0) { nx = -nx; ny = -ny; }
+    return `M ${x1} ${y1} Q ${(mx + nx * lift).toFixed(2)} ${(my + ny * lift).toFixed(2)} ${x2} ${y2}`;
+  }
+  useEffect(() => {
+    if (addMode || !ref.current) return;
+    ref.current.querySelectorAll(".ub-arc:not(.draft)").forEach((p) => {
+      const len = p.getTotalLength();
+      p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
+      animate(p, { strokeDashoffset: [len, 0], duration: 600, ease: "out(2)" });
+    });
+  }, [activeSpot]);
+
   function handleClick(e) {
     if (!addMode) return;
     const r = ref.current.getBoundingClientRect();
@@ -77,10 +94,10 @@ export default function TacticalMap({
           {(lineEnds.length > 0 || showDraftLine) && (
             <svg className="ub-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               {lineEnds.map(({ l, x1, y1, x2, y2 }) => (
-                <line key={l.id} x1={x1} y1={y1} x2={x2} y2={y2} className="ub-line" vectorEffect="non-scaling-stroke" />
+                <path key={l.id} d={arcPath(x1, y1, x2, y2)} className="ub-arc" style={{ "--ac": TYPE_META[l.type].color }} />
               ))}
               {showDraftLine && (
-                <line x1={draftThrow.x} y1={draftThrow.y} x2={draftLand.x} y2={draftLand.y} className="ub-line draft" vectorEffect="non-scaling-stroke" />
+                <path d={arcPath(draftThrow.x, draftThrow.y, draftLand.x, draftLand.y)} className="ub-arc draft" />
               )}
             </svg>
           )}
@@ -97,6 +114,11 @@ export default function TacticalMap({
                 title={`${s.target} (${s.lineups.length})`}>
                 {iconType ? <span className="ub-pin-marker"><NadeIcon type={iconType} size={14} /></span> : <span className="ub-pin-dot" />}
                 {s.lineups.length > 1 && <span className="ub-pin-count">{s.lineups.length}</span>}
+                <span className="ub-pin-pop">
+                  <strong>{s.target}</strong>
+                  <em>{s.lineups.length} lineup{s.lineups.length !== 1 ? "s" : ""}</em>
+                  <span className="ub-pin-poptypes">{types.map((tp) => <NadeIcon key={tp} type={tp} size={12} />)}</span>
+                </span>
               </button>
             );
           })}
@@ -116,6 +138,12 @@ export default function TacticalMap({
           )}
         </div>
       </div>
+      {!addMode && (
+        <div className="ub-hud" aria-hidden="true">
+          <i /><i /><i /><i />
+          <span className="ub-hud-label">{map.name.toUpperCase()} // {spots.length} SPOT{spots.length !== 1 ? "S" : ""}</span>
+        </div>
+      )}
     </div>
   );
 }
