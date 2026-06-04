@@ -4,6 +4,7 @@ import { Plus, Minus } from "lucide-react";
 import { animate, stagger } from "animejs";
 import { TYPE_META } from "@/lib/constants";
 import { MAP_ZONES } from "@/data/radars";
+import NadeIcon from "./NadeIcon";
 
 export default function TacticalMap({
   map, spots = [], activeSpot, onSelectSpot, onPin,
@@ -25,14 +26,14 @@ export default function TacticalMap({
     el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
     el.scrollTop = (el.scrollHeight - el.clientHeight) / 2;
   }, [zoom]);
-  function onPointerDown(e) { if (addMode || zoom <= 1) return; const el = scrollRef.current; drag.current = { x: e.clientX, y: e.clientY, l: el.scrollLeft, t: el.scrollTop }; movedRef.current = false; }
+  function onPointerDown(e) { if (zoom <= 1) return; const el = scrollRef.current; drag.current = { x: e.clientX, y: e.clientY, l: el.scrollLeft, t: el.scrollTop }; movedRef.current = false; }
   function onPointerMove(e) { if (!drag.current) return; const dx = e.clientX - drag.current.x, dy = e.clientY - drag.current.y; if (Math.abs(dx) + Math.abs(dy) > 4) movedRef.current = true; const el = scrollRef.current; el.scrollLeft = drag.current.l - dx; el.scrollTop = drag.current.t - dy; }
   function endDrag() { drag.current = null; }
   function onClickCapture(e) { if (movedRef.current) { e.stopPropagation(); e.preventDefault(); movedRef.current = false; } }
 
   useEffect(() => {
     if (addMode || !ref.current) return;
-    const dots = ref.current.querySelectorAll(".ub-pin .ub-pin-dot");
+    const dots = ref.current.querySelectorAll(".ub-pin .ub-pin-marker, .ub-pin .ub-pin-dot");
     if (dots.length) animate(dots, { scale: [0, 1], opacity: [0, 1], duration: 340, delay: stagger(26), ease: "outBack" });
   }, [spots, map.id, addMode, zoom]);
 
@@ -87,13 +88,14 @@ export default function TacticalMap({
           {/* browse: grouped landing pins */}
           {!addMode && spots.map((s) => {
             const types = [...new Set(s.lineups.map((l) => l.type))];
-            const color = types.length === 1 ? TYPE_META[types[0]].color : "#ececec";
+            const iconType = types.length === 1 ? types[0] : null;
+            const color = iconType ? TYPE_META[iconType].color : "#ececec";
             const dim = activeSpot && s.target !== activeSpot;
             return (
               <button key={s.target} className={`ub-pin ub-spinpin ${dim ? "dim" : ""}`} style={{ left: `${s.x}%`, top: `${s.y}%`, "--pin": color }}
                 onClick={(e) => { e.stopPropagation(); s.lineups.length > 1 ? onSelectSpot(s.target) : onPin(s.lineups[0]); }}
                 title={`${s.target} (${s.lineups.length})`}>
-                <span className="ub-pin-dot" />
+                {iconType ? <span className="ub-pin-marker"><NadeIcon type={iconType} size={14} /></span> : <span className="ub-pin-dot" />}
                 {s.lineups.length > 1 && <span className="ub-pin-count">{s.lineups.length}</span>}
               </button>
             );
