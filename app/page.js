@@ -194,12 +194,6 @@ export default function Page() {
   const openLineup = (l) => transitionTo("map", l.map, l);
 
   useEffect(() => {
-    if (view !== "list" || screen !== "map") return;
-    const cards = document.querySelectorAll(".ub-card");
-    if (cards.length) animate(cards, { opacity: [0, 1], translateY: [10, 0], duration: 420, delay: stagger(45), ease: "outQuad" });
-  }, [view, activeMap, side, type, screen]);
-
-  useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#" + ADMIN_KEY) setAdmin(true);
     let buf = "";
     let timer;
