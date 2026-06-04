@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readLineups, writeLineups, storeConfigured } from "@/lib/store";
+import { auth } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,11 +10,15 @@ export async function GET() {
   return NextResponse.json({ lineups, configured: storeConfigured });
 }
 
-// Skyddad skrivning - kraver ADMIN_TOKEN. Sparar hela listan.
+// Skyddad skrivning - kraver ADMIN_TOKEN eller en admin Discord-inloggning.
 export async function PUT(req) {
-  const auth = req.headers.get("authorization") || "";
-  const token = auth.replace(/^Bearer\s+/i, "");
-  if (!process.env.ADMIN_TOKEN || token !== process.env.ADMIN_TOKEN) {
+  const header = req.headers.get("authorization") || "";
+  const token = header.replace(/^Bearer\s+/i, "");
+  const session = await auth();
+  const adminIds = (process.env.ADMIN_DISCORD_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const sessionAdmin = session?.user?.id && adminIds.includes(session.user.id);
+  const tokenOk = process.env.ADMIN_TOKEN && token === process.env.ADMIN_TOKEN;
+  if (!sessionAdmin && !tokenOk) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!storeConfigured) {

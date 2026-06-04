@@ -402,3 +402,6 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .ub-legend-prog{height:6px;border-radius:999px;background:var(--surface2);overflow:hidden;margin:10px 0 4px;}
 .ub-legend-prog span{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .5s ease;}
 .ub-legend-progtext{font-size:11.5px;color:var(--muted);margin-bottom:6px;}
+
+.ub-discord{border-color:rgba(88,101,242,.5);color:#aab1f5;}
+.ub-discord:hover{border-color:#5865F2;}

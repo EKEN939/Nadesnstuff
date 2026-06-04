@@ -1,7 +1,8 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video, Star } from "lucide-react";
+import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video, Star, LogIn, LogOut } from "lucide-react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { MAPS } from "@/data/maps";
 import { LINEUPS } from "@/data/lineups";
 import { TYPE_META } from "@/lib/constants";
@@ -41,6 +42,7 @@ export default function Page() {
   const [adminToken, setAdminToken] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
+  const { data: session } = useSession();
   const stageRef = useRef(null);
   const deepRef = useRef(undefined);
   if (deepRef.current === undefined) {
@@ -80,10 +82,22 @@ export default function Page() {
     return [...m.values()];
   }, [filtered]);
 
-  useEffect(() => { try { setFavs(JSON.parse(localStorage.getItem("nns_favs") || "[]")); } catch {} }, []);
-  const toggleFav = (id) => setFavs((prev) => { const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]; try { localStorage.setItem("nns_favs", JSON.stringify(next)); } catch {} return next; });
-  useEffect(() => { try { setLearned(JSON.parse(localStorage.getItem("nns_learned") || "[]")); } catch {} }, []);
-  const toggleLearned = (id) => setLearned((prev) => { const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]; try { localStorage.setItem("nns_learned", JSON.stringify(next)); } catch {} return next; });
+  useEffect(() => {
+    if (session?.user) {
+      fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) { setFavs(d.favs || []); setLearned(d.learned || []); } }).catch(() => {});
+    } else {
+      try { setFavs(JSON.parse(localStorage.getItem("nns_favs") || "[]")); setLearned(JSON.parse(localStorage.getItem("nns_learned") || "[]")); } catch {}
+    }
+  }, [session]);
+  function syncUser(nf, nl) {
+    if (session?.user) {
+      fetch("/api/me", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ favs: nf, learned: nl }) }).catch(() => {});
+    } else {
+      try { localStorage.setItem("nns_favs", JSON.stringify(nf)); localStorage.setItem("nns_learned", JSON.stringify(nl)); } catch {}
+    }
+  }
+  const toggleFav = (id) => { const nf = favs.includes(id) ? favs.filter((x) => x !== id) : [...favs, id]; setFavs(nf); syncUser(nf, learned); };
+  const toggleLearned = (id) => { const nl = learned.includes(id) ? learned.filter((x) => x !== id) : [...learned, id]; setLearned(nl); syncUser(favs, nl); };
 
   useEffect(() => { setActiveSpot(null); }, [activeMap, side, type, screen, throwFilter, videoOnly, onlyFavs, sortBy]);
 
@@ -214,8 +228,9 @@ export default function Page() {
 
   async function persist(list) {
     if (!liveConfigured) { setSaveMsg("Local only — storage not set up"); setTimeout(() => setSaveMsg(""), 3000); return; }
+    const loggedIn = !!session?.user;
     let token = adminToken;
-    if (!token) {
+    if (!loggedIn && !token) {
       token = (typeof window !== "undefined" && window.prompt("Admin token (same as ADMIN_TOKEN in Vercel):")) || "";
       if (!token) { setSaveMsg("Not saved — token needed"); setTimeout(() => setSaveMsg(""), 3000); return; }
       setAdminToken(token);
@@ -223,12 +238,13 @@ export default function Page() {
     }
     setSaving(true); setSaveMsg("");
     try {
-      const res = await fetch("/api/lineups", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-        body: JSON.stringify({ lineups: list }),
-      });
-      if (res.status === 401) { setSaveMsg("Wrong token"); setAdminToken(""); try { localStorage.removeItem("nns_admin_token"); } catch {} }
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = "Bearer " + token;
+      const res = await fetch("/api/lineups", { method: "PUT", headers, body: JSON.stringify({ lineups: list }) });
+      if (res.status === 401) {
+        if (loggedIn) setSaveMsg("Not an admin account");
+        else { setSaveMsg("Wrong token"); setAdminToken(""); try { localStorage.removeItem("nns_admin_token"); } catch {} }
+      }
       else if (!res.ok) { setSaveMsg("Could not save"); }
       else { setSaveMsg("Saved ✓"); }
     } catch { setSaveMsg("Network error"); }
@@ -253,6 +269,15 @@ export default function Page() {
           <Logo variant="compact" />
         </button>
         <div className="ub-headbtns">
+          {session?.user ? (
+            <button className="ub-toolbtn" onClick={() => signOut()} title="Log out">
+              <LogOut size={15} /> {(session.user.name || "Account").split("#")[0]}
+            </button>
+          ) : (
+            <button className="ub-toolbtn ub-discord" onClick={() => signIn("discord")}>
+              <LogIn size={15} /> Login with Discord
+            </button>
+          )}
           {admin && <span className="ub-adminflag">admin</span>}
           {admin && saveMsg && <span className="ub-savemsg">{saveMsg}</span>}
           {admin && liveConfigured && (
