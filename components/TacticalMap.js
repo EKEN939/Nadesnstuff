@@ -7,7 +7,7 @@ import { MAP_ZONES } from "@/data/radars";
 import NadeIcon from "./NadeIcon";
 
 export default function TacticalMap({
-  map, spots = [], activeSpot, onSelectSpot, onPin,
+  map, spots = [], activeSpot, onSelectSpot, onPin, selected,
   addMode, draftLand, draftThrow, onMapClick, zoomable,
 }) {
   const ref = useRef(null);
@@ -51,7 +51,7 @@ export default function TacticalMap({
       const d = c.dataset;
       animate(c, { cx: [+d.x1, +d.x2], cy: [+d.y1, +d.y2], duration: 2600, delay: 500, ease: "inOut(2)", loop: true });
     });
-  }, [activeSpot]);
+  }, [activeSpot, selected?.id]);
 
   function handleClick(e) {
     if (!addMode) return;
@@ -61,9 +61,13 @@ export default function TacticalMap({
     onMapClick({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
   }
 
-  const lineEnds = [];
-  if (!addMode && active) {
-    active.lineups.forEach((l) => { if (l.fromX != null) lineEnds.push({ l, x1: l.fromX, y1: l.fromY, x2: active.x, y2: active.y }); });
+  const arcs = [];
+  if (!addMode) {
+    if (selected && selected.fromX != null) {
+      arcs.push({ l: selected, x1: selected.fromX, y1: selected.fromY, x2: selected.x, y2: selected.y, sel: true });
+    } else if (active) {
+      active.lineups.forEach((l) => { if (l.fromX != null) arcs.push({ l, x1: l.fromX, y1: l.fromY, x2: active.x, y2: active.y }); });
+    }
   }
   const showDraftLine = addMode && draftLand && draftThrow;
 
@@ -90,13 +94,13 @@ export default function TacticalMap({
             </div>
           )}
 
-          {(lineEnds.length > 0 || showDraftLine) && (
+          {(arcs.length > 0 || showDraftLine) && (
             <svg className="ub-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              {lineEnds.map(({ l, x1, y1, x2, y2 }) => (
-                <path key={l.id} d={linePath(x1, y1, x2, y2)} className="ub-arc" style={{ "--ac": TYPE_META[l.type].color }} />
+              {arcs.map(({ l, x1, y1, x2, y2, sel }) => (
+                <path key={l.id} d={linePath(x1, y1, x2, y2)} className={`ub-arc ${sel ? "sel" : ""}`} style={{ "--ac": TYPE_META[l.type].color }} />
               ))}
-              {lineEnds.map(({ l, x1, y1, x2, y2 }) => (
-                <circle key={"p" + l.id} className="ub-proj" r="1.3" cx={x1} cy={y1} style={{ "--c": TYPE_META[l.type].color }} data-x1={x1} data-y1={y1} data-x2={x2} data-y2={y2} />
+              {arcs.map(({ l, x1, y1, x2, y2, sel }) => (
+                <circle key={"p" + l.id} className={`ub-proj ${sel ? "sel" : ""}`} r={sel ? "1.7" : "1.3"} cx={x1} cy={y1} style={{ "--c": TYPE_META[l.type].color }} data-x1={x1} data-y1={y1} data-x2={x2} data-y2={y2} />
               ))}
               {showDraftLine && (
                 <path d={linePath(draftThrow.x, draftThrow.y, draftLand.x, draftLand.y)} className="ub-arc draft" />
@@ -109,9 +113,10 @@ export default function TacticalMap({
             const types = [...new Set(s.lineups.map((l) => l.type))];
             const iconType = types.length === 1 ? types[0] : null;
             const color = iconType ? TYPE_META[iconType].color : "#ececec";
-            const dim = activeSpot && s.target !== activeSpot;
+            const focus = selected ? selected.target : activeSpot;
+            const dim = focus && s.target !== focus;
             return (
-              <button key={s.target} className={`ub-pin ub-spinpin ${dim ? "dim" : ""} ${activeSpot && s.target === activeSpot ? "act" : ""}`} style={{ left: `${s.x}%`, top: `${s.y}%`, "--pin": color }}
+              <button key={s.target} className={`ub-pin ub-spinpin ${dim ? "dim" : ""} ${focus && s.target === focus ? "act" : ""}`} style={{ left: `${s.x}%`, top: `${s.y}%`, "--pin": color }}
                 onClick={(e) => { e.stopPropagation(); s.lineups.length > 1 ? onSelectSpot(s.target) : onPin(s.lineups[0]); }}
                 title={`${s.target} (${s.lineups.length})`}>
                 {iconType ? <span className="ub-pin-marker"><NadeIcon type={iconType} size={14} /></span> : <span className="ub-pin-dot" />}
@@ -130,6 +135,11 @@ export default function TacticalMap({
             <button key={"t" + l.id} className="ub-throwdot" style={{ left: `${l.fromX}%`, top: `${l.fromY}%`, "--pin": TYPE_META[l.type].color }}
               onClick={(e) => { e.stopPropagation(); onPin(l); }} title={l.spawn || l.from} />
           ))}
+
+          {/* browse: throw spot for a single selected lineup */}
+          {!addMode && selected && !active && selected.fromX != null && (
+            <span className="ub-throwdot sel" style={{ left: `${selected.fromX}%`, top: `${selected.fromY}%`, "--pin": TYPE_META[selected.type].color }} title={selected.spawn || selected.from} />
+          )}
 
           {/* add mode: landing + throw drafts */}
           {addMode && draftLand && (

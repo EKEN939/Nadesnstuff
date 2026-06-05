@@ -12,6 +12,7 @@ import Landing from "@/components/Landing";
 import TacticalMap from "@/components/TacticalMap";
 import LineupCard from "@/components/LineupCard";
 import LineupModal from "@/components/LineupModal";
+import LineupDetail from "@/components/LineupDetail";
 import LibraryPanel from "@/components/LibraryPanel";
 import AddLineupForm from "@/components/AddLineupForm";
 import ExportModal from "@/components/ExportModal";
@@ -448,9 +449,17 @@ export default function Page() {
             {view === "map" ? (
               <div className="ub-mapview">
                 <TacticalMap map={mapMeta} spots={spots} activeSpot={activeSpot}
-                  onSelectSpot={setActiveSpot} onPin={setSelected} zoomable />
-                <div className="ub-maplegend">
-                  {activeSpot ? (
+                  onSelectSpot={setActiveSpot} onPin={setSelected} selected={selected} zoomable />
+                <div className={`ub-maplegend ${selected ? "detail" : ""}`}>
+                  {selected ? (
+                    <div className="ub-detailpanel" key={selected.id}>
+                      <button className="ub-spotback" onClick={() => setSelected(null)}><ArrowLeft size={14} /> {activeSpot ? "Back to spot" : "Back to map"}</button>
+                      <LineupDetail lineup={selected} admin={admin} onEdit={startEdit} onDelete={removeLineup}
+                        fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)}
+                        learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)}
+                        collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} />
+                    </div>
+                  ) : activeSpot ? (
                     <div className="ub-spotpanel">
                       <button className="ub-spotback" onClick={() => setActiveSpot(null)}><ArrowLeft size={14} /> All spots</button>
                       <div className="ub-spot-h">{activeSpot}</div>
@@ -501,12 +510,12 @@ export default function Page() {
         )}
       </div>
 
-      {selected && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} />}
+      {selected && view === "list" && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} />}
       {libraryView && (
         <LibraryPanel
           view={libraryView} setView={setLibraryView} onClose={() => setLibraryView(null)}
           lineups={lineups} favs={favs} learned={learned} collections={collections} maps={MAPS}
-          onOpenLineup={(l) => { setActiveMap(l.map); setScreen("map"); setSelected(l); setLibraryView(null); }}
+          onOpenLineup={(l) => { setActiveMap(l.map); setScreen("map"); setView("map"); setSelected(l); setLibraryView(null); }}
           toggleFav={toggleFav} createCollection={createCollection}
           renameCollection={renameCollection} deleteCollection={deleteCollection}
           shared={sharedCol} onSaveShared={saveShared}

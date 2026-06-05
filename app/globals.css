@@ -546,3 +546,19 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 
 .ub-spotnote{background:#2a1408;border:1px solid rgba(255,91,0,.4);color:#ffb27a;border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.45;margin-top:-4px;}
 .ub-spotnote strong{color:var(--accent);}
+
+/* lineup detail as side panel (map view) */
+.ub-maplegend.detail{flex:1 1 380px;max-width:600px;padding:16px 18px;}
+.ub-detailpanel{display:flex;flex-direction:column;animation:ubdetailin .24s ease;}
+@keyframes ubdetailin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.ub-detailpanel .ub-spotback{margin-bottom:8px;}
+.ub-detailpanel .ub-modal-head h2{font-size:23px;}
+.ub-detailpanel .ub-video,.ub-detailpanel .ub-tip,.ub-detailpanel .ub-guide,.ub-detailpanel .ub-practice{margin-top:14px;}
+.ub-detailpanel .ub-modal-actions{margin-top:16px;}
+.ub-detailpanel .ub-savecol-pop{right:auto;left:0;}
+
+/* selected-lineup emphasis on the map */
+.ub-arc.sel{stroke-width:1.15;filter:drop-shadow(0 0 2px var(--ac,var(--accent)));}
+.ub-proj.sel{filter:drop-shadow(0 0 2.5px var(--c,var(--accent)));}
+.ub-throwdot.sel{box-shadow:0 0 0 3px rgba(255,91,0,.22),0 1px 5px rgba(0,0,0,.55);animation:ubthrowpulse 2s ease-in-out infinite;}
+@keyframes ubthrowpulse{0%,100%{box-shadow:0 0 0 3px rgba(255,91,0,.22),0 1px 5px rgba(0,0,0,.55);}50%{box-shadow:0 0 0 6px rgba(255,91,0,.08),0 1px 5px rgba(0,0,0,.55);}}
