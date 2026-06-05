@@ -1,37 +1,36 @@
-import { handleUpload } from "@vercel/blob/client";
+import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
-// Client uploads to Vercel Blob. Authorized either by a logged-in admin
-// (Discord id in ADMIN_DISCORD_IDS) or by the ADMIN_TOKEN sent as clientPayload.
-// Needs BLOB_READ_WRITE_TOKEN (set automatically when you add a Blob store in Vercel).
+// Server-side upload to Vercel Blob. The browser POSTs the file as multipart/form-data;
+// we authorize (Discord admin or ADMIN_TOKEN) and store it with put().
+// Uses BLOB_READ_WRITE_TOKEN (or OIDC) automatically.
 export async function POST(req) {
   let session = null;
   try { session = await auth(); } catch {}
   const adminIds = (process.env.ADMIN_DISCORD_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
   const sessionAdmin = !!(session?.user?.id && adminIds.includes(session.user.id));
+  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  const tokenOk = process.env.ADMIN_TOKEN && token === process.env.ADMIN_TOKEN;
+  if (!sessionAdmin && !tokenOk) {
+    return NextResponse.json({ error: "Unauthorized — log in as admin" }, { status: 401 });
+  }
 
-  const body = await req.json();
+  let file;
   try {
-    const result = await handleUpload({
-      body,
-      request: req,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
-        const tokenOk = process.env.ADMIN_TOKEN && clientPayload === process.env.ADMIN_TOKEN;
-        if (!sessionAdmin && !tokenOk) throw new Error("Unauthorized — log in as admin or set the admin token");
-        return {
-          allowedContentTypes: [
-            "image/jpeg", "image/png", "image/gif", "image/webp",
-            "video/mp4", "video/webm", "video/quicktime",
-          ],
-          addRandomSuffix: true,
-        };
-      },
-      onUploadCompleted: async () => {},
-    });
-    return NextResponse.json(result);
+    const form = await req.formData();
+    file = form.get("file");
+  } catch {
+    return NextResponse.json({ error: "Could not read file" }, { status: 400 });
+  }
+  if (!file || typeof file === "string") {
+    return NextResponse.json({ error: "No file provided" }, { status: 400 });
+  }
+  try {
+    const blob = await put(file.name || "upload", file, { access: "public", addRandomSuffix: true });
+    return NextResponse.json({ url: blob.url });
   } catch (e) {
     return NextResponse.json({ error: e.message || "Upload failed" }, { status: 400 });
   }

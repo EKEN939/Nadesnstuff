@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { X, Plus, Copy, Check, Upload } from "lucide-react";
-import { upload } from "@vercel/blob/client";
 import { TYPE_META } from "@/lib/constants";
 import TacticalMap from "./TacticalMap";
 
@@ -9,28 +8,31 @@ function Uploader({ accept, token, onUploaded }) {
   const [busy, setBusy] = useState(false);
   const [pct, setPct] = useState(0);
   const [err, setErr] = useState("");
-  async function onChange(e) {
+  function onChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
     setBusy(true); setErr(""); setPct(0);
-    try {
-      let tok = token;
-      if (!tok) { try { tok = localStorage.getItem("nns_admin_token") || ""; } catch {} }
-      const res = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/upload",
-        clientPayload: tok,
-        onUploadProgress: (p) => setPct(Math.round(p?.percentage || 0)),
-      });
-      onUploaded(res.url);
-    } catch (error) { setErr("Upload failed — " + (error?.message || "paste a URL instead")); }
-    finally { setBusy(false); setPct(0); e.target.value = ""; }
+    let tok = token;
+    if (!tok) { try { tok = localStorage.getItem("nns_admin_token") || ""; } catch {} }
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/upload");
+    if (tok) xhr.setRequestHeader("Authorization", "Bearer " + tok);
+    xhr.upload.onprogress = (ev) => { if (ev.lengthComputable) setPct(Math.round((ev.loaded / ev.total) * 100)); };
+    xhr.onload = () => {
+      setBusy(false); setPct(0);
+      let data = {}; try { data = JSON.parse(xhr.responseText || "{}"); } catch {}
+      if (xhr.status >= 200 && xhr.status < 300 && data.url) onUploaded(data.url);
+      else setErr("Upload failed — " + (data.error || ("status " + xhr.status)));
+    };
+    xhr.onerror = () => { setBusy(false); setPct(0); setErr("Upload failed — network error"); };
+    const fd = new FormData(); fd.append("file", file);
+    xhr.send(fd);
+    e.target.value = "";
   }
-  const label = !busy ? "Upload" : pct >= 100 ? "Finishing…" : pct > 0 ? `Uploading ${pct}%` : "Starting…";
   return (
     <>
       <label className="ub-upload" title="Upload a file">
-        <Upload size={13} /> {label}
+        <Upload size={13} /> {!busy ? "Upload" : pct > 0 ? `Uploading ${pct}%` : "Starting…"}
         <input type="file" accept={accept} onChange={onChange} hidden disabled={busy} />
       </label>
       {err && <span className="ub-uploaderr">{err}</span>}
