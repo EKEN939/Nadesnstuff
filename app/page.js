@@ -158,7 +158,10 @@ export default function Page() {
   const formMapId = editing ? editing.map : activeMap;
   const formSpots = useMemo(() => {
     const m = new Map();
-    lineups.filter((l) => l.map === formMapId).forEach((l) => { if (!m.has(l.target)) m.set(l.target, { target: l.target, x: l.x, y: l.y }); });
+    lineups.filter((l) => l.map === formMapId).forEach((l) => {
+      if (!m.has(l.target)) m.set(l.target, { target: l.target, x: l.x, y: l.y, count: 0 });
+      m.get(l.target).count++;
+    });
     return [...m.values()];
   }, [lineups, formMapId]);
 

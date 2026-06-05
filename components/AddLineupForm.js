@@ -145,6 +145,11 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
               )}
               <label className="ub-field"><span>Target / spot name (where it lands)</span>
                 <input value={f.target} onChange={(e) => up("target", e.target.value)} placeholder="e.g. Window, CT, Jungle…" /></label>
+              {(() => {
+                const m = existingSpots.find((s) => s.target && s.target === f.target);
+                if (!m) return null;
+                return <div className="ub-spotnote">Adding to existing spot <strong>{m.target}</strong> — it already has {m.count} lineup{m.count !== 1 ? "s" : ""}. The pin count will go up by one.</div>;
+              })()}
               <div className="ub-field-row">
                 <label className="ub-field"><span>From (where you stand)</span>
                   <input value={f.from} onChange={(e) => up("from", e.target.value)} placeholder="e.g. T Ramp" /></label>
