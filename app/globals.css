@@ -518,3 +518,13 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .ub-library{animation:ubmodalpop .32s cubic-bezier(.2,.8,.2,1);}
 .ub-profilemenu{transform-origin:top right;animation:ubmenupop .16s ease;}
 .ub-savecol-pop{transform-origin:top left;animation:ubmenupop .16s ease;}
+
+/* unified, aligned action buttons in the lineup modal header */
+.ub-modal-headbtns{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.ub-actbtn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:9px;font-size:13px;font-weight:600;font-family:'Manrope',sans-serif;cursor:pointer;transition:color .15s,border-color .15s,background .15s;white-space:nowrap;}
+.ub-actbtn:hover{color:var(--text);border-color:#3b4046;}
+.ub-actbtn.on{border-color:var(--accent);color:var(--accent);background:#2a1408;}
+.ub-savecol{position:relative;display:inline-flex;}
+.ub-modalfav{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--muted);cursor:pointer;transition:color .15s,border-color .15s;}
+.ub-modalfav:hover{color:var(--text);border-color:#3b4046;}
+.ub-modalfav.on{color:#e8c46a;border-color:#e8c46a;}

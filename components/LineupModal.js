@@ -64,41 +64,40 @@ export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete, 
             <span className="ub-throw" style={{ color: DIFF_COLOR[lineup.difficulty] }}>{lineup.difficulty}</span>
           </div>
           <div className="ub-modal-headbtns">
-            <button className="ub-sharebtn" onClick={copyLink}>
-              {linkCopied ? <><Check size={13} /> Link copied</> : <><Link2 size={13} /> Copy link</>}
+            <button className="ub-actbtn" onClick={copyLink}>
+              {linkCopied ? <><Check size={14} /> Link copied</> : <><Link2 size={14} /> Copy link</>}
             </button>
-            <button className={`ub-learnbtn ${learned ? "on" : ""}`} onClick={onToggleLearned}>
+            <button className={`ub-actbtn ${learned ? "on" : ""}`} onClick={onToggleLearned}>
               <CheckCircle2 size={14} /> {learned ? "Learned" : "Mark learned"}
             </button>
+            {toggleInCollection && (
+              <div className="ub-savecol" data-savecol>
+                <button className={`ub-actbtn ${colOpen ? "on" : ""}`} onClick={() => setColOpen((o) => !o)}><Folder size={14} /> Save to collection</button>
+                {colOpen && (
+                  <div className="ub-savecol-pop">
+                    {collections.length === 0 && <div className="ub-savecol-empty">No collections yet — make one below.</div>}
+                    {collections.map((c) => {
+                      const inIt = c.items.map(String).includes(String(lineup.id));
+                      return (
+                        <button key={c.id} className={`ub-savecol-item ${inIt ? "on" : ""}`} onClick={() => toggleInCollection(lineup.id, c.id)}>
+                          <span className="ub-savecol-check">{inIt && <Check size={13} />}</span> {c.name}
+                        </button>
+                      );
+                    })}
+                    <div className="ub-savecol-new">
+                      <input placeholder="New collection…" value={newCol} onChange={(e) => setNewCol(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && newCol.trim()) { createCollection(newCol.trim(), lineup.id); setNewCol(""); } }} />
+                      <button className="ub-icobtn" disabled={!newCol.trim()} onClick={() => { createCollection(newCol.trim(), lineup.id); setNewCol(""); }}><Plus size={15} /></button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             <button className={`ub-fav ub-modalfav ${fav ? "on" : ""}`} onClick={onToggleFav} aria-label="Favorite" title="Favorite">
               <Star size={16} fill={fav ? "currentColor" : "none"} />
             </button>
           </div>
         </div>
-
-        {toggleInCollection && (
-          <div className="ub-savecol" data-savecol>
-            <button className={`ub-learnbtn ${colOpen ? "on" : ""}`} onClick={() => setColOpen((o) => !o)}><Folder size={14} /> Save to collection</button>
-            {colOpen && (
-              <div className="ub-savecol-pop">
-                {collections.length === 0 && <div className="ub-savecol-empty">No collections yet — make one below.</div>}
-                {collections.map((c) => {
-                  const inIt = c.items.includes(lineup.id);
-                  return (
-                    <button key={c.id} className={`ub-savecol-item ${inIt ? "on" : ""}`} onClick={() => toggleInCollection(lineup.id, c.id)}>
-                      <span className="ub-savecol-check">{inIt && <Check size={13} />}</span> {c.name}
-                    </button>
-                  );
-                })}
-                <div className="ub-savecol-new">
-                  <input placeholder="New collection…" value={newCol} onChange={(e) => setNewCol(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" && newCol.trim()) { createCollection(newCol.trim(), lineup.id); setNewCol(""); } }} />
-                  <button className="ub-icobtn" disabled={!newCol.trim()} onClick={() => { createCollection(newCol.trim(), lineup.id); setNewCol(""); }}><Plus size={15} /></button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {lineup.video && <VideoPlayer url={lineup.video} />}
         {lineup.tip && <div className="ub-tip"><span className="ub-tip-label">Instruction</span>{lineup.tip}</div>}
