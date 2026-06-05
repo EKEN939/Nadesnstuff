@@ -12,7 +12,7 @@ export default function LineupCard({ lineup, index = 0, onClick, fav, onToggleFa
         <div className="ub-card-thumb"><img src={thumb} alt={lineup.target} /></div>
       ) : (
         <div className="ub-card-thumb ub-card-minimap">
-          <img src={`/radars/${lineup.map}.png`} alt="" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+          <img src={`/radars/${lineup.map}.png`} alt="" loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.display = "none"; }} />
           <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" className="ub-mini-svg" aria-hidden="true">
             {lineup.fromX != null && lineup.x != null && (
               <line x1={lineup.fromX} y1={lineup.fromY} x2={lineup.x} y2={lineup.y} className="ub-mini-line" style={{ stroke: t.color }} />
