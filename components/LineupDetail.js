@@ -131,12 +131,9 @@ export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onT
           <button className="ub-btn-ghost" onClick={() => copy(PRACTICE_CMDS, "cfg")}>
             {copied === "cfg" ? <><Check size={14} /> Copied</> : <><Terminal size={14} /> Copy practice config</>}
           </button>
-          <button className="ub-btn-ghost" onClick={() => copy("getpos", "getpos")}>
-            {copied === "getpos" ? <><Check size={14} /> Copied</> : <><MapPin size={14} /> Copy getpos</>}
-          </button>
           {lineup.loc && (
-            <button className="ub-btn-ghost" onClick={() => copy("sv_cheats 1;" + lineup.loc, "tp")}>
-              {copied === "tp" ? <><Check size={14} /> Copied</> : <><MapPin size={14} /> Copy teleport to spot</>}
+            <button className="ub-btn-ghost" onClick={() => copy("sv_cheats 1;" + lineup.loc, "getpos")}>
+              {copied === "getpos" ? <><Check size={14} /> Copied</> : <><MapPin size={14} /> Copy getpos</>}
             </button>
           )}
         </div>
