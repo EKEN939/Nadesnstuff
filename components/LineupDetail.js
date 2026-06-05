@@ -5,7 +5,6 @@ import { TYPE_META, DIFF_COLOR } from "@/lib/constants";
 import NadeIcon from "./NadeIcon";
 
 export const PRACTICE_CMDS = "sv_cheats 1;sv_infinite_ammo 1;ammo_grenade_limit_total 5;mp_warmup_end;mp_freezetime 0;mp_roundtime 60;mp_roundtime_defuse 60;sv_grenade_trajectory 1;sv_grenade_trajectory_time 10;cl_grenadepreview 1;bot_kick;mp_limitteams 0;mp_autoteambalance 0;sv_showimpacts 1";
-export const JUMPTHROW_BIND = 'alias "+jthrow" "-attack;-attack2;+jump";alias "-jthrow" "-jump";bind "alt" "+jthrow"';
 
 function VideoPlayer({ url }) {
   const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
@@ -132,8 +131,8 @@ export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onT
           <button className="ub-btn-ghost" onClick={() => copy(PRACTICE_CMDS, "cfg")}>
             {copied === "cfg" ? <><Check size={14} /> Copied</> : <><Terminal size={14} /> Copy practice config</>}
           </button>
-          <button className="ub-btn-ghost" onClick={() => copy(JUMPTHROW_BIND, "bind")}>
-            {copied === "bind" ? <><Check size={14} /> Copied</> : <><Terminal size={14} /> Copy jumpthrow bind (ALT)</>}
+          <button className="ub-btn-ghost" onClick={() => copy("getpos", "getpos")}>
+            {copied === "getpos" ? <><Check size={14} /> Copied</> : <><MapPin size={14} /> Copy getpos</>}
           </button>
           {lineup.loc && (
             <button className="ub-btn-ghost" onClick={() => copy("sv_cheats 1;" + lineup.loc, "tp")}>
