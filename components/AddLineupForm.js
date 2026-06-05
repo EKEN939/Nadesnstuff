@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { X, Plus, Copy, Check, Upload } from "lucide-react";
+import { X, Plus, Check, Upload } from "lucide-react";
 import { TYPE_META } from "@/lib/constants";
 import TacticalMap from "./TacticalMap";
 
@@ -55,8 +55,6 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
     initial ? initial.steps.map((s) => ({ label: s.label, caption: s.caption, img: s.img || "" }))
             : [{ label: "Setup", caption: "", img: "" }]
   );
-  const [snippet, setSnippet] = useState(null);
-  const [copied, setCopied] = useState(false);
 
   const up = (k, v) => setF((p) => ({ ...p, [k]: v }));
   const upStep = (i, k, v) => setSteps((p) => p.map((s, j) => (j === i ? { ...s, [k]: v } : s)));
@@ -89,11 +87,9 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
   function submit() {
     if (!valid) return;
     const obj = build();
-    if (editing) { onSave(obj, initial.id); onClose(); }
-    else { onSave(obj); setSnippet(buildSnippet(obj)); }
-  }
-  async function copy() {
-    try { await navigator.clipboard.writeText(snippet); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
+    if (editing) onSave(obj, initial.id);
+    else onSave(obj);
+    onClose();
   }
 
   const hint = placing === "land"
@@ -109,17 +105,7 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
           <h2>{editing ? "Edit lineup" : "Add lineup"}</h2>
         </div>
 
-        {snippet ? (
-          <div className="ub-snippet">
-            <p className="ub-snippet-intro">Added. Paste this into <code>data/lineups.js</code> to keep it permanently (or use "Save live"):</p>
-            <textarea readOnly value={snippet} onClick={(e) => e.target.select()} />
-            <div className="ub-snippet-actions">
-              <button className="ub-btn-primary" onClick={copy}>{copied ? <><Check size={15} /> Copied</> : <><Copy size={15} /> Copy code</>}</button>
-              <button className="ub-btn-ghost" onClick={onClose}>Done</button>
-            </div>
-          </div>
-        ) : (
-          <div className="ub-form-grid">
+        <div className="ub-form-grid">
             <div className="ub-form-map">
               <div className="ub-place-tabs">
                 <button type="button" className={placing === "land" ? "on" : ""} onClick={() => setPlacing("land")}>
@@ -208,33 +194,7 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
               </button>
             </div>
           </div>
-        )}
       </div>
     </div>
   );
-}
-
-function buildSnippet(o) {
-  const steps = o.steps.map(
-    (s) => `    { label: ${JSON.stringify(s.label)}, img: ${s.img ? JSON.stringify(s.img) : "null"}, caption: ${JSON.stringify(s.caption)} },`
-  ).join("\n");
-  return `{
-  id: /* set a unique number */,
-  map: ${JSON.stringify(o.map)},
-  side: ${JSON.stringify(o.side)},
-  type: ${JSON.stringify(o.type)},
-  target: ${JSON.stringify(o.target)},
-  from: ${JSON.stringify(o.from)},
-  spawn: ${o.spawn ? JSON.stringify(o.spawn) : "null"},
-  throwType: ${JSON.stringify(o.throwType)},
-  difficulty: ${JSON.stringify(o.difficulty)},
-  x: ${o.x}, y: ${o.y}, fromX: ${o.fromX}, fromY: ${o.fromY},
-  tip: ${o.tip ? JSON.stringify(o.tip) : "null"},
-  video: ${o.video ? JSON.stringify(o.video) : "null"},
-  loc: ${o.loc ? JSON.stringify(o.loc) : "null"},
-  preview: ${o.preview ? JSON.stringify(o.preview) : "null"},
-  steps: [
-${steps}
-  ],
-},`;
 }
