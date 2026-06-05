@@ -33,15 +33,15 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .ub-addbtn:hover{background:#ff7d4f;}
 .ub-addbtn:active{transform:translateY(1px);}
 
-.ub-hero{display:flex;align-items:flex-end;justify-content:space-between;padding:30px 28px 22px;border-bottom:1px solid var(--border);gap:16px;}
-.ub-hero-kicker{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.ub-hero{display:flex;align-items:flex-end;justify-content:space-between;padding:14px 28px 10px;gap:16px;}
+.ub-hero-kicker{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
 .ub-hero-title{font-family:'Archivo',sans-serif;font-weight:800;font-size:clamp(28px,4vw,40px);line-height:1;margin:0;letter-spacing:-1px;}
 .ub-hero-tag{margin:8px 0 0;font-size:13px;color:var(--muted);}
 .ub-hero-count{display:flex;align-items:baseline;gap:8px;flex:0 0 auto;}
 .ub-count-num{font-family:'Archivo',sans-serif;font-size:34px;font-weight:800;color:var(--accent);line-height:1;}
 .ub-count-label{font-size:12px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;}
 
-.ub-maprail{display:flex;gap:8px;padding:18px 28px;overflow-x:auto;border-bottom:1px solid var(--border);}
+.ub-maprail{display:flex;gap:8px;padding:10px 28px 12px;overflow-x:auto;border-bottom:1px solid var(--border);}
 .ub-mapcard{flex:0 0 auto;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px 15px;cursor:pointer;transition:all .15s;font-family:'Manrope',sans-serif;}
 .ub-mapcard-name{font-weight:600;font-size:14px;color:var(--text);}
 .ub-mapcard-count{font-size:12px;color:var(--muted);background:var(--surface2);border-radius:999px;padding:1px 8px;}
@@ -49,7 +49,7 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .ub-mapcard.active{border-color:var(--accent);background:#2a1408;}
 .ub-mapcard.active .ub-mapcard-count{color:var(--accent);}
 
-.ub-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:22px 28px;}
+.ub-controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:14px 28px 8px;}
 .ub-filtergroup{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .ub-filter-icon{color:var(--muted);}
 .ub-pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--muted);padding:7px 14px;font-size:13px;cursor:pointer;transition:all .15s;font-family:'Manrope',sans-serif;}
@@ -177,7 +177,7 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 /* two-screen stage + navigation */
 .nns-stage{transform-origin:center top;will-change:transform,opacity;}
 .ub-logobtn{background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;}
-.ub-back{display:inline-flex;align-items:center;gap:6px;margin:18px 28px 0;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:8px 13px;font-size:13px;cursor:pointer;font-family:'Manrope',sans-serif;transition:all .15s;}
+.ub-back{display:inline-flex;align-items:center;gap:6px;margin:10px 28px 2px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:8px 13px;font-size:13px;cursor:pointer;font-family:'Manrope',sans-serif;transition:all .15s;}
 .ub-back:hover{color:var(--text);border-color:#3b4046;}
 
 /* landing (map picker) */
