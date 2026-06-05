@@ -24,10 +24,10 @@ export default function LibraryPanel({
   const favLineups = lineups.filter((l) => favs.includes(l.id));
   const learnedLineups = lineups.filter((l) => learned.includes(l.id));
 
-  const card = (l, i) => (
+  const card = (ctx) => (l, i) => (
     <LineupCard key={l.id} lineup={l} index={i} mapName={mapName(l.map)}
       fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)}
-      onClick={() => onOpenLineup(l)} />
+      onClick={() => onOpenLineup(l, ctx)} />
   );
 
   const tabs = [
@@ -58,12 +58,12 @@ export default function LibraryPanel({
                 </div>
                 <button className="ub-btn-primary" onClick={() => onSaveShared?.()}><FolderPlus size={15} /> Save to my collections</button>
               </div>
-              {sharedItems.length ? <div className="ub-grid">{sharedItems.map(card)}</div>
+              {sharedItems.length ? <div className="ub-grid">{sharedItems.map(card({ name: shared.name, ids: sharedItems.map((l) => l.id) }))}</div>
                 : <div className="ub-lib-empty"><Folder size={26} /><p>None of these lineups are available right now.</p></div>}
             </>
           )}
           {view === "favs" && (
-            favLineups.length ? <div className="ub-grid">{favLineups.map(card)}</div>
+            favLineups.length ? <div className="ub-grid">{favLineups.map(card({ name: "Favourites", ids: favLineups.map((l) => l.id) }))}</div>
               : <div className="ub-lib-empty"><Star size={26} /><p>No favourites yet. Tap the star on any lineup to save it here.</p></div>
           )}
 
@@ -82,7 +82,7 @@ export default function LibraryPanel({
                   );
                 })}
               </div>
-              {learnedLineups.length ? <div className="ub-grid">{learnedLineups.map(card)}</div>
+              {learnedLineups.length ? <div className="ub-grid">{learnedLineups.map(card({ name: "Learned", ids: learnedLineups.map((l) => l.id) }))}</div>
                 : <div className="ub-lib-empty"><CheckCircle2 size={26} /><p>Nothing marked as learned yet.</p></div>}
             </>
           )}
@@ -124,7 +124,7 @@ export default function LibraryPanel({
                   </button>
                 </div>
                 <h3 className="ub-lib-colname">{col.name}</h3>
-                {items.length ? <div className="ub-grid">{items.map(card)}</div>
+                {items.length ? <div className="ub-grid">{items.map(card({ name: col.name, ids: items.map((l) => l.id) }))}</div>
                   : <div className="ub-lib-empty"><Folder size={26} /><p>This collection is empty. Open a lineup and use “Save to collection”.</p></div>}
               </>
             );

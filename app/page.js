@@ -30,6 +30,8 @@ export default function Page() {
   const [type, setType] = useState("ALL");
   const [selected, setSelected] = useState(null);
   const [activeSpot, setActiveSpot] = useState(null);
+  const [queue, setQueue] = useState(null);
+  const [queueName, setQueueName] = useState(null);
   const [favs, setFavs] = useState([]);
   const [onlyFavs, setOnlyFavs] = useState(false);
   const [learned, setLearned] = useState([]);
@@ -179,8 +181,7 @@ export default function Page() {
     });
   }, [screen]);
 
-  function transitionTo(next, id, selectLineup) {
-    if (transitioning) return;
+  function transitionTo(next, id, selectLineup) {    if (transitioning) return;
     const stage = stageRef.current;
     const finish = () => { if (id) setActiveMap(id); window.scrollTo(0, 0); setScreen(next); if (selectLineup) setSelected(selectLineup); };
     if (!stage) { finish(); return; }
@@ -194,8 +195,30 @@ export default function Page() {
     });
   }
   const openMap = (id) => transitionTo("map", id);
-  const goLanding = () => { setSelected(null); transitionTo("landing"); };
-  const openLineup = (l) => transitionTo("map", l.map, l);
+  const goLanding = () => { setSelected(null); setQueue(null); setQueueName(null); transitionTo("landing"); };
+  const openLineup = (l) => { setQueue(null); setQueueName(null); transitionTo("map", l.map, l); };
+
+  // pick a lineup with no sequence context (single pin, card, search result)
+  function pickLineup(l) { setQueue(null); setQueueName(null); setSelected(l); }
+  // open a lineup as part of a sequence (collection, spot, favourites…) so prev/next works
+  function openWithQueue(l, ids, name) {
+    const list = (ids || []).map(String);
+    setQueue(list.length > 1 ? list : null);
+    setQueueName(list.length > 1 ? (name || null) : null);
+    setSelected(l);
+  }
+  function playQueue(dir) {
+    if (!queue || !selected) return;
+    const i = queue.findIndex((id) => String(id) === String(selected.id));
+    const ni = i + dir;
+    if (i === -1 || ni < 0 || ni >= queue.length) return;
+    const l = lineups.find((x) => String(x.id) === String(queue[ni]));
+    if (!l) return;
+    if (l.map !== activeMap) setActiveMap(l.map);
+    setActiveSpot(null);
+    setSelected(l);
+  }
+  const queueIndex = queue && selected ? queue.findIndex((id) => String(id) === String(selected.id)) : -1;
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#" + ADMIN_KEY) setAdmin(true);
@@ -234,8 +257,9 @@ export default function Page() {
       if (tag === "input" || tag === "textarea" || tag === "select") return;
       if (screen !== "map" || adding || editing) return;
       if ((e.key === "r" || e.key === "R") && filtered.length) {
-        setSelected(filtered[Math.floor(Math.random() * filtered.length)]);
+        pickLineup(filtered[Math.floor(Math.random() * filtered.length)]);
       } else if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && selected) {
+        if (queue && queueIndex !== -1) { playQueue(e.key === "ArrowRight" ? 1 : -1); return; }
         const idx = filtered.findIndex((l) => l.id === selected.id);
         if (idx === -1) return;
         const ni = e.key === "ArrowRight" ? (idx + 1) % filtered.length : (idx - 1 + filtered.length) % filtered.length;
@@ -244,7 +268,7 @@ export default function Page() {
     };
     window.addEventListener("keydown", onNav);
     return () => window.removeEventListener("keydown", onNav);
-  }, [screen, adding, editing, filtered, selected]);
+  }, [screen, adding, editing, filtered, selected, queue, queueIndex, lineups, activeMap]);
 
   useEffect(() => {
     try { const t = localStorage.getItem("nns_admin_token"); if (t) setAdminToken(t); } catch {}
@@ -449,15 +473,17 @@ export default function Page() {
             {view === "map" ? (
               <div className="ub-mapview">
                 <TacticalMap map={mapMeta} spots={spots} activeSpot={activeSpot}
-                  onSelectSpot={setActiveSpot} onPin={setSelected} selected={selected} zoomable />
+                  onSelectSpot={setActiveSpot} onPin={pickLineup} selected={selected} zoomable />
                 <div className={`ub-maplegend ${selected ? "detail" : ""}`}>
                   {selected ? (
                     <div className="ub-detailpanel" key={selected.id}>
-                      <button className="ub-spotback" onClick={() => setSelected(null)}><ArrowLeft size={14} /> {activeSpot ? "Back to spot" : "Back to map"}</button>
+                      <button className="ub-spotback" onClick={() => { setSelected(null); setQueue(null); setQueueName(null); }}><ArrowLeft size={14} /> {activeSpot ? "Back to spot" : "Back to map"}</button>
                       <LineupDetail lineup={selected} admin={admin} onEdit={startEdit} onDelete={removeLineup}
                         fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)}
                         learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)}
-                        collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} />
+                        collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection}
+                        queueName={queueName} queueIndex={queueIndex} queueTotal={queue ? queue.length : 0}
+                        onQueuePrev={() => playQueue(-1)} onQueueNext={() => playQueue(1)} />
                     </div>
                   ) : activeSpot ? (
                     <div className="ub-spotpanel">
@@ -465,13 +491,16 @@ export default function Page() {
                       <div className="ub-spot-h">{activeSpot}</div>
                       <div className="ub-spot-sub">{(spots.find((s) => s.target === activeSpot)?.lineups.length) || 0} lineups · pick where you throw from</div>
                       <div className="ub-spot-list">
-                        {(spots.find((s) => s.target === activeSpot)?.lineups || []).map((l) => (
-                          <button key={l.id} className="ub-spot-variant" onClick={() => setSelected(l)}>
-                            <span className="ub-spot-vicon" style={{ color: TYPE_META[l.type].color }}><NadeIcon type={l.type} size={15} /></span>
-                            <span className="ub-spot-vtext"><strong>{l.spawn || l.from}</strong><small>{l.throwType} · {l.difficulty}</small></span>
-                            {l.video && <Video size={13} className="ub-spot-vvid" />}
-                          </button>
-                        ))}
+                        {(() => {
+                          const sl = spots.find((s) => s.target === activeSpot)?.lineups || [];
+                          return sl.map((l) => (
+                            <button key={l.id} className="ub-spot-variant" onClick={() => openWithQueue(l, sl.map((x) => x.id), activeSpot)}>
+                              <span className="ub-spot-vicon" style={{ color: TYPE_META[l.type].color }}><NadeIcon type={l.type} size={15} /></span>
+                              <span className="ub-spot-vtext"><strong>{l.spawn || l.from}</strong><small>{l.throwType} · {l.difficulty}</small></span>
+                              {l.video && <Video size={13} className="ub-spot-vvid" />}
+                            </button>
+                          ));
+                        })()}
                       </div>
                     </div>
                   ) : (
@@ -503,7 +532,7 @@ export default function Page() {
               </div>
             ) : (
               <div className="ub-grid" key={`${side}-${type}-${throwFilter}-${videoOnly}-${sortBy}-${onlyFavs}`}>
-                {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => setSelected(l)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} onToggleLearned={() => toggleLearned(l.id)} />)}
+                {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => pickLineup(l)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} onToggleLearned={() => toggleLearned(l.id)} />)}
               </div>
             )}
           </>
@@ -515,7 +544,7 @@ export default function Page() {
         <LibraryPanel
           view={libraryView} setView={setLibraryView} onClose={() => setLibraryView(null)}
           lineups={lineups} favs={favs} learned={learned} collections={collections} maps={MAPS}
-          onOpenLineup={(l) => { setActiveMap(l.map); setScreen("map"); setView("map"); setSelected(l); setLibraryView(null); }}
+          onOpenLineup={(l, ctx) => { setActiveMap(l.map); setScreen("map"); setView("map"); setActiveSpot(null); openWithQueue(l, ctx?.ids || [], ctx?.name); setLibraryView(null); }}
           toggleFav={toggleFav} createCollection={createCollection}
           renameCollection={renameCollection} deleteCollection={deleteCollection}
           shared={sharedCol} onSaveShared={saveShared}

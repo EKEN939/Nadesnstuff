@@ -24,7 +24,7 @@ function VideoPlayer({ url }) {
   );
 }
 
-export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onToggleFav, learned, onToggleLearned, collections = [], toggleInCollection, createCollection }) {
+export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onToggleFav, learned, onToggleLearned, collections = [], toggleInCollection, createCollection, queueName, queueIndex = -1, queueTotal = 0, onQueuePrev, onQueueNext }) {
   const t = TYPE_META[lineup.type];
   const [linkCopied, setLinkCopied] = useState(false);
   const [copied, setCopied] = useState("");
@@ -46,6 +46,13 @@ export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onT
 
   return (
     <>
+      {queueTotal > 1 && queueIndex >= 0 && (
+        <div className="ub-queue">
+          <button className="ub-queue-nav" onClick={onQueuePrev} disabled={queueIndex === 0} aria-label="Previous in collection"><ChevronLeft size={16} /></button>
+          <span className="ub-queue-label"><Folder size={13} /> {queueName} · {queueIndex + 1}/{queueTotal}</span>
+          <button className="ub-queue-nav" onClick={onQueueNext} disabled={queueIndex === queueTotal - 1} aria-label="Next in collection"><ChevronRight size={16} /></button>
+        </div>
+      )}
       <div className="ub-modal-head">
         <div className="ub-typebadge" style={{ color: t.color }}><NadeIcon type={lineup.type} size={17} /><span>{t.label}</span></div>
         <h2>{lineup.target}</h2>
