@@ -93,8 +93,8 @@ export default function LineupModal({ lineup, onClose, admin, onEdit, onDelete, 
                 )}
               </div>
             )}
-            <button className={`ub-fav ub-modalfav ${fav ? "on" : ""}`} onClick={onToggleFav} aria-label="Favorite" title="Favorite">
-              <Star size={16} fill={fav ? "currentColor" : "none"} />
+            <button className={`ub-actbtn ${fav ? "fav-on" : ""}`} onClick={onToggleFav} aria-label="Favorite" title="Favorite">
+              <Star size={14} fill={fav ? "currentColor" : "none"} /> {fav ? "Favourited" : "Favourite"}
             </button>
           </div>
         </div>

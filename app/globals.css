@@ -462,7 +462,7 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .ub-icobtn:disabled{opacity:.4;cursor:default;}
 
 /* save-to-collection popover in modal */
-.ub-savecol{position:relative;margin-top:14px;}
+.ub-savecol{position:relative;}
 .ub-savecol-pop{position:absolute;top:calc(100% + 7px);left:0;z-index:30;width:260px;background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:7px;box-shadow:0 14px 30px rgba(0,0,0,.55);display:flex;flex-direction:column;gap:2px;}
 .ub-savecol-empty{font-size:12.5px;color:var(--muted);padding:8px 9px;}
 .ub-savecol-item{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:transparent;border:none;color:var(--text);font-family:'Manrope',sans-serif;font-size:13.5px;font-weight:600;padding:9px 9px;border-radius:8px;cursor:pointer;transition:background .12s;}
@@ -528,3 +528,8 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .ub-modalfav{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;background:var(--surface2);border:1px solid var(--border);border-radius:9px;color:var(--muted);cursor:pointer;transition:color .15s,border-color .15s;}
 .ub-modalfav:hover{color:var(--text);border-color:#3b4046;}
 .ub-modalfav.on{color:#e8c46a;border-color:#e8c46a;}
+
+/* favorite as a matching pill + header breathing room */
+.ub-actbtn.fav-on{border-color:#e8c46a;color:#e8c46a;background:rgba(232,196,106,.1);}
+.ub-modal-headbtns{margin-top:14px;}
+.ub-modal-head{margin-bottom:20px;}
