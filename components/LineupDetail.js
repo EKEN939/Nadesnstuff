@@ -97,6 +97,13 @@ export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onT
         </div>
       </div>
 
+      {lineup.preview && (
+        <div className="ub-preview">
+          <div className="ub-preview-label" style={{ color: t.color }}>Result · in place</div>
+          <img src={lineup.preview} alt="Result — where it lands" loading="lazy" decoding="async" />
+        </div>
+      )}
+
       {lineup.video && <VideoPlayer url={lineup.video} />}
       {lineup.tip && <div className="ub-tip"><span className="ub-tip-label">Instruction</span>{lineup.tip}</div>}
 
@@ -121,13 +128,6 @@ export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onT
               {steps.map((_, i) => <button key={i} className={`ub-guide-dot ${i === step ? "on" : ""}`} onClick={() => setStep(i)} aria-label={`Step ${i + 1}`} />)}
             </div>
           )}
-        </div>
-      )}
-
-      {lineup.preview && (
-        <div className="ub-preview">
-          <div className="ub-preview-label" style={{ color: t.color }}>Result · in place</div>
-          <img src={lineup.preview} alt="Result — where it lands" loading="lazy" decoding="async" />
         </div>
       )}
 
