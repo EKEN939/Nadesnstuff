@@ -644,3 +644,8 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 .ub-spotpanel,.ub-detailpanel{box-shadow:none;}
 .ub-maplegend{box-shadow:0 4px 18px rgba(0,0,0,.14);}
 .ub-header{background:rgba(26,27,32,.92);}
+
+/* library tab intro line (clarifies favourites vs collections vs learned) */
+.ub-lib-intro{display:flex;align-items:flex-start;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:14px;color:var(--muted);font-size:12.5px;line-height:1.5;}
+.ub-lib-intro svg{color:var(--accent);flex:0 0 auto;margin-top:1px;}
+.ub-lib-intro strong{color:var(--text);font-weight:700;}

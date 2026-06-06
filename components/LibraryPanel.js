@@ -64,12 +64,16 @@ export default function LibraryPanel({
             </>
           )}
           {view === "favs" && (
-            favLineups.length ? <div className="ub-grid">{favLineups.map(card({ name: "Favourites", ids: favLineups.map((l) => l.id) }))}</div>
-              : <div className="ub-lib-empty"><Star size={26} /><p>No favourites yet. Tap the star on any lineup to save it here.</p></div>
+            <>
+              <div className="ub-lib-intro"><Star size={14} /> <span><strong>Quick saves.</strong> One tap on a lineup’s star drops it here — no naming, no sorting. For organising into named, shareable sets, use Collections.</span></div>
+              {favLineups.length ? <div className="ub-grid">{favLineups.map(card({ name: "Favourites", ids: favLineups.map((l) => l.id) }))}</div>
+                : <div className="ub-lib-empty"><Star size={26} /><p>No favourites yet. Tap the star on any lineup to save it here.</p></div>}
+            </>
           )}
 
           {view === "learned" && (
             <>
+              <div className="ub-lib-intro"><CheckCircle2 size={14} /> <span><strong>Your progress.</strong> Mark lineups you’ve nailed — this fills the mastery rings on the home page. It’s not a save list; use Favourites or Collections for that.</span></div>
               <div className="ub-lib-progress">
                 {maps.filter((m) => lineups.some((l) => l.map === m.id)).map((m) => {
                   const tot = lineups.filter((l) => l.map === m.id).length;
@@ -90,6 +94,7 @@ export default function LibraryPanel({
 
           {view === "collections" && !activeCol && (
             <>
+              <div className="ub-lib-intro"><Folder size={14} /> <span><strong>Organised sets.</strong> Build named groups (e.g. “Mirage A Smokes”), set the order, and share them with a link. For a quick one-off save, just star it in Favourites.</span></div>
               <div className="ub-newcol">
                 <input placeholder="New collection name…" value={newName} onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && newName.trim()) { createCollection(newName.trim()); setNewName(""); } }} />

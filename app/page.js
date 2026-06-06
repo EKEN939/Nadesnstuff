@@ -482,7 +482,7 @@ export default function Page() {
                 ))}
               </div>
               <div className="ub-filtergroup">
-                <button className={`ub-pill ${onlyFavs ? "active" : ""}`} onClick={() => setOnlyFavs((v) => !v)}><Star size={13} /> Favorites</button>
+                <button className={`ub-pill ${onlyFavs ? "active" : ""}`} onClick={() => setOnlyFavs((v) => !v)}><Star size={13} /> Favourites</button>
               </div>
               <div className="ub-viewtoggle">
                 <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}><MapIcon size={14} /> Map</button>
