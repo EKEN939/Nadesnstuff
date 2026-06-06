@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Tag, Trophy, ListOrdered } from "lucide-react";
+import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Tag, Trophy } from "lucide-react";
 import { confetti } from "@/lib/confetti";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { MAPS } from "@/data/maps";
@@ -42,7 +42,6 @@ export default function Page() {
   const [showLabels, setShowLabels] = useState(false);
   const [loading, setLoading] = useState(true);
   const [collections, setCollections] = useState([]);
-  const [executes, setExecutes] = useState([]);
   const [toast, setToast] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [libraryView, setLibraryView] = useState(null);
@@ -97,13 +96,12 @@ export default function Page() {
 
   useEffect(() => {
     if (session?.user) {
-      fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) { setFavs(d.favs || []); setLearned(d.learned || []); setCollections(d.collections || []); setExecutes(d.executes || []); } }).catch(() => {});
+      fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) { setFavs(d.favs || []); setLearned(d.learned || []); setCollections(d.collections || []); } }).catch(() => {});
     } else {
       try {
         setFavs(JSON.parse(localStorage.getItem("nns_favs") || "[]"));
         setLearned(JSON.parse(localStorage.getItem("nns_learned") || "[]"));
         setCollections(JSON.parse(localStorage.getItem("nns_collections") || "[]"));
-        setExecutes(JSON.parse(localStorage.getItem("nns_executes") || "[]"));
       } catch {}
     }
   }, [session?.user?.id]);
@@ -118,15 +116,14 @@ export default function Page() {
       }
     } catch {}
   }, []);
-  function saveUser(f, l, c, e = executes) {
+  function saveUser(f, l, c) {
     if (session?.user) {
-      fetch("/api/me", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ favs: f, learned: l, collections: c, executes: e }) }).catch(() => {});
+      fetch("/api/me", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ favs: f, learned: l, collections: c }) }).catch(() => {});
     } else {
       try {
         localStorage.setItem("nns_favs", JSON.stringify(f));
         localStorage.setItem("nns_learned", JSON.stringify(l));
         localStorage.setItem("nns_collections", JSON.stringify(c));
-        localStorage.setItem("nns_executes", JSON.stringify(e));
       } catch {}
     }
   }
@@ -161,29 +158,16 @@ export default function Page() {
     const nc = collections.map((c) => (c.id === colId ? { ...c, items: c.items.map(String).includes(sid) ? c.items.filter((x) => String(x) !== sid) : [...c.items, lineupId] } : c));
     setCollections(nc); saveUser(favs, learned, nc);
   };
-
-  // --- executes (ordered, map-scoped tactical sequences) ---
-  function createExecute(name, map, initialItem) {
-    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    const ne = [...executes, { id, name: name || "Untitled execute", map, items: initialItem != null ? [initialItem] : [] }];
-    setExecutes(ne); saveUser(favs, learned, collections, ne); return id;
-  }
-  const renameExecute = (id, name) => { const ne = executes.map((e) => (e.id === id ? { ...e, name } : e)); setExecutes(ne); saveUser(favs, learned, collections, ne); };
-  const deleteExecute = (id) => { const ne = executes.filter((e) => e.id !== id); setExecutes(ne); saveUser(favs, learned, collections, ne); };
-  const addToExecute = (lineupId, execId) => {
+  const moveInCollection = (colId, lineupId, dir) => {
     const sid = String(lineupId);
-    const ne = executes.map((e) => (e.id === execId ? { ...e, items: e.items.map(String).includes(sid) ? e.items.filter((x) => String(x) !== sid) : [...e.items, lineupId] } : e));
-    setExecutes(ne); saveUser(favs, learned, collections, ne);
-  };
-  const moveInExecute = (execId, index, dir) => {
-    const ne = executes.map((e) => {
-      if (e.id !== execId) return e;
-      const items = [...e.items]; const ni = index + dir;
-      if (ni < 0 || ni >= items.length) return e;
-      [items[index], items[ni]] = [items[ni], items[index]];
-      return { ...e, items };
+    const nc = collections.map((c) => {
+      if (c.id !== colId) return c;
+      const items = [...c.items]; const i = items.findIndex((x) => String(x) === sid); const ni = i + dir;
+      if (i === -1 || ni < 0 || ni >= items.length) return c;
+      [items[i], items[ni]] = [items[ni], items[i]];
+      return { ...c, items };
     });
-    setExecutes(ne); saveUser(favs, learned, collections, ne);
+    setCollections(nc); saveUser(favs, learned, nc);
   };
   function addCollectionFull(name, items) {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -422,7 +406,6 @@ export default function Page() {
                   <button className="ub-pm-item" onClick={() => { setLibraryView("favs"); setProfileOpen(false); }}><Star size={15} /> Favourites</button>
                   <button className="ub-pm-item" onClick={() => { setLibraryView("learned"); setProfileOpen(false); }}><CheckCircle2 size={15} /> Learned</button>
                   <button className="ub-pm-item" onClick={() => { setLibraryView("collections"); setProfileOpen(false); }}><Folder size={15} /> Collections</button>
-                  <button className="ub-pm-item" onClick={() => { setLibraryView("executes"); setProfileOpen(false); }}><ListOrdered size={15} /> Executes</button>
                   {admin && <div className="ub-pm-div" />}
                   {admin && <button className="ub-pm-item" onClick={() => { setAdding(true); setProfileOpen(false); }}><Plus size={15} /> Add lineup</button>}
                   {admin && <button className="ub-pm-item" onClick={() => { setShowExport(true); setProfileOpen(false); }}><Download size={15} /> Export</button>}
@@ -542,7 +525,6 @@ export default function Page() {
                         fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)}
                         learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)}
                         collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection}
-                        executes={executes} addToExecute={addToExecute} createExecute={createExecute}
                         queueName={queueName} queueIndex={queueIndex} queueTotal={queue ? queue.length : 0}
                         onQueuePrev={() => playQueue(-1)} onQueueNext={() => playQueue(1)} />
                     </div>
@@ -606,7 +588,7 @@ export default function Page() {
         )}
       </div>
 
-      {selected && view === "list" && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} executes={executes} addToExecute={addToExecute} createExecute={createExecute} />}
+      {selected && view === "list" && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} />}
       {libraryView && (
         <LibraryPanel
           view={libraryView} setView={setLibraryView} onClose={() => setLibraryView(null)}
@@ -614,8 +596,7 @@ export default function Page() {
           onOpenLineup={(l, ctx) => { setActiveMap(l.map); setScreen("map"); setView("map"); setActiveSpot(null); openWithQueue(l, ctx?.ids || [], ctx?.name); setLibraryView(null); }}
           toggleFav={toggleFav} createCollection={createCollection}
           renameCollection={renameCollection} deleteCollection={deleteCollection}
-          executes={executes} createExecute={createExecute} renameExecute={renameExecute}
-          deleteExecute={deleteExecute} addToExecute={addToExecute} moveInExecute={moveInExecute}
+          toggleInCollection={toggleInCollection} moveInCollection={moveInCollection}
           shared={sharedCol} onSaveShared={saveShared}
         />
       )}
