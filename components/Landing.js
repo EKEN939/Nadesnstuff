@@ -22,7 +22,21 @@ function MapThumb({ m }) {
   return ok ? <img src={src} alt={`${m.name} radar`} loading="lazy" decoding="async" onError={() => setOk(false)} /> : <div className="nl-thumbgrid" />;
 }
 
-export default function Landing({ maps, lineups, onPick, onOpenLineup }) {
+function MasteryRing({ pct }) {
+  const r = 13, c = 2 * Math.PI * r;
+  const done = pct >= 100;
+  return (
+    <span className={`nl-ring ${done ? "done" : ""}`} title={`${pct}% mastered`}>
+      <svg viewBox="0 0 32 32" width="32" height="32">
+        <circle cx="16" cy="16" r={r} className="nl-ring-bg" />
+        <circle cx="16" cy="16" r={r} className="nl-ring-fg" strokeDasharray={c} strokeDashoffset={c * (1 - pct / 100)} transform="rotate(-90 16 16)" />
+      </svg>
+      <span className="nl-ring-num">{done ? "✓" : pct}</span>
+    </span>
+  );
+}
+
+export default function Landing({ maps, lineups, learned = [], onPick, onOpenLineup }) {
   const [query, setQuery] = useState("");
   const total = lineups.length;
   const live = maps.filter((m) => !m.comingSoon).length;
@@ -91,6 +105,8 @@ export default function Landing({ maps, lineups, onPick, onOpenLineup }) {
               const count = mapLineups.length;
               const spots = new Set(mapLineups.map((l) => l.target)).size;
               const typesPresent = [...new Set(mapLineups.map((l) => l.type))];
+              const learnedCount = mapLineups.filter((l) => learned.includes(l.id)).length;
+              const pct = count > 0 ? Math.round((learnedCount / count) * 100) : 0;
               if (m.comingSoon) {
                 return (
                   <div key={m.id} className="nl-card soon" aria-disabled="true">
@@ -101,7 +117,7 @@ export default function Landing({ maps, lineups, onPick, onOpenLineup }) {
               }
               return (
                 <button key={m.id} className="nl-card" onClick={() => onPick(m.id)}>
-                  <div className="nl-thumb"><MapThumb m={m} /></div>
+                  <div className="nl-thumb"><MapThumb m={m} />{count > 0 && <MasteryRing pct={pct} />}</div>
                   <div className="nl-cardbody">
                     <div className="nl-cardtop"><span className="nl-name">{m.name}</span><span className="nl-count">{count} lineup{count !== 1 ? "s" : ""}</span></div>
                     <div className="nl-dots">

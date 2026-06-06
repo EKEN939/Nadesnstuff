@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ArrowRight, ImageOff, Pencil, Trash2, Link2, Check, Star, ChevronLeft, ChevronRight, Crosshair, Terminal, CheckCircle2, Folder, Plus, MapPin } from "lucide-react";
+import { ArrowRight, ImageOff, Pencil, Trash2, Link2, Check, Star, ChevronLeft, ChevronRight, Crosshair, Terminal, CheckCircle2, Folder, Plus, MapPin, ListOrdered } from "lucide-react";
 import { TYPE_META, DIFF_COLOR } from "@/lib/constants";
 import NadeIcon from "./NadeIcon";
 
@@ -23,15 +23,19 @@ function VideoPlayer({ url }) {
   );
 }
 
-export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onToggleFav, learned, onToggleLearned, collections = [], toggleInCollection, createCollection, queueName, queueIndex = -1, queueTotal = 0, onQueuePrev, onQueueNext }) {
+export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onToggleFav, learned, onToggleLearned, collections = [], toggleInCollection, createCollection, executes = [], addToExecute, createExecute, queueName, queueIndex = -1, queueTotal = 0, onQueuePrev, onQueueNext }) {
   const t = TYPE_META[lineup.type];
+  const mapExecutes = executes.filter((e) => e.map === lineup.map);
+  const mapLabel = lineup.map ? lineup.map.charAt(0).toUpperCase() + lineup.map.slice(1) : "";
   const [linkCopied, setLinkCopied] = useState(false);
   const [copied, setCopied] = useState("");
   const [colOpen, setColOpen] = useState(false);
   const [newCol, setNewCol] = useState("");
+  const [execOpen, setExecOpen] = useState(false);
+  const [newExec, setNewExec] = useState("");
   const steps = lineup.steps || [];
   const [step, setStep] = useState(0);
-  useEffect(() => { setStep(0); setColOpen(false); }, [lineup.id]);
+  useEffect(() => { setStep(0); setColOpen(false); setExecOpen(false); }, [lineup.id]);
 
   function copyLink() {
     if (typeof window === "undefined") return;
@@ -86,6 +90,32 @@ export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onT
                     <input placeholder="New collection…" value={newCol} onChange={(e) => setNewCol(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && newCol.trim()) { createCollection(newCol.trim(), lineup.id); setNewCol(""); } }} />
                     <button className="ub-icobtn" disabled={!newCol.trim()} onClick={() => { createCollection(newCol.trim(), lineup.id); setNewCol(""); }}><Plus size={15} /></button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {addToExecute && (
+            <div className="ub-savecol" data-savecol>
+              <button className={`ub-actbtn ${execOpen ? "on" : ""}`} onClick={() => setExecOpen((o) => !o)}><ListOrdered size={14} /> Add to execute</button>
+              {execOpen && (
+                <div className="ub-savecol-pop">
+                  <div className="ub-savecol-poptitle">{mapLabel} executes</div>
+                  {mapExecutes.length === 0 && <div className="ub-savecol-empty">No executes for this map yet — make one below.</div>}
+                  {mapExecutes.map((ex) => {
+                    const inIt = ex.items.map(String).includes(String(lineup.id));
+                    const pos = ex.items.map(String).indexOf(String(lineup.id));
+                    return (
+                      <button key={ex.id} className={`ub-savecol-item ${inIt ? "on" : ""}`} onClick={() => addToExecute(lineup.id, ex.id)}>
+                        <span className="ub-savecol-check">{inIt && <Check size={13} />}</span> {ex.name}
+                        {inIt && <span className="ub-exec-pos">#{pos + 1}</span>}
+                      </button>
+                    );
+                  })}
+                  <div className="ub-savecol-new">
+                    <input placeholder="New execute…" value={newExec} onChange={(e) => setNewExec(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && newExec.trim()) { createExecute(newExec.trim(), lineup.map, lineup.id); setNewExec(""); } }} />
+                    <button className="ub-icobtn" disabled={!newExec.trim()} onClick={() => { createExecute(newExec.trim(), lineup.map, lineup.id); setNewExec(""); }}><Plus size={15} /></button>
                   </div>
                 </div>
               )}
