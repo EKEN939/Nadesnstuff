@@ -745,3 +745,11 @@ body::before{will-change:transform;}
 
 /* when a lineup is selected, keep the other (dimmed) pins clickable above it */
 .ub-pin.dim{z-index:5;}
+
+/* perf: isolate the fixed ambient layers onto their own GPU layer so they don't repaint while scrolling */
+body::after{transform:translateZ(0);will-change:transform;backface-visibility:hidden;}
+body::before{backface-visibility:hidden;}
+
+/* perf: opaque sticky header (no per-frame blend) + drop backdrop-blur on zoom buttons */
+.ub-header{background:#1b1c21;}
+.ub-zoom button{backdrop-filter:none;background:rgba(24,26,30,.96);}
