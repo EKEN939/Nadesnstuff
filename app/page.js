@@ -207,7 +207,9 @@ export default function Page() {
   const openLineup = (l) => { setQueue(null); setQueueName(null); transitionTo("map", l.map, l); };
 
   // pick a lineup with no sequence context (single pin, card, search result)
-  function pickLineup(l) { setQueue(null); setQueueName(null); setSelected(l); }
+  function pickLineup(l) { setQueue(null); setQueueName(null); setActiveSpot(null); setSelected(l); }
+  // clicking a multi-lineup spot pin: drop any current selection so the new spot takes over
+  function openSpot(target) { setSelected(null); setQueue(null); setQueueName(null); setActiveSpot(target); }
   // open a lineup as part of a sequence (collection, spot, favourites…) so prev/next works
   function openWithQueue(l, ids, name) {
     const list = (ids || []).map(String);
@@ -467,7 +469,7 @@ export default function Page() {
             {view === "map" ? (
               <div className="ub-mapview">
                 <TacticalMap map={mapMeta} spots={spots} activeSpot={activeSpot}
-                  onSelectSpot={setActiveSpot} onPin={pickLineup} selected={selected} zoomable />
+                  onSelectSpot={openSpot} onPin={pickLineup} selected={selected} zoomable />
                 <div className={`ub-maplegend ${selected ? "detail" : ""}`}>
                   {selected ? (
                     <div className="ub-detailpanel" key={selected.id}>

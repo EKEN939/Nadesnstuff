@@ -742,3 +742,6 @@ body::before{will-change:transform;}
 .ub-arc{stroke-width:0.55;}
 .ub-arc.sel{stroke-width:0.9;}
 .ub-arc.ghost{stroke-width:0.4;}
+
+/* when a lineup is selected, keep the other (dimmed) pins clickable above it */
+.ub-pin.dim{z-index:5;}
