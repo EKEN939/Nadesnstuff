@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
 
 :root{
-  --bg:#15161a; --surface:#1e2026; --surface2:#25282f;
-  --border:#2a2d34; --text:#f2f3f5; --muted:#9aa0aa; --accent:#ff5b00; --logo:#ff5b00;
+  --bg:#1a1b20; --surface:#23242b; --surface2:#2b2d36;
+  --border:#31333c; --text:#eceef2; --muted:#9aa1ac; --accent:#ff5b00; --logo:#ff5b00;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
-body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at 50% -12%, #2a2c37 0%, rgba(42,44,55,0) 62%), var(--bg);background-color:var(--bg);color:var(--text);min-height:100vh;}
 .ub-wrap{max-width:1200px;margin:0 auto;min-height:100vh;padding-bottom:60px;}
 
 /* logo */
@@ -637,3 +637,10 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .ub-colitem:hover .ub-colitem-ctl,.ub-colitem:focus-within .ub-colitem-ctl{opacity:1;}
 .ub-colhint{font-size:12px;color:var(--muted);margin:-2px 0 12px;}
 @media (max-width:640px){ .ub-colitem-ctl{opacity:1;} }
+
+/* softer, cushioned surfaces */
+.ub-overlay{background:rgba(14,15,18,.72);}
+.ub-card,.nl-card{box-shadow:0 4px 16px rgba(0,0,0,.20);}
+.ub-spotpanel,.ub-detailpanel{box-shadow:none;}
+.ub-maplegend{box-shadow:0 4px 18px rgba(0,0,0,.14);}
+.ub-header{background:rgba(26,27,32,.92);}

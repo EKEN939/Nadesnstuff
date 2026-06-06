@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Tag, Trophy } from "lucide-react";
+import { Filter, Plus, Map as MapIcon, List, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Tag, Trophy } from "lucide-react";
 import { confetti } from "@/lib/confetti";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { MAPS } from "@/data/maps";
@@ -16,7 +16,6 @@ import LineupModal from "@/components/LineupModal";
 import LineupDetail from "@/components/LineupDetail";
 import LibraryPanel from "@/components/LibraryPanel";
 import AddLineupForm from "@/components/AddLineupForm";
-import ExportModal from "@/components/ExportModal";
 
 const ADMIN_KEY = "admin";
 const ACTIVE_MAPS = MAPS.filter((m) => !m.comingSoon);
@@ -49,7 +48,6 @@ export default function Page() {
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
   const [admin, setAdmin] = useState(false);
-  const [showExport, setShowExport] = useState(false);
   const [liveConfigured, setLiveConfigured] = useState(false);
   const [adminToken, setAdminToken] = useState("");
   const [saving, setSaving] = useState(false);
@@ -282,12 +280,11 @@ export default function Page() {
       if (e.key !== "Escape") return;
       if (selected) return setSelected(null);
       if (adding || editing) { setAdding(false); setEditing(null); return; }
-      if (showExport) return setShowExport(false);
       if (screen !== "landing") goLanding();
     };
     window.addEventListener("keydown", onEsc);
     return () => window.removeEventListener("keydown", onEsc);
-  }, [selected, adding, editing, showExport, screen, transitioning]);
+  }, [selected, adding, editing, screen, transitioning]);
 
   // R = random lineup, arrows = cycle through the current list while a lineup is open
   useEffect(() => {
@@ -408,7 +405,6 @@ export default function Page() {
                   <button className="ub-pm-item" onClick={() => { setLibraryView("collections"); setProfileOpen(false); }}><Folder size={15} /> Collections</button>
                   {admin && <div className="ub-pm-div" />}
                   {admin && <button className="ub-pm-item" onClick={() => { setAdding(true); setProfileOpen(false); }}><Plus size={15} /> Add lineup</button>}
-                  {admin && <button className="ub-pm-item" onClick={() => { setShowExport(true); setProfileOpen(false); }}><Download size={15} /> Export</button>}
                   <div className="ub-pm-div" />
                   <button className="ub-pm-item" onClick={() => signOut()}><LogOut size={15} /> Log out</button>
                 </div>
@@ -430,11 +426,6 @@ export default function Page() {
           {admin && liveConfigured && (
             <button className="ub-toolbtn" onClick={saveLive} disabled={saving}>
               <Save size={15} /> {saving ? "Saving…" : "Save live"}
-            </button>
-          )}
-          {admin && screen === "map" && (
-            <button className="ub-toolbtn" onClick={() => setShowExport(true)} title="Export all lineups to data/lineups.js">
-              <Download size={15} /> Export
             </button>
           )}
           {admin && screen === "map" && (
@@ -610,7 +601,6 @@ export default function Page() {
           existingSpots={formSpots}
         />
       )}
-      {showExport && <ExportModal lineups={lineups} onClose={() => setShowExport(false)} />}
     </div>
   );
 }
