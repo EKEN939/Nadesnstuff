@@ -570,8 +570,6 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 .ub-queue-nav:disabled{opacity:.35;cursor:default;}
 
 /* spot labels on the radar (toggle) */
-.ub-pin-label{position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:#fff;background:rgba(8,9,12,.74);border:1px solid rgba(255,255,255,.09);padding:1px 5px;border-radius:5px;pointer-events:none;font-family:'Manrope',sans-serif;z-index:3;}
-.ub-pin.dim .ub-pin-label{opacity:.35;}
 
 /* paste / drop upload zone */
 .ub-uploadwrap{display:inline-flex;align-items:center;gap:8px;border-radius:8px;outline:none;}

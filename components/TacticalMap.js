@@ -7,7 +7,7 @@ import { MAP_ZONES } from "@/data/radars";
 import NadeIcon from "./NadeIcon";
 
 export default function TacticalMap({
-  map, spots = [], activeSpot, onSelectSpot, onPin, selected, showLabels,
+  map, spots = [], activeSpot, onSelectSpot, onPin, selected,
   addMode, draftLand, draftThrow, onMapClick, zoomable,
 }) {
   const ref = useRef(null);
@@ -121,7 +121,6 @@ export default function TacticalMap({
                 title={`${s.target} (${s.lineups.length})`}>
                 {iconType ? <span className="ub-pin-marker"><NadeIcon type={iconType} size={14} /></span> : <span className="ub-pin-dot" />}
                 {s.lineups.length > 1 && <span className="ub-pin-count">{s.lineups.length}</span>}
-                {showLabels && <span className="ub-pin-label">{s.target}</span>}
                 <span className="ub-pin-pop">
                   <strong>{s.target}</strong>
                   <em>{s.lineups.length} lineup{s.lineups.length !== 1 ? "s" : ""}</em>

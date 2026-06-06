@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Plus, Map as MapIcon, List, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Tag, Trophy } from "lucide-react";
+import { Filter, Plus, Map as MapIcon, List, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Trophy } from "lucide-react";
 import { confetti } from "@/lib/confetti";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { MAPS } from "@/data/maps";
@@ -33,9 +33,7 @@ export default function Page() {
   const [queue, setQueue] = useState(null);
   const [queueName, setQueueName] = useState(null);
   const [favs, setFavs] = useState([]);
-  const [onlyFavs, setOnlyFavs] = useState(false);
   const [learned, setLearned] = useState([]);
-  const [showLabels, setShowLabels] = useState(false);
   const [loading, setLoading] = useState(true);
   const [collections, setCollections] = useState([]);
   const [toast, setToast] = useState(null);
@@ -68,10 +66,9 @@ export default function Page() {
       if (l.map !== activeMap) return false;
       if (side !== "ALL" && l.side !== side) return false;
       if (type !== "ALL" && l.type !== type) return false;
-      if (onlyFavs && !favs.includes(l.id)) return false;
       return true;
     });
-  }, [lineups, activeMap, side, type, onlyFavs, favs]);
+  }, [lineups, activeMap, side, type]);
 
   // group lineups by landing spot (target); the pin sits on the landing point
   const spots = useMemo(() => {
@@ -87,7 +84,7 @@ export default function Page() {
     if (session?.user) {
       fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) { setFavs(d.favs || []); setLearned(d.learned || []); setCollections(d.collections || []); } }).catch(() => {});
     } else {
-      setFavs([]); setLearned([]); setCollections([]); setOnlyFavs(false);
+      setFavs([]); setLearned([]); setCollections([]);
     }
   }, [session?.user?.id]);
   useEffect(() => {
@@ -167,7 +164,7 @@ export default function Page() {
     return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onEsc); };
   }, [profileOpen]);
 
-  useEffect(() => { setActiveSpot(null); }, [activeMap, side, type, screen, onlyFavs]);
+  useEffect(() => { setActiveSpot(null); }, [activeMap, side, type, screen]);
 
   const formMapId = editing ? editing.map : activeMap;
   const formSpots = useMemo(() => {
@@ -461,10 +458,6 @@ export default function Page() {
                   </button>
                 ))}
               </div>
-              <div className="ub-filtergroup">
-                {loggedIn && <button className={`ub-pill ${onlyFavs ? "active" : ""}`} onClick={() => setOnlyFavs((v) => !v)}><Star size={13} /> Favourites</button>}
-                {view === "map" && <button className={`ub-pill ${showLabels ? "active" : ""}`} onClick={() => setShowLabels((v) => !v)}><Tag size={13} /> Labels</button>}
-              </div>
               <div className="ub-viewtoggle">
                 <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}><MapIcon size={14} /> Map</button>
                 <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}><List size={14} /> List</button>
@@ -474,7 +467,7 @@ export default function Page() {
             {view === "map" ? (
               <div className="ub-mapview">
                 <TacticalMap map={mapMeta} spots={spots} activeSpot={activeSpot}
-                  onSelectSpot={setActiveSpot} onPin={pickLineup} selected={selected} showLabels={showLabels} zoomable />
+                  onSelectSpot={setActiveSpot} onPin={pickLineup} selected={selected} zoomable />
                 <div className={`ub-maplegend ${selected ? "detail" : ""}`}>
                   {selected ? (
                     <div className="ub-detailpanel" key={selected.id}>
@@ -538,7 +531,7 @@ export default function Page() {
                 {admin && <span>Click "Add lineup" to create one on {mapMeta.name}.</span>}
               </div>
             ) : (
-              <div className="ub-grid" key={`${side}-${type}-${onlyFavs}`}>
+              <div className="ub-grid" key={`${side}-${type}`}>
                 {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => pickLineup(l)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} onToggleLearned={() => toggleLearned(l.id)} loggedIn={loggedIn} />)}
               </div>
             )}
