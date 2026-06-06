@@ -7,7 +7,7 @@
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
 body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at 50% -12%, #2a2c37 0%, rgba(42,44,55,0) 62%), var(--bg);background-color:var(--bg);color:var(--text);min-height:100vh;}
-.ub-wrap{max-width:1200px;margin:0 auto;min-height:100vh;padding-bottom:60px;}
+.ub-wrap{max-width:1560px;margin:0 auto;min-height:100vh;padding-bottom:60px;}
 
 /* logo */
 .nns-logo{display:flex;align-items:center;}
@@ -64,7 +64,7 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 .ub-search input::placeholder{color:var(--muted);}
 
 .ub-mapview{display:flex;gap:22px;padding:8px 28px;flex-wrap:wrap;align-items:flex-start;}
-.ub-mapouter{position:relative;width:min(620px,100%);flex:0 1 auto;}
+.ub-mapouter{position:relative;width:min(840px,100%);flex:0 1 auto;border-radius:16px;overflow:hidden;border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,.28);}
 .ub-mapscroll{overflow:auto;border-radius:14px;aspect-ratio:1/1;border:1px solid var(--border);background:#191c1f;}
 .ub-mapscroll.zoomed{cursor:grab;touch-action:none;}
 .ub-mapscroll.zoomed:active{cursor:grabbing;}
@@ -88,7 +88,7 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 .ub-pin:hover .ub-pin-marker{transform:scale(1.16);}
 .ub-pin-draft{--pin:#ff5b00;pointer-events:none;animation:ubpulse 1.1s infinite;}
 @keyframes ubpulse{0%,100%{opacity:1;}50%{opacity:.45;}}
-.ub-maplegend{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;min-width:200px;flex:1 1 240px;}
+.ub-maplegend{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;min-width:260px;flex:1 1 320px;}
 .ub-legend-title{font-size:12px;letter-spacing:.5px;color:var(--muted);margin-bottom:14px;}
 .ub-legend-row{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text);padding:6px 0;}
 .ub-legend-dot{width:9px;height:9px;border-radius:50%;}
@@ -548,7 +548,7 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 .ub-spotnote strong{color:var(--accent);}
 
 /* lineup detail as side panel (map view) */
-.ub-maplegend.detail{flex:1 1 380px;max-width:600px;padding:16px 18px;}
+.ub-maplegend.detail{flex:1 1 440px;max-width:700px;padding:18px 22px;}
 .ub-detailpanel{display:flex;flex-direction:column;animation:ubdetailin .24s ease;}
 @keyframes ubdetailin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 .ub-detailpanel .ub-spotback{margin-bottom:8px;}
