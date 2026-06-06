@@ -660,3 +660,52 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 .ub-uploadwrap{min-width:0;}
 .ub-uploadwrap.compact{gap:0;flex:0 0 auto;}
 .ub-uploadwrap.compact .ub-upload{flex:0 0 auto;white-space:nowrap;}
+
+/* ============ design polish pass: motion + ambient depth + rounder ============ */
+
+/* rounder shapes */
+.ub-card{border-radius:16px;}
+.nl-card{border-radius:18px;}
+.ub-modal{border-radius:20px;}
+.ub-maplegend{border-radius:18px;}
+.ub-mapcard{border-radius:12px;}
+.ub-spot-variant,.nl-recentchip{border-radius:12px;}
+.ub-toolbtn,.ub-addbtn,.ub-btn-primary,.ub-btn-ghost,.ub-btn-danger,.ub-back,.ub-actbtn,.ub-learnbtn,.ub-sharebtn,.ub-close{border-radius:10px;}
+
+/* press feedback on interactive elements */
+.ub-pill,.ub-toolbtn,.ub-addbtn,.ub-btn-primary,.ub-btn-ghost,.ub-btn-danger,.ub-actbtn,.ub-mapcard,.ub-back,.ub-learnbtn,.ub-sharebtn{transition:all .16s ease;}
+.ub-pill:active,.ub-toolbtn:active,.ub-addbtn:active,.ub-btn-primary:active,.ub-btn-ghost:active,.ub-btn-danger:active,.ub-actbtn:active,.ub-mapcard:active,.ub-back:active{transform:translateY(1px) scale(.985);}
+
+/* primary buttons: gradient + warm glow */
+.ub-addbtn,.ub-btn-primary{background:linear-gradient(180deg,#ff6f24,#ff5b00);box-shadow:0 4px 16px rgba(255,91,0,.22);}
+.ub-addbtn:hover,.ub-btn-primary:hover{background:linear-gradient(180deg,#ff854a,#ff6a1a);box-shadow:0 6px 22px rgba(255,91,0,.30);}
+.ub-btn-primary:disabled{background:#2b2f34;box-shadow:none;}
+
+/* cards: lift + scale + glow on hover, subtle top sheen for depth */
+.ub-card,.nl-card{transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;background-image:linear-gradient(180deg,rgba(255,255,255,.022),rgba(255,255,255,0));}
+.ub-card:hover,.nl-card:hover{transform:translateY(-4px) scale(1.012);border-color:rgba(255,91,0,.38);box-shadow:0 14px 32px rgba(0,0,0,.34);}
+.ub-card:active,.nl-card:active{transform:translateY(-1px) scale(1.002);}
+.ub-maplegend,.ub-modal{background-image:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0));}
+
+/* pins + throw dots: glow on hover */
+.ub-pin:hover .ub-pin-marker,.ub-pin:hover .ub-pin-dot{filter:drop-shadow(0 0 6px var(--pin,var(--accent)));}
+.ub-throwdot{transition:transform .15s,filter .15s;}
+.ub-throwdot:hover{transform:translate(-50%,-50%) scale(1.25);filter:drop-shadow(0 0 5px var(--pin,var(--accent)));}
+
+/* ambient: solid bg + slow drifting glow + faint grain texture */
+body{background:var(--bg);}
+body::before{content:"";position:fixed;inset:-25%;z-index:-2;pointer-events:none;background:radial-gradient(820px 460px at 50% 6%, rgba(255,91,0,.07), transparent 62%),radial-gradient(720px 520px at 50% 3%, rgba(120,132,165,.09), transparent 60%);animation:ubglow 18s ease-in-out infinite alternate;}
+@keyframes ubglow{0%{transform:translate3d(-2%,0,0) scale(1);opacity:.8;}100%{transform:translate3d(2%,1%,0) scale(1.08);opacity:1;}}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* subtle brand pulse on the logo crosshair */
+.nns-cross{animation:ubcrossglow 3.4s ease-in-out infinite;}
+@keyframes ubcrossglow{0%,100%{filter:drop-shadow(0 0 0 rgba(255,91,0,0));}50%{filter:drop-shadow(0 0 5px rgba(255,91,0,.5));}}
+
+html{scroll-behavior:smooth;}
+
+@media (prefers-reduced-motion: reduce){
+  body::before,.nns-cross{animation:none;}
+  .ub-card,.nl-card,.ub-card:hover,.nl-card:hover{transition:none;transform:none;}
+  html{scroll-behavior:auto;}
+}
