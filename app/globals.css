@@ -737,3 +737,8 @@ body::before{will-change:transform;}
 @keyframes ubglow{from{transform:translate3d(-2%,0,0);}to{transform:translate3d(2%,0,0);}}
 
 @media (prefers-reduced-motion: reduce){ .ub-arc{animation:none!important;stroke-dasharray:none;} }
+
+/* thinner trajectory strokes (~2px slimmer) */
+.ub-arc{stroke-width:0.55;}
+.ub-arc.sel{stroke-width:0.9;}
+.ub-arc.ghost{stroke-width:0.4;}

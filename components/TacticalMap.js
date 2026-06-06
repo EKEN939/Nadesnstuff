@@ -38,13 +38,7 @@ export default function TacticalMap({
   }, [spots, map.id, addMode, zoom]);
 
   function linePath(x1, y1, x2, y2) {
-    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
-    const dx = x2 - x1, dy = y2 - y1;
-    const len = Math.hypot(dx, dy) || 1;
-    const k = Math.min(len * 0.14, 10); // gentle bow, capped on long throws
-    const cx = mx + (-dy / len) * k;
-    const cy = my + (dx / len) * k;
-    return `M ${x1} ${y1} Q ${cx.toFixed(2)} ${cy.toFixed(2)} ${x2} ${y2}`;
+    return `M ${x1} ${y1} L ${x2} ${y2}`;
   }
 
   function handleClick(e) {
