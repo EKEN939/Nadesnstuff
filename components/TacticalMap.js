@@ -42,7 +42,7 @@ export default function TacticalMap({
   }
   useEffect(() => {
     if (addMode || !ref.current) return;
-    ref.current.querySelectorAll(".ub-arc:not(.draft)").forEach((p) => {
+    ref.current.querySelectorAll(".ub-arc:not(.draft):not(.ghost)").forEach((p) => {
       const len = p.getTotalLength();
       p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
       animate(p, { strokeDashoffset: [len, 0], duration: 600, ease: "out(2)" });
@@ -64,6 +64,9 @@ export default function TacticalMap({
   const arcs = [];
   if (!addMode) {
     if (selected && selected.fromX != null) {
+      const sibs = (spots.find((s) => s.target === selected.target)?.lineups || [])
+        .filter((l) => l.id !== selected.id && l.fromX != null);
+      sibs.forEach((l) => arcs.push({ l, x1: l.fromX, y1: l.fromY, x2: l.x, y2: l.y, ghost: true }));
       arcs.push({ l: selected, x1: selected.fromX, y1: selected.fromY, x2: selected.x, y2: selected.y, sel: true });
     } else if (active) {
       active.lineups.forEach((l) => { if (l.fromX != null) arcs.push({ l, x1: l.fromX, y1: l.fromY, x2: active.x, y2: active.y }); });
@@ -96,10 +99,24 @@ export default function TacticalMap({
 
           {(arcs.length > 0 || showDraftLine) && (
             <svg className="ub-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              {arcs.map(({ l, x1, y1, x2, y2, sel }) => (
-                <path key={l.id} d={linePath(x1, y1, x2, y2)} className={`ub-arc ${sel ? "sel" : ""}`} style={{ "--ac": TYPE_META[l.type].color }} />
+              <defs>
+                {arcs.filter((a) => !a.ghost).map(({ l, x1, y1, x2, y2 }) => (
+                  <linearGradient key={"g" + l.id} id={"arc" + l.id} gradientUnits="userSpaceOnUse" x1={x1} y1={y1} x2={x2} y2={y2}>
+                    <stop offset="0%" stopColor={TYPE_META[l.type].color} stopOpacity="0.12" />
+                    <stop offset="55%" stopColor={TYPE_META[l.type].color} stopOpacity="0.62" />
+                    <stop offset="100%" stopColor={TYPE_META[l.type].color} stopOpacity="1" />
+                  </linearGradient>
+                ))}
+              </defs>
+              {arcs.filter((a) => !a.ghost).map(({ l, x1, y1, x2, y2, sel }) => (
+                <path key={"glow" + l.id} d={linePath(x1, y1, x2, y2)} className={`ub-arc-glow ${sel ? "sel" : ""}`} style={{ "--ac": TYPE_META[l.type].color }} />
               ))}
-              {arcs.map(({ l, x1, y1, x2, y2, sel }) => (
+              {arcs.map(({ l, x1, y1, x2, y2, sel, ghost }) => (
+                <path key={l.id} d={linePath(x1, y1, x2, y2)}
+                  className={`ub-arc ${sel ? "sel" : ""} ${ghost ? "ghost" : ""}`}
+                  style={ghost ? { "--ac": TYPE_META[l.type].color } : { stroke: `url(#arc${l.id})`, "--ac": TYPE_META[l.type].color }} />
+              ))}
+              {arcs.filter((a) => !a.ghost).map(({ l, x1, y1, x2, y2, sel }) => (
                 <circle key={"p" + l.id} className={`ub-proj ${sel ? "sel" : ""}`} r={sel ? "1.7" : "1.3"} cx={x1} cy={y1} style={{ "--c": TYPE_META[l.type].color }} data-x1={x1} data-y1={y1} data-x2={x2} data-y2={y2} />
               ))}
               {showDraftLine && (

@@ -709,3 +709,10 @@ html{scroll-behavior:smooth;}
   .ub-card,.nl-card,.ub-card:hover,.nl-card:hover{transition:none;transform:none;}
   html{scroll-behavior:auto;}
 }
+
+/* prettier trajectory lines: gradient stroke + soft glow underlay + dashed ghosts */
+.ub-arc{stroke-width:0.95;}
+.ub-arc.sel{stroke-width:1.4;filter:drop-shadow(0 0 1px rgba(0,0,0,.5));}
+.ub-arc.ghost{stroke:var(--ac,var(--accent));stroke-width:0.6;opacity:.3;stroke-dasharray:1.4 1.8;filter:none;}
+.ub-arc-glow{fill:none;stroke:var(--ac,var(--accent));stroke-linecap:round;stroke-width:2.6;opacity:.12;}
+.ub-arc-glow.sel{stroke-width:3.6;opacity:.2;}
