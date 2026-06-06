@@ -4,7 +4,7 @@ import { X, Plus, Check, Upload } from "lucide-react";
 import { TYPE_META } from "@/lib/constants";
 import TacticalMap from "./TacticalMap";
 
-function Uploader({ accept, token, onUploaded }) {
+function Uploader({ accept, token, onUploaded, compact }) {
   const [busy, setBusy] = useState(false);
   const [pct, setPct] = useState(0);
   const [err, setErr] = useState("");
@@ -38,13 +38,13 @@ function Uploader({ accept, token, onUploaded }) {
   }
   function onDrop(e) { e.preventDefault(); setDrag(false); uploadFile(e.dataTransfer?.files?.[0]); }
   return (
-    <span className={`ub-uploadwrap ${drag ? "drag" : ""}`} tabIndex={0} onPaste={onPaste} onDrop={onDrop}
+    <span className={`ub-uploadwrap ${compact ? "compact" : ""} ${drag ? "drag" : ""}`} tabIndex={0} onPaste={onPaste} onDrop={onDrop}
       onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} title="Upload, paste (Ctrl+V) or drop an image">
       <label className="ub-upload">
-        <Upload size={13} /> {!busy ? "Upload" : pct > 0 ? `Uploading ${pct}%` : "Starting…"}
+        <Upload size={13} /> {!busy ? "Upload" : pct > 0 ? `${pct}%` : "…"}
         <input type="file" accept={accept} onChange={onChange} hidden disabled={busy} />
       </label>
-      <span className="ub-upload-hint">or paste / drop</span>
+      {!compact && <span className="ub-upload-hint">or paste / drop</span>}
       {err && <span className="ub-uploaderr">{err}</span>}
     </span>
   );
@@ -192,7 +192,7 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
                     <input value={s.caption} onChange={(e) => upStep(i, "caption", e.target.value)} placeholder="Caption" />
                     <div className="ub-imgcell">
                       <input value={s.img} onChange={(e) => upStep(i, "img", e.target.value)} placeholder="Image URL" />
-                      <Uploader accept="image/*" token={token} onUploaded={(url) => upStep(i, "img", url)} />
+                      <Uploader accept="image/*" token={token} onUploaded={(url) => upStep(i, "img", url)} compact />
                     </div>
                     {steps.length > 1 && <button type="button" className="ub-step-rm" onClick={() => rmStep(i)}><X size={13} /></button>}
                   </div>
