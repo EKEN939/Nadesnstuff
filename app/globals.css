@@ -723,3 +723,17 @@ html{scroll-behavior:smooth;}
 .ub-arc.ghost{stroke:var(--ac,var(--accent));stroke-width:0.5;opacity:.28;stroke-dasharray:1.4 1.8;filter:none;}
 .ub-arc-glow{display:none;}
 .ub-proj.sel{filter:drop-shadow(0 0 1.4px var(--c,var(--accent)));}
+
+/* trajectory v3: flowing dashes along the curved path */
+.ub-arc{fill:none;stroke:var(--ac,var(--accent));stroke-width:0.8;stroke-linecap:round;filter:drop-shadow(0 0 .7px rgba(0,0,0,.55));}
+.ub-arc:not(.ghost):not(.draft){stroke-dasharray:2.4 2.2;animation:ubflow 1s linear infinite;}
+.ub-arc.sel{stroke-width:1.15;filter:drop-shadow(0 0 1.4px var(--ac,var(--accent)));}
+.ub-arc.ghost{stroke:var(--ac,var(--accent));stroke-width:0.55;opacity:.3;stroke-dasharray:1.4 1.8;filter:none;animation:none;}
+@keyframes ubflow{to{stroke-dashoffset:-4.6;}}
+
+/* perf: drop continuous filter animation on the logo, make ambient glow translate-only */
+.nns-cross{animation:none;}
+body::before{will-change:transform;}
+@keyframes ubglow{from{transform:translate3d(-2%,0,0);}to{transform:translate3d(2%,0,0);}}
+
+@media (prefers-reduced-motion: reduce){ .ub-arc{animation:none!important;stroke-dasharray:none;} }

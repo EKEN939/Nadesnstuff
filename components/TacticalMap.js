@@ -38,20 +38,14 @@ export default function TacticalMap({
   }, [spots, map.id, addMode, zoom]);
 
   function linePath(x1, y1, x2, y2) {
-    return `M ${x1} ${y1} L ${x2} ${y2}`;
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.hypot(dx, dy) || 1;
+    const k = Math.min(len * 0.14, 10); // gentle bow, capped on long throws
+    const cx = mx + (-dy / len) * k;
+    const cy = my + (dx / len) * k;
+    return `M ${x1} ${y1} Q ${cx.toFixed(2)} ${cy.toFixed(2)} ${x2} ${y2}`;
   }
-  useEffect(() => {
-    if (addMode || !ref.current) return;
-    ref.current.querySelectorAll(".ub-arc:not(.draft):not(.ghost)").forEach((p) => {
-      const len = p.getTotalLength();
-      p.style.strokeDasharray = len; p.style.strokeDashoffset = len;
-      animate(p, { strokeDashoffset: [len, 0], duration: 600, ease: "out(2)" });
-    });
-    ref.current.querySelectorAll(".ub-proj").forEach((c) => {
-      const d = c.dataset;
-      animate(c, { cx: [+d.x1, +d.x2], cy: [+d.y1, +d.y2], duration: 2600, delay: 500, ease: "inOut(2)", loop: true });
-    });
-  }, [activeSpot, selected?.id]);
 
   function handleClick(e) {
     if (!addMode) return;
@@ -103,9 +97,6 @@ export default function TacticalMap({
                 <path key={l.id} d={linePath(x1, y1, x2, y2)}
                   className={`ub-arc ${sel ? "sel" : ""} ${ghost ? "ghost" : ""}`}
                   style={{ "--ac": TYPE_META[l.type].color }} />
-              ))}
-              {arcs.filter((a) => !a.ghost).map(({ l, x1, y1, x2, y2, sel }) => (
-                <circle key={"p" + l.id} className={`ub-proj ${sel ? "sel" : ""}`} r={sel ? "1.3" : "1.0"} cx={x1} cy={y1} style={{ "--c": TYPE_META[l.type].color }} data-x1={x1} data-y1={y1} data-x2={x2} data-y2={y2} />
               ))}
               {showDraftLine && (
                 <path d={linePath(draftThrow.x, draftThrow.y, draftLand.x, draftLand.y)} className="ub-arc draft" />
