@@ -53,6 +53,7 @@ export default function Page() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const { data: session } = useSession();
+  const loggedIn = !!session?.user;
   const stageRef = useRef(null);
   const deepRef = useRef(undefined);
   if (deepRef.current === undefined) {
@@ -96,11 +97,7 @@ export default function Page() {
     if (session?.user) {
       fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) { setFavs(d.favs || []); setLearned(d.learned || []); setCollections(d.collections || []); } }).catch(() => {});
     } else {
-      try {
-        setFavs(JSON.parse(localStorage.getItem("nns_favs") || "[]"));
-        setLearned(JSON.parse(localStorage.getItem("nns_learned") || "[]"));
-        setCollections(JSON.parse(localStorage.getItem("nns_collections") || "[]"));
-      } catch {}
+      setFavs([]); setLearned([]); setCollections([]); setOnlyFavs(false);
     }
   }, [session?.user?.id]);
   useEffect(() => {
@@ -117,12 +114,6 @@ export default function Page() {
   function saveUser(f, l, c) {
     if (session?.user) {
       fetch("/api/me", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ favs: f, learned: l, collections: c }) }).catch(() => {});
-    } else {
-      try {
-        localStorage.setItem("nns_favs", JSON.stringify(f));
-        localStorage.setItem("nns_learned", JSON.stringify(l));
-        localStorage.setItem("nns_collections", JSON.stringify(c));
-      } catch {}
     }
   }
   function showToast(msg) { setToast(msg); clearTimeout(showToast._t); showToast._t = setTimeout(() => setToast(null), 2800); }
@@ -436,7 +427,7 @@ export default function Page() {
 
       <div className="nns-stage" ref={stageRef}>
         {screen === "landing" ? (
-          <Landing maps={MAPS} lineups={lineups} learned={learned} onPick={openMap} onOpenLineup={openLineup} />
+          <Landing maps={MAPS} lineups={lineups} learned={learned} loggedIn={loggedIn} onPick={openMap} onOpenLineup={openLineup} />
         ) : (
           <>
             <button className="ub-back" onClick={goLanding}><ArrowLeft size={15} /> All maps</button>
@@ -482,7 +473,7 @@ export default function Page() {
                 ))}
               </div>
               <div className="ub-filtergroup">
-                <button className={`ub-pill ${onlyFavs ? "active" : ""}`} onClick={() => setOnlyFavs((v) => !v)}><Star size={13} /> Favourites</button>
+                {loggedIn && <button className={`ub-pill ${onlyFavs ? "active" : ""}`} onClick={() => setOnlyFavs((v) => !v)}><Star size={13} /> Favourites</button>}
               </div>
               <div className="ub-viewtoggle">
                 <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}><MapIcon size={14} /> Map</button>
@@ -512,7 +503,7 @@ export default function Page() {
                   {selected ? (
                     <div className="ub-detailpanel" key={selected.id}>
                       <button className="ub-spotback" onClick={() => { setSelected(null); setQueue(null); setQueueName(null); }}><ArrowLeft size={14} /> {activeSpot ? "Back to spot" : "Back to map"}</button>
-                      <LineupDetail lineup={selected} admin={admin} onEdit={startEdit} onDelete={removeLineup}
+                      <LineupDetail lineup={selected} admin={admin} loggedIn={loggedIn} onEdit={startEdit} onDelete={removeLineup}
                         fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)}
                         learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)}
                         collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection}
@@ -572,18 +563,18 @@ export default function Page() {
               </div>
             ) : (
               <div className="ub-grid" key={`${side}-${type}-${throwFilter}-${videoOnly}-${sortBy}-${onlyFavs}`}>
-                {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => pickLineup(l)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} onToggleLearned={() => toggleLearned(l.id)} />)}
+                {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => pickLineup(l)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} onToggleLearned={() => toggleLearned(l.id)} loggedIn={loggedIn} />)}
               </div>
             )}
           </>
         )}
       </div>
 
-      {selected && view === "list" && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} />}
+      {selected && view === "list" && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} loggedIn={loggedIn} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} />}
       {libraryView && (
         <LibraryPanel
           view={libraryView} setView={setLibraryView} onClose={() => setLibraryView(null)}
-          lineups={lineups} favs={favs} learned={learned} collections={collections} maps={MAPS}
+          lineups={lineups} favs={favs} learned={learned} collections={collections} maps={MAPS} loggedIn={loggedIn}
           onOpenLineup={(l, ctx) => { setActiveMap(l.map); setScreen("map"); setView("map"); setActiveSpot(null); openWithQueue(l, ctx?.ids || [], ctx?.name); setLibraryView(null); }}
           toggleFav={toggleFav} createCollection={createCollection}
           renameCollection={renameCollection} deleteCollection={deleteCollection}

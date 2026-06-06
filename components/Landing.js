@@ -36,7 +36,7 @@ function MasteryRing({ pct }) {
   );
 }
 
-export default function Landing({ maps, lineups, learned = [], onPick, onOpenLineup }) {
+export default function Landing({ maps, lineups, learned = [], loggedIn, onPick, onOpenLineup }) {
   const [query, setQuery] = useState("");
   const total = lineups.length;
   const live = maps.filter((m) => !m.comingSoon).length;
@@ -117,7 +117,7 @@ export default function Landing({ maps, lineups, learned = [], onPick, onOpenLin
               }
               return (
                 <button key={m.id} className="nl-card" onClick={() => onPick(m.id)}>
-                  <div className="nl-thumb"><MapThumb m={m} />{count > 0 && <MasteryRing pct={pct} />}</div>
+                  <div className="nl-thumb"><MapThumb m={m} />{loggedIn && count > 0 && <MasteryRing pct={pct} />}</div>
                   <div className="nl-cardbody">
                     <div className="nl-cardtop"><span className="nl-name">{m.name}</span><span className="nl-count">{count} lineup{count !== 1 ? "s" : ""}</span></div>
                     <div className="nl-dots">

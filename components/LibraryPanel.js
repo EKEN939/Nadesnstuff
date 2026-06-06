@@ -4,7 +4,7 @@ import { X, Star, CheckCircle2, FolderPlus, Folder, Trash2, ChevronLeft, Pencil,
 import LineupCard from "./LineupCard";
 
 export default function LibraryPanel({
-  view, setView, onClose, lineups, favs, learned, collections, maps,
+  view, setView, onClose, lineups, favs, learned, collections, maps, loggedIn,
   onOpenLineup, toggleFav, createCollection, renameCollection, deleteCollection,
   toggleInCollection, moveInCollection,
   shared, onSaveShared,
@@ -27,7 +27,7 @@ export default function LibraryPanel({
 
   const card = (ctx) => (l, i) => (
     <LineupCard key={l.id} lineup={l} index={i} mapName={mapName(l.map)}
-      fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)}
+      fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} loggedIn={loggedIn}
       onClick={() => onOpenLineup(l, ctx)} />
   );
 
@@ -57,7 +57,9 @@ export default function LibraryPanel({
                   <div className="ub-pm-sub">Shared collection</div>
                   <h3 className="ub-lib-colname">{shared.name}</h3>
                 </div>
-                <button className="ub-btn-primary" onClick={() => onSaveShared?.()}><FolderPlus size={15} /> Save to my collections</button>
+                {loggedIn
+                  ? <button className="ub-btn-primary" onClick={() => onSaveShared?.()}><FolderPlus size={15} /> Save to my collections</button>
+                  : <span className="ub-shared-loginhint">Log in with Discord to save this to your collections.</span>}
               </div>
               {sharedItems.length ? <div className="ub-grid">{sharedItems.map(card({ name: shared.name, ids: sharedItems.map((l) => l.id) }))}</div>
                 : <div className="ub-lib-empty"><Folder size={26} /><p>None of these lineups are available right now.</p></div>}
@@ -134,7 +136,7 @@ export default function LibraryPanel({
                   <div className="ub-grid">
                     {items.map((l, i) => (
                       <div key={l.id} className="ub-colitem">
-                        <LineupCard lineup={l} index={i} mapName={mapName(l.map)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} onClick={() => onOpenLineup(l, { name: col.name, ids: col.items })} />
+                        <LineupCard lineup={l} index={i} mapName={mapName(l.map)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} loggedIn={loggedIn} onClick={() => onOpenLineup(l, { name: col.name, ids: col.items })} />
                         <div className="ub-colitem-ctl">
                           <button className="ub-icobtn" title="Move up" disabled={i === 0} onClick={(e) => { e.stopPropagation(); moveInCollection(col.id, l.id, -1); }}><ArrowUp size={13} /></button>
                           <button className="ub-icobtn" title="Move down" disabled={i === items.length - 1} onClick={(e) => { e.stopPropagation(); moveInCollection(col.id, l.id, 1); }}><ArrowDown size={13} /></button>

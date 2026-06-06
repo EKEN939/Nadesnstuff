@@ -23,7 +23,7 @@ function VideoPlayer({ url }) {
   );
 }
 
-export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onToggleFav, learned, onToggleLearned, collections = [], toggleInCollection, createCollection, queueName, queueIndex = -1, queueTotal = 0, onQueuePrev, onQueueNext }) {
+export default function LineupDetail({ lineup, admin, loggedIn, onEdit, onDelete, fav, onToggleFav, learned, onToggleLearned, collections = [], toggleInCollection, createCollection, queueName, queueIndex = -1, queueTotal = 0, onQueuePrev, onQueueNext }) {
   const t = TYPE_META[lineup.type];
   const [linkCopied, setLinkCopied] = useState(false);
   const [copied, setCopied] = useState("");
@@ -65,10 +65,12 @@ export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onT
           <button className="ub-actbtn" onClick={copyLink}>
             {linkCopied ? <><Check size={14} /> Link copied</> : <><Link2 size={14} /> Copy link</>}
           </button>
-          <button className={`ub-actbtn ${learned ? "on" : ""}`} onClick={onToggleLearned}>
-            <CheckCircle2 size={14} /> {learned ? "Learned" : "Mark learned"}
-          </button>
-          {toggleInCollection && (
+          {loggedIn && (
+            <button className={`ub-actbtn ${learned ? "on" : ""}`} onClick={onToggleLearned}>
+              <CheckCircle2 size={14} /> {learned ? "Learned" : "Mark learned"}
+            </button>
+          )}
+          {loggedIn && toggleInCollection && (
             <div className="ub-savecol" data-savecol>
               <button className={`ub-actbtn ${colOpen ? "on" : ""}`} onClick={() => setColOpen((o) => !o)}><Folder size={14} /> Save to collection</button>
               {colOpen && (
@@ -91,9 +93,11 @@ export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onT
               )}
             </div>
           )}
-          <button className={`ub-actbtn ${fav ? "fav-on" : ""}`} onClick={onToggleFav} aria-label="Favorite" title="Favorite">
-            <Star size={14} fill={fav ? "currentColor" : "none"} /> {fav ? "Favourited" : "Favourite"}
-          </button>
+          {loggedIn && (
+            <button className={`ub-actbtn ${fav ? "fav-on" : ""}`} onClick={onToggleFav} aria-label="Favorite" title="Favorite">
+              <Star size={14} fill={fav ? "currentColor" : "none"} /> {fav ? "Favourited" : "Favourite"}
+            </button>
+          )}
         </div>
       </div>
 
