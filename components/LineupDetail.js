@@ -124,6 +124,13 @@ export default function LineupDetail({ lineup, admin, onEdit, onDelete, fav, onT
         </div>
       )}
 
+      {lineup.preview && (
+        <div className="ub-preview">
+          <div className="ub-preview-label" style={{ color: t.color }}>Result · in place</div>
+          <img src={lineup.preview} alt="Result — where it lands" loading="lazy" decoding="async" />
+        </div>
+      )}
+
       <div className="ub-practice">
         <div className="ub-practice-h"><Crosshair size={14} /> Practice this lineup</div>
         <p className="ub-practice-sub">Start a private server, paste in console, then rehearse the throw.</p>
