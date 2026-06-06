@@ -569,3 +569,49 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .ub-queue-nav{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);cursor:pointer;transition:all .14s;}
 .ub-queue-nav:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
 .ub-queue-nav:disabled{opacity:.35;cursor:default;}
+
+/* spot labels on the radar (toggle) */
+.ub-pin-label{position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:#fff;background:rgba(8,9,12,.74);border:1px solid rgba(255,255,255,.09);padding:1px 5px;border-radius:5px;pointer-events:none;font-family:'Manrope',sans-serif;z-index:3;}
+.ub-pin.dim .ub-pin-label{opacity:.35;}
+
+/* paste / drop upload zone */
+.ub-uploadwrap{display:inline-flex;align-items:center;gap:8px;border-radius:8px;outline:none;}
+.ub-uploadwrap:focus-visible,.ub-uploadwrap.drag{box-shadow:0 0 0 2px var(--accent);}
+.ub-upload-hint{font-size:11px;color:var(--muted);}
+
+/* thin top loading bar */
+.ub-loadbar{position:fixed;top:0;left:0;height:2px;width:100%;z-index:200;background:linear-gradient(90deg,transparent,var(--accent),transparent);background-size:40% 100%;background-repeat:no-repeat;animation:ubload 1.1s ease-in-out infinite;}
+@keyframes ubload{0%{background-position:-40% 0;}100%{background-position:140% 0;}}
+
+/* empty legend (map with no lineups) */
+.ub-legend-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;padding:34px 16px;color:var(--muted);}
+.ub-legend-empty svg{color:var(--accent);opacity:.75;}
+.ub-legend-empty p{color:var(--text);font-weight:700;margin:0;}
+.ub-legend-empty span{font-size:12.5px;line-height:1.5;}
+
+/* ---------- mobile ---------- */
+@media (max-width:640px){
+  .ub-wrap{padding-bottom:40px;}
+  .ub-header{padding:12px 14px;}
+  .ub-back{margin:10px 14px 2px;}
+  .ub-hero{padding:10px 14px 8px;}
+  .ub-maprail{padding:8px 14px 10px;}
+  .ub-controls{padding:10px 14px 6px;}
+  .ub-controls.ub-controls2{padding:0 14px;}
+  .nl-grid{padding:14px;gap:12px;}
+  .nl-pickbar{padding:18px 14px 0;}
+  .nl-recent,.nl-footer{padding-left:14px;padding-right:14px;}
+  .nl-search{width:100%;min-width:0;}
+
+  .ub-mapview{gap:12px;}
+  .ub-maplegend{flex-basis:100%;}
+
+  /* detail panel: full-width card below the map (auto-scrolled into view) */
+  .ub-maplegend.detail{flex-basis:100%;max-width:none;padding:14px 16px calc(16px + env(safe-area-inset-bottom));background:var(--surface);border:1px solid var(--border);border-radius:14px;}
+
+  /* modals slide up from the bottom */
+  .ub-overlay{padding:0;align-items:flex-end;}
+  .ub-modal{max-width:100%;border-radius:16px 16px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));max-height:94vh;overflow-y:auto;}
+  .ub-library{width:100vw;max-width:100vw;min-height:100vh;border-radius:0;}
+  .ub-profilemenu{right:0;left:auto;min-width:min(280px,86vw);}
+}

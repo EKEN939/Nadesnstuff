@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2 } from "lucide-react";
+import { Filter, Plus, Map as MapIcon, List, Download, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Tag } from "lucide-react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { MAPS } from "@/data/maps";
 import { LINEUPS } from "@/data/lineups";
@@ -38,6 +38,8 @@ export default function Page() {
   const [throwFilter, setThrowFilter] = useState("ALL");
   const [videoOnly, setVideoOnly] = useState(false);
   const [sortBy, setSortBy] = useState("default");
+  const [showLabels, setShowLabels] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [collections, setCollections] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
   const [libraryView, setLibraryView] = useState(null);
@@ -220,6 +222,13 @@ export default function Page() {
   }
   const queueIndex = queue && selected ? queue.findIndex((id) => String(id) === String(selected.id)) : -1;
 
+  // on mobile, bring the detail panel into view when a lineup is opened
+  useEffect(() => {
+    if (!selected || typeof window === "undefined" || window.innerWidth > 640) return;
+    const t = setTimeout(() => document.querySelector(".ub-maplegend.detail")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+    return () => clearTimeout(t);
+  }, [selected]);
+
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#" + ADMIN_KEY) setAdmin(true);
     let buf = "";
@@ -286,7 +295,8 @@ export default function Page() {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   // keep the URL in sync so links are shareable
@@ -340,6 +350,7 @@ export default function Page() {
 
   return (
     <div className="ub-wrap">
+      {loading && <div className="ub-loadbar" aria-hidden="true" />}
       <header className="ub-header">
         <button className="ub-logobtn" onClick={() => screen !== "landing" && goLanding()} aria-label="Home">
           <Logo variant="compact" />
@@ -463,6 +474,7 @@ export default function Page() {
                   {throwTypes.map((tt) => <option key={tt} value={tt}>{tt}</option>)}
                 </select>
                 <button className={`ub-pill ${videoOnly ? "active" : ""}`} onClick={() => setVideoOnly((v) => !v)}><Video size={13} /> Video only</button>
+                {view === "map" && <button className={`ub-pill ${showLabels ? "active" : ""}`} onClick={() => setShowLabels((v) => !v)}><Tag size={13} /> Labels</button>}
                 <select className="ub-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                   <option value="default">Newest</option>
                   <option value="difficulty">By difficulty</option>
@@ -473,7 +485,7 @@ export default function Page() {
             {view === "map" ? (
               <div className="ub-mapview">
                 <TacticalMap map={mapMeta} spots={spots} activeSpot={activeSpot}
-                  onSelectSpot={setActiveSpot} onPin={pickLineup} selected={selected} zoomable />
+                  onSelectSpot={setActiveSpot} onPin={pickLineup} selected={selected} showLabels={showLabels} zoomable />
                 <div className={`ub-maplegend ${selected ? "detail" : ""}`}>
                   {selected ? (
                     <div className="ub-detailpanel" key={selected.id}>
@@ -502,6 +514,12 @@ export default function Page() {
                           ));
                         })()}
                       </div>
+                    </div>
+                  ) : filtered.length === 0 ? (
+                    <div className="ub-legend-empty">
+                      <MapIcon size={26} />
+                      <p>No lineups on {mapMeta.name} yet.</p>
+                      {admin ? <span>Tap “Add lineup” to place the first one.</span> : <span>Check back soon, or try another map.</span>}
                     </div>
                   ) : (
                     <>

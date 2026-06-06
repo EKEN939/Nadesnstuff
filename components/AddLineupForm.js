@@ -8,8 +8,8 @@ function Uploader({ accept, token, onUploaded }) {
   const [busy, setBusy] = useState(false);
   const [pct, setPct] = useState(0);
   const [err, setErr] = useState("");
-  function onChange(e) {
-    const file = e.target.files?.[0];
+  const [drag, setDrag] = useState(false);
+  function uploadFile(file) {
     if (!file) return;
     setBusy(true); setErr(""); setPct(0);
     let tok = token;
@@ -25,18 +25,28 @@ function Uploader({ accept, token, onUploaded }) {
       else setErr("Upload failed — " + (data.error || ("status " + xhr.status)));
     };
     xhr.onerror = () => { setBusy(false); setPct(0); setErr("Upload failed — network error"); };
-    const fd = new FormData(); fd.append("file", file);
+    const fd = new FormData();
+    fd.append("file", file, file.name || "pasted.png");
     xhr.send(fd);
-    e.target.value = "";
   }
+  function onChange(e) { uploadFile(e.target.files?.[0]); e.target.value = ""; }
+  function onPaste(e) {
+    const items = e.clipboardData?.items || [];
+    for (const it of items) {
+      if (it.type && it.type.startsWith("image/")) { const f = it.getAsFile(); if (f) { e.preventDefault(); uploadFile(f); return; } }
+    }
+  }
+  function onDrop(e) { e.preventDefault(); setDrag(false); uploadFile(e.dataTransfer?.files?.[0]); }
   return (
-    <>
-      <label className="ub-upload" title="Upload a file">
+    <span className={`ub-uploadwrap ${drag ? "drag" : ""}`} tabIndex={0} onPaste={onPaste} onDrop={onDrop}
+      onDragOver={(e) => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} title="Upload, paste (Ctrl+V) or drop an image">
+      <label className="ub-upload">
         <Upload size={13} /> {!busy ? "Upload" : pct > 0 ? `Uploading ${pct}%` : "Starting…"}
         <input type="file" accept={accept} onChange={onChange} hidden disabled={busy} />
       </label>
+      <span className="ub-upload-hint">or paste / drop</span>
       {err && <span className="ub-uploaderr">{err}</span>}
-    </>
+    </span>
   );
 }
 
