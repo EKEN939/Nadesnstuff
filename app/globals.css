@@ -716,3 +716,10 @@ html{scroll-behavior:smooth;}
 .ub-arc.ghost{stroke:var(--ac,var(--accent));stroke-width:0.6;opacity:.3;stroke-dasharray:1.4 1.8;filter:none;}
 .ub-arc-glow{fill:none;stroke:var(--ac,var(--accent));stroke-linecap:round;stroke-width:2.6;opacity:.12;}
 .ub-arc-glow.sel{stroke-width:3.6;opacity:.2;}
+
+/* trajectory: thin + crisp, tight glow only on the selected line */
+.ub-arc{stroke-width:0.7;filter:drop-shadow(0 0 .7px rgba(0,0,0,.6));}
+.ub-arc.sel{stroke-width:1.0;filter:drop-shadow(0 0 1.5px var(--ac,var(--accent)));}
+.ub-arc.ghost{stroke:var(--ac,var(--accent));stroke-width:0.5;opacity:.28;stroke-dasharray:1.4 1.8;filter:none;}
+.ub-arc-glow{display:none;}
+.ub-proj.sel{filter:drop-shadow(0 0 1.4px var(--c,var(--accent)));}

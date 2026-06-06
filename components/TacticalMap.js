@@ -99,25 +99,13 @@ export default function TacticalMap({
 
           {(arcs.length > 0 || showDraftLine) && (
             <svg className="ub-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-              <defs>
-                {arcs.filter((a) => !a.ghost).map(({ l, x1, y1, x2, y2 }) => (
-                  <linearGradient key={"g" + l.id} id={"arc" + l.id} gradientUnits="userSpaceOnUse" x1={x1} y1={y1} x2={x2} y2={y2}>
-                    <stop offset="0%" stopColor={TYPE_META[l.type].color} stopOpacity="0.12" />
-                    <stop offset="55%" stopColor={TYPE_META[l.type].color} stopOpacity="0.62" />
-                    <stop offset="100%" stopColor={TYPE_META[l.type].color} stopOpacity="1" />
-                  </linearGradient>
-                ))}
-              </defs>
-              {arcs.filter((a) => !a.ghost).map(({ l, x1, y1, x2, y2, sel }) => (
-                <path key={"glow" + l.id} d={linePath(x1, y1, x2, y2)} className={`ub-arc-glow ${sel ? "sel" : ""}`} style={{ "--ac": TYPE_META[l.type].color }} />
-              ))}
               {arcs.map(({ l, x1, y1, x2, y2, sel, ghost }) => (
                 <path key={l.id} d={linePath(x1, y1, x2, y2)}
                   className={`ub-arc ${sel ? "sel" : ""} ${ghost ? "ghost" : ""}`}
-                  style={ghost ? { "--ac": TYPE_META[l.type].color } : { stroke: `url(#arc${l.id})`, "--ac": TYPE_META[l.type].color }} />
+                  style={{ "--ac": TYPE_META[l.type].color }} />
               ))}
               {arcs.filter((a) => !a.ghost).map(({ l, x1, y1, x2, y2, sel }) => (
-                <circle key={"p" + l.id} className={`ub-proj ${sel ? "sel" : ""}`} r={sel ? "1.7" : "1.3"} cx={x1} cy={y1} style={{ "--c": TYPE_META[l.type].color }} data-x1={x1} data-y1={y1} data-x2={x2} data-y2={y2} />
+                <circle key={"p" + l.id} className={`ub-proj ${sel ? "sel" : ""}`} r={sel ? "1.3" : "1.0"} cx={x1} cy={y1} style={{ "--c": TYPE_META[l.type].color }} data-x1={x1} data-y1={y1} data-x2={x2} data-y2={y2} />
               ))}
               {showDraftLine && (
                 <path d={linePath(draftThrow.x, draftThrow.y, draftLand.x, draftLand.y)} className="ub-arc draft" />
