@@ -161,15 +161,18 @@ export default function LineupDetail({ lineup, admin, loggedIn, onEdit, onDelete
   );
 }
 
-function ZoomImage({ src, alt, className = "" }) {
+function ZoomImage({ src, alt, className = "", edge = 11 }) {
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const [origin, setOrigin] = useState("50% 50%");
   function move(e) {
     const r = e.currentTarget.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
-    const y = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100));
-    setOrigin(`${x}% ${y}%`);
+    const x = ((e.clientX - r.left) / r.width) * 100;
+    const y = ((e.clientY - r.top) / r.height) * 100;
+    // dead zone along the left/right edges (where the prev/next arrows live)
+    if (x < edge || x > 100 - edge) { setHover(false); return; }
+    setHover(true);
+    setOrigin(`${Math.max(0, Math.min(100, x))}% ${Math.max(0, Math.min(100, y))}%`);
   }
   useEffect(() => {
     if (!open) return;
@@ -179,7 +182,7 @@ function ZoomImage({ src, alt, className = "" }) {
   }, [open]);
   return (
     <>
-      <span className={`ub-zoomimg ${className}`} onMouseMove={move} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+      <span className={`ub-zoomimg ${className}`} onMouseMove={move} onMouseLeave={() => setHover(false)}
         onClick={() => setOpen(true)} role="button" tabIndex={0} title="Hover to zoom · click to enlarge">
         <img src={src} alt={alt} loading="lazy" decoding="async" style={{ transformOrigin: origin, transform: hover ? "scale(2.3)" : "scale(1)" }} />
         <span className="ub-zoomhint"><ZoomIn size={12} /> Enlarge</span>
