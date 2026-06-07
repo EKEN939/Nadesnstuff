@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Plus, Map as MapIcon, List, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Trophy } from "lucide-react";
+import { Filter, Plus, Map as MapIcon, List, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Trophy, Keyboard } from "lucide-react";
 import { confetti } from "@/lib/confetti";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { MAPS } from "@/data/maps";
@@ -16,6 +16,7 @@ import LineupModal from "@/components/LineupModal";
 import LineupDetail from "@/components/LineupDetail";
 import LibraryPanel from "@/components/LibraryPanel";
 import AddLineupForm from "@/components/AddLineupForm";
+import BindsModal from "@/components/BindsModal";
 
 const ADMIN_KEY = "admin";
 const ACTIVE_MAPS = MAPS.filter((m) => !m.comingSoon);
@@ -38,6 +39,7 @@ export default function Page() {
   const [collections, setCollections] = useState([]);
   const [toast, setToast] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [bindsOpen, setBindsOpen] = useState(false);
   const [libraryView, setLibraryView] = useState(null);
   const [sharedCol, setSharedCol] = useState(null);
   const [adding, setAdding] = useState(false);
@@ -363,6 +365,7 @@ export default function Page() {
           <Logo variant="compact" />
         </button>
         <div className="ub-headbtns">
+          <button className="ub-toolbtn ub-bindsbtn" onClick={() => setBindsOpen(true)}><Keyboard size={15} /> Binds</button>
           {session?.user ? (
             <div className="ub-profilewrap" data-profile>
               <button className="ub-toolbtn ub-profilebtn" onClick={() => setProfileOpen((o) => !o)}>
@@ -542,6 +545,7 @@ export default function Page() {
       </div>
 
       {selected && view === "list" && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} loggedIn={loggedIn} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} />}
+      <BindsModal open={bindsOpen} onClose={() => setBindsOpen(false)} />
       {libraryView && (
         <LibraryPanel
           view={libraryView} setView={setLibraryView} onClose={() => setLibraryView(null)}
