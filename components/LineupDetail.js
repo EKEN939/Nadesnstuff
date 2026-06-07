@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ArrowRight, ImageOff, Pencil, Trash2, Link2, Check, Star, ChevronLeft, ChevronRight, Crosshair, Terminal, CheckCircle2, Folder, Plus, MapPin } from "lucide-react";
+import { createPortal } from "react-dom";
+import { ArrowRight, ImageOff, Pencil, Trash2, Link2, Check, Star, ChevronLeft, ChevronRight, Crosshair, Terminal, CheckCircle2, Folder, Plus, MapPin, ZoomIn, X } from "lucide-react";
 import { TYPE_META, DIFF_COLOR } from "@/lib/constants";
 import NadeIcon from "./NadeIcon";
 
@@ -104,7 +105,7 @@ export default function LineupDetail({ lineup, admin, loggedIn, onEdit, onDelete
       {lineup.preview && (
         <div className="ub-preview">
           <div className="ub-preview-label" style={{ color: t.color }}>Result · in place</div>
-          <img src={lineup.preview} alt="Result — where it lands" loading="lazy" decoding="async" />
+          <ZoomImage src={lineup.preview} alt="Result — where it lands" />
         </div>
       )}
 
@@ -118,7 +119,7 @@ export default function LineupDetail({ lineup, admin, loggedIn, onEdit, onDelete
             <span className="ub-guide-count">{step + 1} / {steps.length}</span>
           </div>
           <div className="ub-guide-imgwrap">
-            {cur.img ? <img src={cur.img} alt={cur.label} /> : <div className="ub-placeholder"><ImageOff size={26} /><span>{cur.label}</span><small>add an image when editing</small></div>}
+            {cur.img ? <ZoomImage src={cur.img} alt={cur.label} /> : <div className="ub-placeholder"><ImageOff size={26} /><span>{cur.label}</span><small>add an image when editing</small></div>}
             {steps.length > 1 && (
               <>
                 <button className="ub-guide-nav left" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0} aria-label="Previous"><ChevronLeft size={20} /></button>
@@ -155,6 +156,40 @@ export default function LineupDetail({ lineup, admin, loggedIn, onEdit, onDelete
           <button className="ub-btn-ghost" onClick={() => onEdit(lineup)}><Pencil size={14} /> Edit</button>
           <button className="ub-btn-danger" onClick={() => onDelete(lineup.id)}><Trash2 size={14} /> Delete</button>
         </div>
+      )}
+    </>
+  );
+}
+
+function ZoomImage({ src, alt, className = "" }) {
+  const [open, setOpen] = useState(false);
+  const [hover, setHover] = useState(false);
+  const [origin, setOrigin] = useState("50% 50%");
+  function move(e) {
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
+    const y = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100));
+    setOrigin(`${x}% ${y}%`);
+  }
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") { e.stopImmediatePropagation(); e.preventDefault(); setOpen(false); } };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [open]);
+  return (
+    <>
+      <span className={`ub-zoomimg ${className}`} onMouseMove={move} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+        onClick={() => setOpen(true)} role="button" tabIndex={0} title="Hover to zoom · click to enlarge">
+        <img src={src} alt={alt} loading="lazy" decoding="async" style={{ transformOrigin: origin, transform: hover ? "scale(2.3)" : "scale(1)" }} />
+        <span className="ub-zoomhint"><ZoomIn size={12} /> Enlarge</span>
+      </span>
+      {open && typeof document !== "undefined" && createPortal(
+        <div className="ub-lightbox" onClick={() => setOpen(false)}>
+          <button className="ub-lightbox-close" aria-label="Close" onClick={() => setOpen(false)}><X size={20} /></button>
+          <img src={src} alt={alt} onClick={(e) => e.stopPropagation()} />
+        </div>,
+        document.body
       )}
     </>
   );
