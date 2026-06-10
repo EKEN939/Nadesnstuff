@@ -188,12 +188,29 @@ function ZoomImage({ src, alt, className = "", edge = 11 }) {
         <span className="ub-zoomhint"><ZoomIn size={12} /> Enlarge</span>
       </span>
       {open && typeof document !== "undefined" && createPortal(
-        <div className="ub-lightbox" onClick={() => setOpen(false)}>
-          <button className="ub-lightbox-close" aria-label="Close" onClick={() => setOpen(false)}><X size={20} /></button>
-          <img src={src} alt={alt} onClick={(e) => e.stopPropagation()} />
-        </div>,
+        <Lightbox src={src} alt={alt} onClose={() => setOpen(false)} />,
         document.body
       )}
     </>
+  );
+}
+
+function Lightbox({ src, alt, onClose }) {
+  const [scale, setScale] = useState(1);
+  const imgRef = (el) => {
+    if (!el) return;
+    const onWheel = (e) => {
+      e.preventDefault();
+      setScale((s) => Math.min(4, Math.max(1, s + (e.deltaY < 0 ? 0.3 : -0.3))));
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+  };
+  return (
+    <div className="ub-lightbox" onClick={onClose}>
+      <button className="ub-lightbox-close" aria-label="Close" onClick={onClose}><X size={20} /></button>
+      <span className="ub-lightbox-hint">scroll to zoom · double-click to reset</span>
+      <img ref={imgRef} src={src} alt={alt} style={{ transform: `scale(${scale})`, cursor: scale > 1 ? "zoom-out" : "zoom-in" }}
+        onClick={(e) => e.stopPropagation()} onDoubleClick={() => setScale(1)} />
+    </div>
   );
 }

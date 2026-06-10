@@ -872,3 +872,14 @@ body::before{backface-visibility:hidden;}
   [data-reveal]{opacity:1;transform:none;transition:none;}
   .ub-splash-bar span{animation:none;}
 }
+
+/* collection drag-and-drop */
+.ub-colitem{transition:opacity .15s,transform .15s;}
+.ub-colitem[draggable]{cursor:grab;}
+.ub-colitem.dragging{opacity:.45;}
+.ub-colitem.dragover{transform:translateY(3px);outline:2px dashed var(--accent);outline-offset:4px;border-radius:16px;}
+
+/* lightbox zoom */
+.ub-lightbox{overflow:hidden;}
+.ub-lightbox img{transition:transform .15s ease-out;}
+.ub-lightbox-hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-size:11.5px;color:rgba(255,255,255,.65);background:rgba(0,0,0,.45);padding:5px 12px;border-radius:99px;pointer-events:none;}

@@ -6,12 +6,14 @@ import LineupCard from "./LineupCard";
 export default function LibraryPanel({
   view, setView, onClose, lineups, favs, learned, collections, maps, loggedIn,
   onOpenLineup, toggleFav, createCollection, renameCollection, deleteCollection,
-  toggleInCollection, moveInCollection,
+  toggleInCollection, moveInCollection, reorderCollection,
   shared, onSaveShared,
 }) {
   const [activeCol, setActiveCol] = useState(null);
   const [newName, setNewName] = useState("");
   const [shareCopied, setShareCopied] = useState("");
+  const [dragId, setDragId] = useState(null);
+  const [overId, setOverId] = useState(null);
   const mapName = (id) => maps.find((m) => m.id === id)?.name || id;
   function shareCol(col) {
     try {
@@ -131,11 +133,17 @@ export default function LibraryPanel({
                   </button>
                 </div>
                 <h3 className="ub-lib-colname">{col.name}</h3>
-                {items.length > 1 && <div className="ub-colhint">Use the arrows to set the order — that’s how they play with ‹ / › and arrow keys.</div>}
+                {items.length > 1 && <div className="ub-colhint">Drag the cards to set the order (or use the arrows) — that’s how they play with ‹ / › and arrow keys.</div>}
                 {items.length ? (
                   <div className="ub-grid">
                     {items.map((l, i) => (
-                      <div key={l.id} className="ub-colitem">
+                      <div key={l.id} className={`ub-colitem ${dragId === l.id ? "dragging" : ""} ${overId === l.id && dragId !== l.id ? "dragover" : ""}`}
+                        draggable
+                        onDragStart={(e) => { setDragId(l.id); e.dataTransfer.effectAllowed = "move"; }}
+                        onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; if (overId !== l.id) setOverId(l.id); }}
+                        onDragLeave={() => { if (overId === l.id) setOverId(null); }}
+                        onDrop={(e) => { e.preventDefault(); if (dragId != null) reorderCollection?.(col.id, dragId, l.id); setDragId(null); setOverId(null); }}
+                        onDragEnd={() => { setDragId(null); setOverId(null); }}>
                         <LineupCard lineup={l} index={i} mapName={mapName(l.map)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} loggedIn={loggedIn} onClick={() => onOpenLineup(l, { name: col.name, ids: col.items })} />
                         <div className="ub-colitem-ctl">
                           <button className="ub-icobtn" title="Move up" disabled={i === 0} onClick={(e) => { e.stopPropagation(); moveInCollection(col.id, l.id, -1); }}><ArrowUp size={13} /></button>

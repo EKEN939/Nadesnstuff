@@ -152,6 +152,20 @@ export default function Page() {
     });
     setCollections(nc); saveUser(favs, learned, nc);
   };
+  const reorderCollection = (colId, dragId, overId) => {
+    if (String(dragId) === String(overId)) return;
+    const nc = collections.map((c) => {
+      if (c.id !== colId) return c;
+      const items = [...c.items];
+      const from = items.findIndex((x) => String(x) === String(dragId));
+      const to = items.findIndex((x) => String(x) === String(overId));
+      if (from === -1 || to === -1) return c;
+      const [moved] = items.splice(from, 1);
+      items.splice(to, 0, moved);
+      return { ...c, items };
+    });
+    setCollections(nc); saveUser(favs, learned, nc);
+  };
   function addCollectionFull(name, items) {
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     const nc = [...collections, { id, name: name || "Untitled", items: Array.isArray(items) ? items : [] }];
@@ -589,7 +603,7 @@ export default function Page() {
           onOpenLineup={(l, ctx) => { setActiveMap(l.map); setScreen("map"); setView("map"); setActiveSpot(null); openWithQueue(l, ctx?.ids || [], ctx?.name); setLibraryView(null); }}
           toggleFav={toggleFav} createCollection={createCollection}
           renameCollection={renameCollection} deleteCollection={deleteCollection}
-          toggleInCollection={toggleInCollection} moveInCollection={moveInCollection}
+          toggleInCollection={toggleInCollection} moveInCollection={moveInCollection} reorderCollection={reorderCollection}
           shared={sharedCol} onSaveShared={saveShared}
         />
       )}
