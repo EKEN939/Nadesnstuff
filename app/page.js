@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Plus, Map as MapIcon, List, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Trophy } from "lucide-react";
+import { Filter, Plus, Map as MapIcon, List, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Trophy, Search } from "lucide-react";
 import { confetti } from "@/lib/confetti";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { MAPS } from "@/data/maps";
@@ -15,6 +15,7 @@ import LineupCard from "@/components/LineupCard";
 import LineupModal from "@/components/LineupModal";
 import LineupDetail from "@/components/LineupDetail";
 import LibraryPanel from "@/components/LibraryPanel";
+import QuickSearch from "@/components/QuickSearch";
 import AddLineupForm from "@/components/AddLineupForm";
 
 const ADMIN_KEY = "admin";
@@ -35,9 +36,15 @@ export default function Page() {
   const [favs, setFavs] = useState([]);
   const [learned, setLearned] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [splash, setSplash] = useState(true);
+  const [splashOut, setSplashOut] = useState(false);
+  useEffect(() => {
+    if (!loading && splash) { setSplashOut(true); const t = setTimeout(() => setSplash(false), 560); return () => clearTimeout(t); }
+  }, [loading, splash]);
   const [collections, setCollections] = useState([]);
   const [toast, setToast] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [quickOpen, setQuickOpen] = useState(false);
   const [libraryView, setLibraryView] = useState(null);
   const [sharedCol, setSharedCol] = useState(null);
   const [adding, setAdding] = useState(false);
@@ -230,6 +237,15 @@ export default function Page() {
   }
   const queueIndex = queue && selected ? queue.findIndex((id) => String(id) === String(selected.id)) : -1;
 
+  // global quick-search hotkey
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setQuickOpen((o) => !o); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   // on mobile, bring the detail panel into view when a lineup is opened
   useEffect(() => {
     if (!selected || typeof window === "undefined" || window.innerWidth > 640) return;
@@ -357,12 +373,24 @@ export default function Page() {
   return (
     <div className="ub-wrap">
       {loading && <div className="ub-loadbar" aria-hidden="true" />}
+      {splash && (
+        <div className={`ub-splash ${splashOut ? "out" : ""}`} aria-hidden="true">
+          <div className="ub-splash-inner">
+            <Logo variant="full" />
+            <span className="ub-splash-bar"><span /></span>
+            <span className="ub-splash-text">loading lineups…</span>
+          </div>
+        </div>
+      )}
       {toast && <div className="ub-toast"><Trophy size={16} /> {toast}</div>}
       <header className="ub-header">
         <button className="ub-logobtn" onClick={() => screen !== "landing" && goLanding()} aria-label="Home">
           <Logo variant="compact" />
         </button>
         <div className="ub-headbtns">
+          <button className="ub-searchbtn" onClick={() => setQuickOpen(true)} aria-label="Search lineups">
+            <Search size={14} /> <span className="ub-searchbtn-label">Search</span> <kbd>Ctrl K</kbd>
+          </button>
           {session?.user ? (
             <div className="ub-profilewrap" data-profile>
               <button className="ub-toolbtn ub-profilebtn" onClick={() => setProfileOpen((o) => !o)}>
@@ -454,11 +482,14 @@ export default function Page() {
               </div>
               <div className="ub-filtergroup">
                 <button className={`ub-pill ${type === "ALL" ? "active" : ""}`} onClick={() => setType("ALL")}>All types</button>
-                {Object.entries(TYPE_META).map(([key, t]) => (
-                  <button key={key} className={`ub-pill ub-pill-type ${type === key ? "active" : ""}`} onClick={() => setType(key)} style={type === key ? { borderColor: t.color, color: t.color } : undefined}>
-                    <NadeIcon type={key} size={14} />{t.label}
-                  </button>
-                ))}
+                {Object.entries(TYPE_META).map(([key, t]) => {
+                  const n = lineups.filter((l) => l.map === activeMap && (side === "ALL" || l.side === side) && l.type === key).length;
+                  return (
+                    <button key={key} className={`ub-pill ub-pill-type ${type === key ? "active" : ""} ${n === 0 ? "zero" : ""}`} onClick={() => setType(key)} style={type === key ? { borderColor: t.color, color: t.color } : undefined}>
+                      <NadeIcon type={key} size={14} />{t.label}{n > 0 && <span className="ub-pillcount">{n}</span>}
+                    </button>
+                  );
+                })}
               </div>
               <div className="ub-viewtoggle">
                 <button className={view === "map" ? "active" : ""} onClick={() => setView("map")}><MapIcon size={14} /> Map</button>
@@ -498,6 +529,13 @@ export default function Page() {
                           ));
                         })()}
                       </div>
+                    </div>
+                  ) : loading ? (
+                    <div className="ub-skel">
+                      <span className="ub-skel-row" style={{ width: "62%" }} />
+                      <span className="ub-skel-row" style={{ width: "88%" }} />
+                      <span className="ub-skel-row" style={{ width: "74%" }} />
+                      <span className="ub-skel-row" style={{ width: "81%" }} />
                     </div>
                   ) : filtered.length === 0 ? (
                     <div className="ub-legend-empty">
@@ -541,6 +579,8 @@ export default function Page() {
         )}
       </div>
 
+      <QuickSearch open={quickOpen} onClose={() => setQuickOpen(false)} lineups={lineups} maps={MAPS}
+        onPick={(l) => { setQuickOpen(false); openLineup(l); }} />
       {selected && view === "list" && <LineupModal lineup={selected} onClose={() => setSelected(null)} admin={admin} loggedIn={loggedIn} onEdit={startEdit} onDelete={removeLineup} fav={favs.includes(selected.id)} onToggleFav={() => toggleFav(selected.id)} learned={learned.includes(selected.id)} onToggleLearned={() => toggleLearned(selected.id)} collections={collections} toggleInCollection={toggleInCollection} createCollection={createCollection} />}
       {libraryView && (
         <LibraryPanel

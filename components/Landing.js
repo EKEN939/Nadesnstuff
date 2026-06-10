@@ -37,6 +37,18 @@ function MasteryRing({ pct }) {
 }
 
 export default function Landing({ maps, lineups, learned = [], loggedIn, onPick, onOpenLineup }) {
+  // scroll-reveal: sections slide in as they enter the viewport
+  useEffect(() => {
+    if (typeof window === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.querySelectorAll("[data-reveal]").forEach((el) => el.classList.add("in"));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  });
   const [query, setQuery] = useState("");
   const total = lineups.length;
   const live = maps.filter((m) => !m.comingSoon).length;
@@ -56,6 +68,10 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
     <div className="nl-landing">
       <div className="nl-hero">
         <Logo variant="full" />
+        <h1 className="nl-display" aria-label="Learn the throw. Win the round.">
+          <span className="nl-display-line"><span>Learn the throw.</span></span>
+          <span className="nl-display-line"><span>Win the round.</span></span>
+        </h1>
         <div className="nl-tally">
           {Object.entries(TYPE_META).map(([key, t]) => (
             <span key={key} className="nl-tallyitem" style={{ color: t.color }}>
@@ -117,7 +133,7 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
               }
               return (
                 <button key={m.id} className="nl-card" onClick={() => onPick(m.id)}>
-                  <div className="nl-thumb"><MapThumb m={m} />{loggedIn && count > 0 && <MasteryRing pct={pct} />}</div>
+                  <div className="nl-thumb"><MapThumb m={m} />{loggedIn && count > 0 && <MasteryRing pct={pct} />}<span className="nl-cardgo">View map <ArrowRight size={13} /></span></div>
                   <div className="nl-cardbody">
                     <div className="nl-cardtop"><span className="nl-name">{m.name}</span><span className="nl-count">{count} lineup{count !== 1 ? "s" : ""}</span></div>
                     <div className="nl-dots">
@@ -132,8 +148,15 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
             })}
           </div>
 
+          <div className="nl-marquee" aria-hidden="true" data-reveal>
+            <div className="nl-marquee-track">
+              <span>nades&apos;n&apos;stuff · learn the throw · win the round · smokes · flashes · mollies · HE · nades&apos;n&apos;stuff · learn the throw · win the round · smokes · flashes · mollies · HE ·&nbsp;</span>
+              <span>nades&apos;n&apos;stuff · learn the throw · win the round · smokes · flashes · mollies · HE · nades&apos;n&apos;stuff · learn the throw · win the round · smokes · flashes · mollies · HE ·&nbsp;</span>
+            </div>
+          </div>
+
           {recent.length > 0 && (
-            <div className="nl-recent">
+            <div className="nl-recent" data-reveal>
               <div className="nl-pick">Recently added</div>
               <div className="nl-recentgrid">
                 {recent.map((l) => (
@@ -152,9 +175,16 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
         </>
       )}
 
-      <footer className="nl-footer">
-        <span>nades&apos;n&apos;stuff — community CS2 grenade lineups.</span>
-        <span>Map radars by SimpleRadar.</span>
+      <footer className="nl-footer" data-reveal>
+        <div className="nl-footer-big" aria-hidden="true">See you on the server.</div>
+        <div className="nl-footer-brand">
+          <span className="nl-footer-name">nades&apos;n&apos;stuff</span>
+          <span className="nl-footer-tag">Community CS2 grenade lineups — learn the throw, win the round.</span>
+        </div>
+        <div className="nl-footer-meta">
+          <span>Map radars by SimpleRadar.</span>
+          <span>Not affiliated with Valve.</span>
+        </div>
       </footer>
     </div>
   );
