@@ -18,6 +18,7 @@ export const metadata = {
     "Mirage smokes", "Inferno smokes", "Dust 2 smokes", "CS2 flash lineups", "CS2 molotov lineups",
   ],
   alternates: { canonical: BASE },
+  verification: { google: "lJIzzkdPT9-swCf29OsjovOiIul7DhLjy1Ue2xBO2Y4" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large" } },
   icons: { icon: "/logo.png", apple: "/icon-192.png" },
   openGraph: {
