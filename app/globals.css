@@ -862,9 +862,6 @@ body::before{backface-visibility:hidden;}
 .nl-thumb img{transition:transform .4s ease;}
 .nl-card:hover .nl-thumb img{transform:scale(1.055);}
 
-/* big footer statement */
-.nl-footer-big{width:100%;font-family:'Archivo',sans-serif;font-weight:800;letter-spacing:-1.2px;line-height:1;font-size:clamp(26px,4.4vw,46px);color:var(--text);margin-bottom:18px;}
-.nl-footer-big::after{content:"";display:block;width:54px;height:4px;border-radius:99px;background:var(--accent);margin-top:14px;}
 
 /* brand selection color */
 ::selection{background:var(--accent);color:#15161a;}

@@ -68,9 +68,9 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
     <div className="nl-landing">
       <div className="nl-hero">
         <Logo variant="full" />
-        <h1 className="nl-display" aria-label="Learn the throw. Win the round.">
-          <span className="nl-display-line"><span>Learn the throw.</span></span>
-          <span className="nl-display-line"><span>Win the round.</span></span>
+        <h1 className="nl-display" aria-label="CS2 lineups. Mapped.">
+          <span className="nl-display-line"><span>CS2 lineups.</span></span>
+          <span className="nl-display-line"><span>Mapped.</span></span>
         </h1>
         <div className="nl-tally">
           {Object.entries(TYPE_META).map(([key, t]) => (
@@ -150,8 +150,8 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
 
           <div className="nl-marquee" aria-hidden="true" data-reveal>
             <div className="nl-marquee-track">
-              <span>nades&apos;n&apos;stuff · learn the throw · win the round · smokes · flashes · mollies · HE · nades&apos;n&apos;stuff · learn the throw · win the round · smokes · flashes · mollies · HE ·&nbsp;</span>
-              <span>nades&apos;n&apos;stuff · learn the throw · win the round · smokes · flashes · mollies · HE · nades&apos;n&apos;stuff · learn the throw · win the round · smokes · flashes · mollies · HE ·&nbsp;</span>
+              <span>nades&apos;n&apos;stuff · smokes · flashes · mollies · HE · mirage · inferno · dust ii · ancient · nades&apos;n&apos;stuff · smokes · flashes · mollies · HE · mirage · inferno · dust ii · ancient ·&nbsp;</span>
+              <span>nades&apos;n&apos;stuff · smokes · flashes · mollies · HE · mirage · inferno · dust ii · ancient · nades&apos;n&apos;stuff · smokes · flashes · mollies · HE · mirage · inferno · dust ii · ancient ·&nbsp;</span>
             </div>
           </div>
 
@@ -176,10 +176,9 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
       )}
 
       <footer className="nl-footer" data-reveal>
-        <div className="nl-footer-big" aria-hidden="true">See you on the server.</div>
         <div className="nl-footer-brand">
           <span className="nl-footer-name">nades&apos;n&apos;stuff</span>
-          <span className="nl-footer-tag">Community CS2 grenade lineups — learn the throw, win the round.</span>
+          <span className="nl-footer-tag">Community CS2 grenade lineups.</span>
         </div>
         <div className="nl-footer-meta">
           <span>Map radars by SimpleRadar.</span>
