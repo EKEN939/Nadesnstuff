@@ -7,6 +7,7 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  images: { unoptimized: true },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
