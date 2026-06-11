@@ -18,7 +18,6 @@ import LibraryPanel from "@/components/LibraryPanel";
 import QuickSearch from "@/components/QuickSearch";
 import AddLineupForm from "@/components/AddLineupForm";
 
-const ADMIN_KEY = "admin";
 const ACTIVE_MAPS = MAPS.filter((m) => !m.comingSoon);
 
 export default function Page() {
@@ -49,11 +48,11 @@ export default function Page() {
   const [sharedCol, setSharedCol] = useState(null);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [admin, setAdmin] = useState(false);
   const [liveConfigured, setLiveConfigured] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const { data: session } = useSession();
+  const admin = !!session?.user?.admin;
   const loggedIn = !!session?.user;
   const stageRef = useRef(null);
   const deepRef = useRef(undefined);
@@ -265,23 +264,6 @@ export default function Page() {
     const t = setTimeout(() => document.querySelector(".ub-maplegend.detail")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
     return () => clearTimeout(t);
   }, [selected]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.hash === "#" + ADMIN_KEY) setAdmin(true);
-    let buf = "";
-    let timer;
-    const onKey = (e) => {
-      const tag = (e.target.tagName || "").toLowerCase();
-      if (tag === "input" || tag === "textarea" || tag === "select") return;
-      if (e.key.length !== 1) return;
-      buf = (buf + e.key.toLowerCase()).slice(-ADMIN_KEY.length);
-      clearTimeout(timer);
-      timer = setTimeout(() => { buf = ""; }, 1200);
-      if (buf === ADMIN_KEY) { setAdmin((a) => !a); buf = ""; }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => { window.removeEventListener("keydown", onKey); clearTimeout(timer); };
-  }, []);
 
   // Esc: close modals, otherwise go back to the landing
   useEffect(() => {
