@@ -19,10 +19,21 @@ export async function PUT(req) {
   if (!storeConfigured) return NextResponse.json({ error: "not configured" }, { status: 503 });
   let body;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "bad json" }, { status: 400 }); }
+  // sanitize + cap: ids are short scalars, collections have a strict shape
+  const capIds = (a) => (Array.isArray(a) ? a.slice(0, 2000).map(String).filter((s) => s.length <= 40) : []);
+  const collections = (Array.isArray(body?.collections) ? body.collections : [])
+    .slice(0, 100)
+    .filter((c) => c && typeof c === "object")
+    .map((c) => ({
+      id: String(c.id || "").slice(0, 40),
+      name: String(c.name || "").slice(0, 80),
+      items: capIds(c.items),
+    }))
+    .filter((c) => c.id);
   await writeUser(session.user.id, {
-    favs: Array.isArray(body?.favs) ? body.favs : [],
-    learned: Array.isArray(body?.learned) ? body.learned : [],
-    collections: Array.isArray(body?.collections) ? body.collections : [],
+    favs: capIds(body?.favs),
+    learned: capIds(body?.learned),
+    collections,
   });
   return NextResponse.json({ ok: true });
 }

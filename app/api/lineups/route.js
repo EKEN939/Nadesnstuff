@@ -30,6 +30,9 @@ export async function PUT(req) {
   if (!Array.isArray(body?.lineups)) {
     return NextResponse.json({ error: "lineups must be an array" }, { status: 400 });
   }
+  if (body.lineups.length > 5000 || JSON.stringify(body.lineups).length > 4_000_000) {
+    return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+  }
   await writeLineups(body.lineups);
   return NextResponse.json({ ok: true, count: body.lineups.length });
 }

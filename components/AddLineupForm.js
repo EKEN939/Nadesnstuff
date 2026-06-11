@@ -4,7 +4,7 @@ import { X, Plus, Check, Upload } from "lucide-react";
 import { TYPE_META } from "@/lib/constants";
 import TacticalMap from "./TacticalMap";
 
-function Uploader({ accept, token, onUploaded, compact }) {
+function Uploader({ accept, onUploaded, compact }) {
   const [busy, setBusy] = useState(false);
   const [pct, setPct] = useState(0);
   const [err, setErr] = useState("");
@@ -12,11 +12,8 @@ function Uploader({ accept, token, onUploaded, compact }) {
   function uploadFile(file) {
     if (!file) return;
     setBusy(true); setErr(""); setPct(0);
-    let tok = token;
-    if (!tok) { try { tok = localStorage.getItem("nns_admin_token") || ""; } catch {} }
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/upload");
-    if (tok) xhr.setRequestHeader("Authorization", "Bearer " + tok);
     xhr.upload.onprogress = (ev) => { if (ev.lengthComputable) setPct(Math.round((ev.loaded / ev.total) * 100)); };
     xhr.onload = () => {
       setBusy(false); setPct(0);
@@ -50,7 +47,7 @@ function Uploader({ accept, token, onUploaded, compact }) {
   );
 }
 
-export default function AddLineupForm({ map, onClose, onSave, initial, token, existingSpots = [] }) {
+export default function AddLineupForm({ map, onClose, onSave, initial, existingSpots = [] }) {
   const editing = !!initial;
   const [f, setF] = useState(
     initial
@@ -169,12 +166,12 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
               <label className="ub-field"><span>Video (mp4/YouTube URL — or upload)</span>
                 <div className="ub-uploadrow">
                   <input value={f.video} onChange={(e) => up("video", e.target.value)} placeholder="https://…" />
-                  <Uploader accept="video/*" token={token} onUploaded={(url) => up("video", url)} />
+                  <Uploader accept="video/*" onUploaded={(url) => up("video", url)} />
                 </div></label>
               <label className="ub-field"><span>Preview image — smoke in place (optional)</span>
                 <div className="ub-uploadrow">
                   <input value={f.preview} onChange={(e) => up("preview", e.target.value)} placeholder="https://… screenshot of the landed smoke" />
-                  <Uploader accept="image/*" token={token} onUploaded={(url) => up("preview", url)} />
+                  <Uploader accept="image/*" onUploaded={(url) => up("preview", url)} />
                 </div>
                 <small className="ub-field-hint">An in-game screenshot of the smoke landed/active — shows as the card thumbnail.</small></label>
               <label className="ub-field"><span>Instruction (optional)</span>
@@ -192,7 +189,7 @@ export default function AddLineupForm({ map, onClose, onSave, initial, token, ex
                     <input value={s.caption} onChange={(e) => upStep(i, "caption", e.target.value)} placeholder="Caption" />
                     <div className="ub-imgcell">
                       <input value={s.img} onChange={(e) => upStep(i, "img", e.target.value)} placeholder="Image URL" />
-                      <Uploader accept="image/*" token={token} onUploaded={(url) => upStep(i, "img", url)} compact />
+                      <Uploader accept="image/*" onUploaded={(url) => upStep(i, "img", url)} compact />
                     </div>
                     {steps.length > 1 && <button type="button" className="ub-step-rm" onClick={() => rmStep(i)}><X size={13} /></button>}
                   </div>

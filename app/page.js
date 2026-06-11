@@ -51,7 +51,6 @@ export default function Page() {
   const [editing, setEditing] = useState(null);
   const [admin, setAdmin] = useState(false);
   const [liveConfigured, setLiveConfigured] = useState(false);
-  const [adminToken, setAdminToken] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const { data: session } = useSession();
@@ -317,7 +316,6 @@ export default function Page() {
   }, [screen, adding, editing, filtered, selected, queue, queueIndex, lineups, activeMap]);
 
   useEffect(() => {
-    try { const t = localStorage.getItem("nns_admin_token"); if (t) setAdminToken(t); } catch {}
     fetch("/api/lineups")
       .then((r) => r.json())
       .then((d) => {
@@ -350,23 +348,11 @@ export default function Page() {
 
   async function persist(list) {
     if (!liveConfigured) { setSaveMsg("Local only — storage not set up"); setTimeout(() => setSaveMsg(""), 3000); return; }
-    const loggedIn = !!session?.user;
-    let token = adminToken;
-    if (!loggedIn && !token) {
-      token = (typeof window !== "undefined" && window.prompt("Admin token (same as ADMIN_TOKEN in Vercel):")) || "";
-      if (!token) { setSaveMsg("Not saved — token needed"); setTimeout(() => setSaveMsg(""), 3000); return; }
-      setAdminToken(token);
-      try { localStorage.setItem("nns_admin_token", token); } catch {}
-    }
+    if (!session?.user) { setSaveMsg("Log in as admin to save"); setTimeout(() => setSaveMsg(""), 3000); return; }
     setSaving(true); setSaveMsg("");
     try {
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers.Authorization = "Bearer " + token;
-      const res = await fetch("/api/lineups", { method: "PUT", headers, body: JSON.stringify({ lineups: list }) });
-      if (res.status === 401) {
-        if (loggedIn) setSaveMsg("Not an admin account");
-        else { setSaveMsg("Wrong token"); setAdminToken(""); try { localStorage.removeItem("nns_admin_token"); } catch {} }
-      }
+      const res = await fetch("/api/lineups", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lineups: list }) });
+      if (res.status === 401) { setSaveMsg("Not an admin account"); }
       else if (!res.ok) { setSaveMsg("Could not save"); }
       else { setSaveMsg("Saved ✓"); }
     } catch { setSaveMsg("Network error"); }
@@ -613,7 +599,7 @@ export default function Page() {
           initial={editing}
           onClose={() => { setAdding(false); setEditing(null); }}
           onSave={saveLineup}
-          token={adminToken}
+
           existingSpots={formSpots}
         />
       )}
