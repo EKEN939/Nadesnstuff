@@ -883,3 +883,35 @@ body::before{backface-visibility:hidden;}
 .ub-lightbox{overflow:hidden;}
 .ub-lightbox img{transition:transform .15s ease-out;}
 .ub-lightbox-hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-size:11.5px;color:rgba(255,255,255,.65);background:rgba(0,0,0,.45);padding:5px 12px;border-radius:99px;pointer-events:none;}
+
+/* ============ warmth pass: more colour, friendlier feel ============ */
+
+/* warmer base tones */
+:root{
+  --bg:#1d1b20;
+  --surface:#26242b;
+  --surface2:#2f2c35;
+  --border:#37343e;
+  --text:#f0eef2;
+  --muted:#a59fab;
+}
+body::before{background:radial-gradient(880px 500px at 50% 4%, rgba(255,121,40,.10), transparent 62%),radial-gradient(760px 540px at 18% 30%, rgba(120,132,185,.07), transparent 60%),radial-gradient(700px 500px at 84% 64%, rgba(255,91,0,.05), transparent 60%);}
+
+/* type pills wear their nade colour all the time */
+.ub-pill-type{color:var(--tc,var(--muted));border-color:color-mix(in srgb, var(--tc,#888) 28%, var(--border));background:color-mix(in srgb, var(--tc,#888) 7%, var(--surface));}
+.ub-pill-type:hover{border-color:color-mix(in srgb, var(--tc,#888) 55%, var(--border));}
+.ub-pill-type.active{color:var(--tc);border-color:var(--tc);background:color-mix(in srgb, var(--tc) 16%, var(--surface));font-weight:700;}
+.ub-pill-type .ub-pillcount{background:color-mix(in srgb, var(--tc,#888) 16%, var(--surface2));color:inherit;}
+.ub-pill-type.zero{opacity:.42;}
+
+/* lineup cards: soft colour edge + glow in their nade colour */
+.ub-card{border-top:2px solid color-mix(in srgb, var(--tc,var(--accent)) 55%, transparent);}
+.ub-card:hover{border-color:color-mix(in srgb, var(--tc,var(--accent)) 50%, var(--border));box-shadow:0 14px 32px rgba(0,0,0,.32),0 0 22px color-mix(in srgb, var(--tc,var(--accent)) 14%, transparent);}
+
+/* friendlier empty state */
+.ub-legend-empty{color:var(--muted);}
+.ub-legend-empty svg{color:var(--accent);opacity:.9;}
+.ub-legend-empty p{color:var(--text);font-weight:700;}
+
+/* warm the section labels slightly */
+.ub-preview-label{opacity:.95;}

@@ -467,7 +467,7 @@ export default function Page() {
                 {Object.entries(TYPE_META).map(([key, t]) => {
                   const n = lineups.filter((l) => l.map === activeMap && (side === "ALL" || l.side === side) && l.type === key).length;
                   return (
-                    <button key={key} className={`ub-pill ub-pill-type ${type === key ? "active" : ""} ${n === 0 ? "zero" : ""}`} onClick={() => setType(key)} style={type === key ? { borderColor: t.color, color: t.color } : undefined}>
+                    <button key={key} className={`ub-pill ub-pill-type ${type === key ? "active" : ""} ${n === 0 ? "zero" : ""}`} onClick={() => setType(key)} style={{ "--tc": t.color }}>
                       <NadeIcon type={key} size={14} />{t.label}{n > 0 && <span className="ub-pillcount">{n}</span>}
                     </button>
                   );
@@ -522,7 +522,7 @@ export default function Page() {
                   ) : filtered.length === 0 ? (
                     <div className="ub-legend-empty">
                       <MapIcon size={26} />
-                      <p>No lineups on {mapMeta.name} yet.</p>
+                      <p>Nothing on {mapMeta.name} yet \u2014 fresh snow!</p>
                       {admin ? <span>Tap “Add lineup” to place the first one.</span> : <span>Check back soon, or try another map.</span>}
                     </div>
                   ) : (

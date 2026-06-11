@@ -7,7 +7,7 @@ export default function LineupCard({ lineup, index = 0, onClick, fav, onToggleFa
   const t = TYPE_META[lineup.type];
   const thumb = lineup.preview || lineup.steps?.find((s) => s.img)?.img || null;
   return (
-    <button className={`ub-card ${learned ? "learned" : ""}`} style={{ animationDelay: `${index * 45}ms` }} onClick={onClick}>
+    <button className={`ub-card ${learned ? "learned" : ""}`} style={{ animationDelay: `${index * 45}ms`, "--tc": t.color }} onClick={onClick}>
       {thumb ? (
         <div className="ub-card-thumb"><img src={thumb} alt={lineup.target} /></div>
       ) : (
