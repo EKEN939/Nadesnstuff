@@ -52,7 +52,8 @@ export default function Page() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
   const { data: session } = useSession();
-  const admin = !!session?.user?.admin;
+  const [meAdmin, setMeAdmin] = useState(false);
+  const admin = !!(session?.user?.admin || meAdmin);
   const loggedIn = !!session?.user;
   const stageRef = useRef(null);
   const deepRef = useRef(undefined);
@@ -87,9 +88,9 @@ export default function Page() {
 
   useEffect(() => {
     if (session?.user) {
-      fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) { setFavs(d.favs || []); setLearned(d.learned || []); setCollections(d.collections || []); } }).catch(() => {});
+      fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) { setFavs(d.favs || []); setLearned(d.learned || []); setCollections(d.collections || []); setMeAdmin(!!d.admin); } }).catch(() => {});
     } else {
-      setFavs([]); setLearned([]); setCollections([]);
+      setFavs([]); setLearned([]); setCollections([]); setMeAdmin(false);
     }
   }, [session?.user?.id]);
   useEffect(() => {

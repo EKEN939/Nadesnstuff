@@ -8,8 +8,12 @@ export async function GET() {
   let session = null;
   try { session = await auth(); } catch {}
   if (!session?.user?.id) return NextResponse.json({ error: "unauth" }, { status: 401 });
+  const adminIds = (process.env.ADMIN_DISCORD_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
   const data = await readUser(session.user.id);
-  return NextResponse.json({ favs: data?.favs || [], learned: data?.learned || [], collections: data?.collections || [] });
+  return NextResponse.json({
+    favs: data?.favs || [], learned: data?.learned || [], collections: data?.collections || [],
+    admin: adminIds.includes(session.user.id),
+  });
 }
 
 export async function PUT(req) {
