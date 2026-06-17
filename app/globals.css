@@ -944,5 +944,3 @@ body::before{background:radial-gradient(880px 500px at 50% 4%, rgba(255,121,40,.
   .nl-howrow-text{padding:6px 10px 12px;}
 }
 
-/* step-1 real map image */
-.nl-art-img{width:100%;height:auto;display:block;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.35);}
