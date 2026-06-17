@@ -5,19 +5,8 @@ import { Crosshair, FolderPlus, GripVertical, Share2 } from "lucide-react";
 
 function ArtFind() {
   return (
-    <svg viewBox="0 0 340 210" className="nl-art" role="img" aria-label="A lineup pin and trajectory on the map">
-      <rect x="8" y="8" width="324" height="194" rx="16" fill="var(--surface2)" stroke="var(--border)" />
-      <g stroke="var(--border)" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity=".85">
-        <path d="M42 66 H120 V44 H188" />
-        <path d="M58 156 H132 V118" />
-        <rect x="206" y="78" width="74" height="52" rx="5" />
-        <path d="M150 96 H180" />
-      </g>
-      <line x1="74" y1="158" x2="250" y2="62" stroke="var(--sc)" strokeWidth="3" strokeLinecap="round" strokeDasharray="2 8" />
-      <circle cx="74" cy="158" r="7" fill="var(--surface)" stroke="var(--sc)" strokeWidth="3" />
-      <circle cx="250" cy="62" r="22" fill="none" stroke="var(--sc)" strokeWidth="2" opacity=".4" />
-      <circle cx="250" cy="62" r="12" fill="var(--sc)" />
-    </svg>
+    <img className="nl-art nl-art-img" src="/howsteps/find.png" width="640" height="640"
+      alt="A smoke lineup shown on the Mirage radar — throw point and landing pin connected by a trajectory" loading="lazy" decoding="async" />
   );
 }
 

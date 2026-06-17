@@ -156,6 +156,8 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
             </div>
           </div>
 
+          <HowCollections loggedIn={loggedIn} />
+
           {recent.length > 0 && (
             <div className="nl-recent" data-reveal>
               <div className="nl-pick">Recently added</div>
@@ -173,8 +175,6 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
               </div>
             </div>
           )}
-
-          <HowCollections loggedIn={loggedIn} />
         </>
       )}
 
