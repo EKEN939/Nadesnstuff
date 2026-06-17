@@ -1045,3 +1045,7 @@ body{
   .ub-emptyradar .er-sweep,.ub-emptyradar .er-pin,.ub-emptyradar .er-pinring{animation:none;}
 }
 
+
+/* locked action button (logged-out save-to-collection) */
+.ub-actbtn-locked{opacity:.72;border-style:dashed;}
+.ub-actbtn-locked:hover{opacity:1;border-color:var(--accent);color:var(--accent);}
