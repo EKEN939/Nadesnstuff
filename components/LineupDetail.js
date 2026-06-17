@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { signIn } from "next-auth/react";
 import { ArrowRight, ImageOff, Pencil, Trash2, Link2, Check, Star, ChevronLeft, ChevronRight, Crosshair, Terminal, CheckCircle2, Folder, Plus, MapPin, ZoomIn, X, Lock } from "lucide-react";
 import { TYPE_META, DIFF_COLOR } from "@/lib/constants";
 import NadeIcon from "./NadeIcon";
@@ -96,9 +95,10 @@ export default function LineupDetail({ lineup, admin, loggedIn, onEdit, onDelete
             </div>
           )}
           {!loggedIn && (
-            <button className="ub-actbtn ub-actbtn-locked" onClick={() => signIn("discord")} title="Log in with Discord to save lineups to collections">
-              <Lock size={13} /> Save to collection
-            </button>
+            <span className="ub-locked-wrap">
+              <button className="ub-actbtn ub-actbtn-locked" type="button"><Lock size={13} /> Save to collection</button>
+              <span className="ub-locktip"><Lock size={11} /> Log in to save lineups to your collections</span>
+            </span>
           )}
           {loggedIn && (
             <button className={`ub-actbtn ${fav ? "fav-on" : ""}`} onClick={onToggleFav} aria-label="Favorite" title="Favorite">
