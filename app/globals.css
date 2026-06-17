@@ -945,4 +945,4 @@ body::before{background:radial-gradient(880px 500px at 50% 4%, rgba(255,121,40,.
 }
 
 /* step-1 real map image */
-.nl-art-img{width:auto;max-width:100%;max-height:240px;border-radius:12px;display:block;margin:0 auto;box-shadow:0 8px 22px rgba(0,0,0,.35);}
+.nl-art-img{width:100%;height:auto;display:block;border-radius:12px;box-shadow:0 8px 22px rgba(0,0,0,.35);}
