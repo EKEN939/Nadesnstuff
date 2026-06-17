@@ -86,6 +86,14 @@ export default function Page() {
     return [...m.values()];
   }, [filtered]);
 
+  // if the side/type filter changes so the current selection no longer matches,
+  // drop it (but never disturb an active collection run)
+  useEffect(() => {
+    if (queue) return;
+    if (selected && !filtered.some((l) => l.id === selected.id)) setSelected(null);
+    if (activeSpot && !spots.some((s) => s.target === activeSpot)) setActiveSpot(null);
+  }, [filtered, spots, queue]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (session?.user) {
       fetch("/api/me").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d) { setFavs(d.favs || []); setLearned(d.learned || []); setCollections(d.collections || []); setMeAdmin(!!d.admin); } }).catch(() => {});
