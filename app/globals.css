@@ -919,20 +919,27 @@ body::before{background:radial-gradient(880px 500px at 50% 4%, rgba(255,121,40,.
 /* file-picker menu item behaves like the other rows */
 .ub-pm-file{cursor:pointer;}
 
-/* ============ landing: "how collections work" ============ */
-.nl-how{margin-top:54px;}
+/* ============ landing: "how collections work" (alternating rows) ============ */
+.nl-how{margin-top:58px;}
 .nl-how-head{max-width:640px;}
 .nl-how-eyebrow{display:inline-block;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:800;color:var(--accent);}
 .nl-how-title{font-family:'Archivo',sans-serif;font-weight:800;letter-spacing:-.8px;font-size:clamp(22px,3.2vw,32px);margin:8px 0 8px;}
 .nl-how-sub{color:var(--muted);font-size:14px;line-height:1.6;margin:0;}
-.nl-how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:26px;position:relative;}
-.nl-step{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 18px 18px;display:flex;flex-direction:column;gap:9px;background-image:linear-gradient(180deg,rgba(255,255,255,.022),rgba(255,255,255,0));transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;}
-.nl-step:hover{transform:translateY(-4px);border-color:color-mix(in srgb, var(--sc,var(--accent)) 45%, var(--border));box-shadow:0 14px 30px rgba(0,0,0,.3),0 0 22px color-mix(in srgb, var(--sc,var(--accent)) 12%, transparent);}
-.nl-step-num{position:absolute;top:14px;right:16px;font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;line-height:1;color:color-mix(in srgb, var(--sc,var(--accent)) 30%, transparent);}
-.nl-step-ico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--sc,var(--accent));background:color-mix(in srgb, var(--sc,var(--accent)) 14%, var(--surface2));}
-.nl-step-title{font-weight:700;font-size:15px;}
-.nl-step-desc{color:var(--muted);font-size:12.8px;line-height:1.5;}
-.nl-how-foot{margin-top:18px;font-size:13px;color:var(--muted);}
+.nl-how-rows{display:flex;flex-direction:column;gap:18px;margin-top:30px;}
+.nl-howrow{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:28px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:14px;background-image:linear-gradient(180deg,rgba(255,255,255,.022),rgba(255,255,255,0));transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;}
+.nl-howrow:hover{transform:translateY(-3px);border-color:color-mix(in srgb, var(--sc,var(--accent)) 42%, var(--border));box-shadow:0 16px 36px rgba(0,0,0,.3),0 0 26px color-mix(in srgb, var(--sc,var(--accent)) 12%, transparent);}
+.nl-howrow:nth-child(even) .nl-howrow-art{order:2;}
+.nl-howrow-art{background:radial-gradient(120% 120% at 50% 0%, color-mix(in srgb, var(--sc) 12%, var(--surface2)), var(--surface2));border:1px solid var(--border);border-radius:14px;padding:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.nl-art{width:100%;height:auto;max-height:210px;display:block;}
+.nl-howrow-text{padding:8px 18px;}
+.nl-howrow-step{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:800;color:var(--sc);}
+.nl-howrow-title{display:flex;align-items:center;gap:9px;font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;letter-spacing:-.3px;margin:9px 0 7px;}
+.nl-howrow-ico{width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;color:var(--sc);background:color-mix(in srgb, var(--sc) 16%, var(--surface2));flex:0 0 auto;}
+.nl-howrow-desc{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0;}
+.nl-how-foot{margin-top:20px;font-size:13px;color:var(--muted);}
 .nl-how-foot::before{content:"→ ";color:var(--accent);font-weight:700;}
-@media (max-width:880px){ .nl-how-steps{grid-template-columns:repeat(2,1fr);} }
-@media (max-width:480px){ .nl-how-steps{grid-template-columns:1fr;} }
+@media (max-width:720px){
+  .nl-howrow{grid-template-columns:1fr;gap:6px;}
+  .nl-howrow:nth-child(even) .nl-howrow-art{order:0;}
+  .nl-howrow-text{padding:6px 10px 12px;}
+}

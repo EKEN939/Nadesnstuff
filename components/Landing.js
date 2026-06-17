@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { Lock, ArrowRight, Search, X, FolderPlus, GripVertical, Share2, Crosshair } from "lucide-react";
+import { Lock, ArrowRight, Search, X } from "lucide-react";
 import Logo from "./Logo";
 import NadeIcon from "./NadeIcon";
 import { TYPE_META } from "@/lib/constants";
+import HowCollections from "./HowCollections";
 
 function CountUp({ n }) {
   const [v, setV] = useState(0);
@@ -173,40 +174,7 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
             </div>
           )}
 
-          <section className="nl-how" data-reveal>
-            <div className="nl-how-head">
-              <span className="nl-how-eyebrow">Collections</span>
-              <h2 className="nl-how-title">Build your own throw routines</h2>
-              <p className="nl-how-sub">Group the lineups you actually run into ordered sets — a full smoke execute, a pistol-round setup, everything for one bombsite — then step through them on the map or share them with your team.</p>
-            </div>
-            <div className="nl-how-steps">
-              <div className="nl-step">
-                <span className="nl-step-num">1</span>
-                <span className="nl-step-ico" style={{ "--sc": "#5d8ad8" }}><Crosshair size={20} /></span>
-                <span className="nl-step-title">Find a lineup</span>
-                <span className="nl-step-desc">Open any map and click a smoke, flash or molly you want in your arsenal.</span>
-              </div>
-              <div className="nl-step">
-                <span className="nl-step-num">2</span>
-                <span className="nl-step-ico" style={{ "--sc": "#ff5b00" }}><FolderPlus size={20} /></span>
-                <span className="nl-step-title">Save to a collection</span>
-                <span className="nl-step-desc">Hit “Save to collection” and drop it into a new or existing set.</span>
-              </div>
-              <div className="nl-step">
-                <span className="nl-step-num">3</span>
-                <span className="nl-step-ico" style={{ "--sc": "#e0b341" }}><GripVertical size={20} /></span>
-                <span className="nl-step-title">Order them your way</span>
-                <span className="nl-step-desc">Drag the cards into the exact sequence you throw them in a round.</span>
-              </div>
-              <div className="nl-step">
-                <span className="nl-step-num">4</span>
-                <span className="nl-step-ico" style={{ "--sc": "#cf4a3c" }}><Share2 size={20} /></span>
-                <span className="nl-step-title">Run it &amp; share</span>
-                <span className="nl-step-desc">Step through the set with ‹ / › on the map, or send the whole thing as a link.</span>
-              </div>
-            </div>
-            {!loggedIn && <div className="nl-how-foot">Sign in with Discord to start your first collection.</div>}
-          </section>
+          <HowCollections loggedIn={loggedIn} />
         </>
       )}
 
