@@ -1016,27 +1016,8 @@ body{
    POLISH PASS — map HUD, reticle pins, card watermark+difficulty, empty radar
    ============================================================ */
 
-/* --- map HUD upgrade --- */
-.ub-hud i{width:20px;height:20px;border-width:2px;border-color:color-mix(in srgb,var(--accent) 80%, transparent);opacity:.85;}
-.ub-hud-label{font-family:'JetBrains Mono',ui-monospace,monospace !important;text-transform:uppercase;letter-spacing:1.4px;font-size:10px;color:rgba(255,255,255,.62);background:rgba(10,12,15,.6);display:flex;align-items:center;gap:7px;}
-.ub-hud-label::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 7px var(--accent);animation:ubblink 1.7s ease-in-out infinite;}
 @keyframes ubblink{0%,100%{opacity:1;}50%{opacity:.25;}}
-.ub-hud::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,91,0,.30),transparent);animation:ubscan 6s linear infinite;}
-@keyframes ubscan{0%{top:-4px;opacity:0;}12%{opacity:1;}88%{opacity:1;}100%{top:100%;opacity:0;}}
 
-/* --- reticle pins (scope markers) --- */
-.ub-pin-marker{position:relative;}
-.ub-pin-marker::before{content:"";position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--pin,var(--accent));opacity:.5;}
-.ub-pin-marker::after{content:"";position:absolute;inset:-10px;pointer-events:none;opacity:.75;
-  background:
-    linear-gradient(var(--pin,var(--accent)),var(--pin,var(--accent))) 50% 0/1.5px 6px no-repeat,
-    linear-gradient(var(--pin,var(--accent)),var(--pin,var(--accent))) 50% 100%/1.5px 6px no-repeat,
-    linear-gradient(var(--pin,var(--accent)),var(--pin,var(--accent))) 0 50%/6px 1.5px no-repeat,
-    linear-gradient(var(--pin,var(--accent)),var(--pin,var(--accent))) 100% 50%/6px 1.5px no-repeat;}
-.ub-pin.act .ub-pin-marker::after{animation:ubreticle 9s linear infinite;}
-@keyframes ubreticle{to{transform:rotate(360deg);}}
-.ub-pin-dot{position:relative;}
-.ub-pin-dot::before{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid var(--pin,var(--accent));opacity:.45;}
 
 /* --- lineup card: nade watermark + difficulty bars --- */
 .ub-card{position:relative;overflow:hidden;}
@@ -1059,17 +1040,6 @@ body{
 @keyframes ubping{0%{transform:scale(.5);opacity:.6;}100%{transform:scale(1.5);opacity:0;}}
 
 @media (prefers-reduced-motion: reduce){
-  .ub-hud::after,.ub-pin.act .ub-pin-marker::after,.ub-emptyradar .er-sweep,.ub-emptyradar .er-pin,.ub-emptyradar .er-pinring,.ub-hud-label::before{animation:none;}
+  .ub-emptyradar .er-sweep,.ub-emptyradar .er-pin,.ub-emptyradar .er-pinring{animation:none;}
 }
 
-/* --- hero radar silhouette + live badge --- */
-.nl-hero{position:relative;overflow:hidden;}
-.nl-hero > *:not(.nl-hero-radar){position:relative;z-index:1;}
-.nl-hero-radar{position:absolute;top:-46px;right:-40px;width:300px;height:300px;opacity:.22;z-index:0;pointer-events:none;}
-.nl-hero-radar .er-ring{fill:none;stroke:var(--border);stroke-width:1.2;}
-.nl-hero-radar .er-cross{stroke:var(--border);stroke-width:1;}
-.nl-hero-radar .er-sweep{transform-box:view-box;transform-origin:100px 100px;animation:ubsweep 5s linear infinite;}
-.nl-live{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:1.5px;font-size:10px;font-weight:700;color:var(--muted);}
-.nl-live i{width:6px;height:6px;border-radius:50%;background:#5fa463;box-shadow:0 0 7px #5fa463;animation:ubblink 1.7s ease-in-out infinite;}
-@media (max-width:640px){ .nl-hero-radar{width:200px;height:200px;top:-30px;right:-50px;opacity:.16;} }
-@media (prefers-reduced-motion: reduce){ .nl-hero-radar .er-sweep,.nl-live i{animation:none;} }

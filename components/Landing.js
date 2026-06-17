@@ -68,29 +68,12 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
   return (
     <div className="nl-landing">
       <div className="nl-hero">
-        <svg className="nl-hero-radar" viewBox="0 0 200 200" aria-hidden="true">
-          <circle className="er-ring" cx="100" cy="100" r="92" />
-          <circle className="er-ring" cx="100" cy="100" r="62" />
-          <circle className="er-ring" cx="100" cy="100" r="32" />
-          <line className="er-cross" x1="100" y1="2" x2="100" y2="198" />
-          <line className="er-cross" x1="2" y1="100" x2="198" y2="100" />
-          <g className="er-sweep">
-            <defs>
-              <linearGradient id="herosw" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#ff5b00" stopOpacity="0" />
-                <stop offset="100%" stopColor="#ff5b00" stopOpacity="0.5" />
-              </linearGradient>
-            </defs>
-            <path d="M100 100 L100 8 A92 92 0 0 1 182 62 Z" fill="url(#herosw)" />
-          </g>
-        </svg>
         <Logo variant="full" />
         <h1 className="nl-display" aria-label="CS2 lineups. Mapped.">
           <span className="nl-display-line"><span>CS2 lineups.</span></span>
           <span className="nl-display-line"><span>Mapped.</span></span>
         </h1>
         <div className="nl-tally">
-          <span className="nl-live"><i />live</span>
           {Object.entries(TYPE_META).map(([key, t]) => (
             <span key={key} className="nl-tallyitem" style={{ color: t.color }}>
               <NadeIcon type={key} size={15} />
