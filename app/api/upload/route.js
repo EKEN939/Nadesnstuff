@@ -1,6 +1,7 @@
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { rateLimit } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,9 @@ export async function POST(req) {
   const tokenOk = process.env.ADMIN_TOKEN && token === process.env.ADMIN_TOKEN;
   if (!sessionAdmin && !tokenOk) {
     return NextResponse.json({ error: "Unauthorized — log in as admin" }, { status: 401 });
+  }
+  if (!(await rateLimit("upload", session?.user?.id || "token", 30))) {
+    return NextResponse.json({ error: "Too many uploads — wait a minute" }, { status: 429 });
   }
 
   let file;

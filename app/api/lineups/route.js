@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { readLineups, writeLineups, storeConfigured } from "@/lib/store";
 import { auth } from "@/auth";
+import { rateLimit } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,8 @@ export async function PUT(req) {
   if (!storeConfigured) {
     return NextResponse.json({ error: "Storage not configured" }, { status: 503 });
   }
+  const rlId = session?.user?.id || "token";
+  if (!(await rateLimit("lineups", rlId, 20))) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   let body;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Bad JSON" }, { status: 400 }); }
   if (!Array.isArray(body?.lineups)) {

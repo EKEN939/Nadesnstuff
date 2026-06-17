@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { animate, stagger } from "animejs";
-import { Filter, Plus, Map as MapIcon, List, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Trophy, Search } from "lucide-react";
+import { Filter, Plus, Map as MapIcon, List, Save, ArrowLeft, Video, Star, LogIn, LogOut, ChevronDown, Folder, CheckCircle2, Trophy, Search, Download, FileUp } from "lucide-react";
 import { confetti } from "@/lib/confetti";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { MAPS } from "@/data/maps";
@@ -329,6 +329,34 @@ export default function Page() {
   const mapAll = lineups.filter((l) => l.map === activeMap);
   const mapLearned = mapAll.filter((l) => learned.includes(l.id)).length;
 
+  // ----- backup: download / restore the whole lineup set (admin) -----
+  function downloadBackup() {
+    const stamp = new Date().toISOString().slice(0, 10);
+    const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), lineups }, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `nadesnstuff-backup-${stamp}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  function restoreBackup(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        const list = Array.isArray(parsed) ? parsed : parsed?.lineups;
+        if (!Array.isArray(list) || !list.every((l) => l && typeof l === "object" && l.id != null && l.map)) {
+          alert("That file doesn't look like a nades'n'stuff backup."); return;
+        }
+        if (!window.confirm(`Restore backup with ${list.length} lineups? This replaces everything currently on the site.`)) return;
+        setLineups(list);
+        persist(list);
+      } catch { alert("Could not read that file as JSON."); }
+    };
+    reader.readAsText(file);
+  }
+
   async function persist(list) {
     if (!liveConfigured) { setSaveMsg("Local only — storage not set up"); setTimeout(() => setSaveMsg(""), 3000); return; }
     if (!session?.user) { setSaveMsg("Log in as admin to save"); setTimeout(() => setSaveMsg(""), 3000); return; }
@@ -395,6 +423,14 @@ export default function Page() {
                   <button className="ub-pm-item" onClick={() => { setLibraryView("collections"); setProfileOpen(false); }}><Folder size={15} /> Collections</button>
                   {admin && <div className="ub-pm-div" />}
                   {admin && <button className="ub-pm-item" onClick={() => { setAdding(true); setProfileOpen(false); }}><Plus size={15} /> Add lineup</button>}
+                  {admin && <button className="ub-pm-item" onClick={() => { downloadBackup(); setProfileOpen(false); }}><Download size={15} /> Download backup</button>}
+                  {admin && (
+                    <label className="ub-pm-item ub-pm-file">
+                      <FileUp size={15} /> Restore backup
+                      <input type="file" accept="application/json,.json" hidden
+                        onChange={(e) => { restoreBackup(e.target.files?.[0]); e.target.value = ""; setProfileOpen(false); }} />
+                    </label>
+                  )}
                   <div className="ub-pm-div" />
                   <button className="ub-pm-item" onClick={() => signOut()}><LogOut size={15} /> Log out</button>
                 </div>

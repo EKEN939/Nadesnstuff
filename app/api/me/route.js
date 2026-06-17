@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { readUser, writeUser, storeConfigured } from "@/lib/store";
+import { rateLimit } from "@/lib/ratelimit";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ export async function PUT(req) {
   try { session = await auth(); } catch {}
   if (!session?.user?.id) return NextResponse.json({ error: "unauth" }, { status: 401 });
   if (!storeConfigured) return NextResponse.json({ error: "not configured" }, { status: 503 });
+  if (!(await rateLimit("me", session.user.id, 30))) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   let body;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "bad json" }, { status: 400 }); }
   // sanitize + cap: ids are short scalars, collections have a strict shape
