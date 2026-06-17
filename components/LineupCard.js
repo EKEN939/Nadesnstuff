@@ -8,6 +8,7 @@ export default function LineupCard({ lineup, index = 0, onClick, fav, onToggleFa
   const thumb = lineup.preview || lineup.steps?.find((s) => s.img)?.img || null;
   return (
     <button className={`ub-card ${learned ? "learned" : ""}`} style={{ animationDelay: `${index * 45}ms`, "--tc": t.color }} onClick={onClick}>
+      <span className="ub-card-wm" aria-hidden="true"><NadeIcon type={lineup.type} size={120} /></span>
       {thumb ? (
         <div className="ub-card-thumb"><img src={thumb} alt={lineup.target} /></div>
       ) : (
@@ -38,7 +39,10 @@ export default function LineupCard({ lineup, index = 0, onClick, fav, onToggleFa
       <div className="ub-card-route"><span>{lineup.from}</span><ArrowRight size={13} /><span>{lineup.target}</span></div>
       <div className="ub-card-meta">
         <span className="ub-meta-chip"><Footprints size={12} /> {lineup.throwType}</span>
-        <span className="ub-meta-chip" style={{ color: DIFF_COLOR[lineup.difficulty] }}>{lineup.difficulty}</span>
+        <span className="ub-meta-chip ub-diff" style={{ color: DIFF_COLOR[lineup.difficulty] }}>
+          <span className="ub-diffbars" aria-hidden="true">{[1, 2, 3].map((n) => <i key={n} className={n <= ({ Easy: 1, Medium: 2, Hard: 3 }[lineup.difficulty] || 1) ? "on" : ""} />)}</span>
+          {lineup.difficulty}
+        </span>
       </div>
       <div className="ub-card-cta">View lineup <ChevronRight size={14} /></div>
     </button>

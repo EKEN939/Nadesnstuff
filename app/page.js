@@ -558,8 +558,25 @@ export default function Page() {
                     </div>
                   ) : filtered.length === 0 ? (
                     <div className="ub-legend-empty">
-                      <MapIcon size={26} />
-                      <p>Nothing on {mapMeta.name} yet \u2014 fresh snow!</p>
+                      <svg className="ub-emptyradar" viewBox="0 0 128 128" aria-hidden="true">
+                        <circle className="er-ring" cx="64" cy="64" r="58" />
+                        <circle className="er-ring" cx="64" cy="64" r="40" />
+                        <circle className="er-ring" cx="64" cy="64" r="22" />
+                        <line className="er-cross" x1="64" y1="6" x2="64" y2="122" />
+                        <line className="er-cross" x1="6" y1="64" x2="122" y2="64" />
+                        <g className="er-sweep">
+                          <defs>
+                            <linearGradient id="ersw" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stopColor="#ff5b00" stopOpacity="0" />
+                              <stop offset="100%" stopColor="#ff5b00" stopOpacity="0.5" />
+                            </linearGradient>
+                          </defs>
+                          <path d="M64 64 L64 6 A58 58 0 0 1 116 40 Z" fill="url(#ersw)" />
+                        </g>
+                        <circle className="er-pinring" cx="92" cy="44" r="7" />
+                        <circle className="er-pin" cx="92" cy="44" r="3.5" />
+                      </svg>
+                      <p>Nothing on {mapMeta.name} yet — fresh snow!</p>
                       {admin ? <span>Tap “Add lineup” to place the first one.</span> : <span>Check back soon, or try another map.</span>}
                     </div>
                   ) : (
