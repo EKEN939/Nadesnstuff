@@ -112,9 +112,11 @@ export default function TacticalMap({
                 {iconType ? <span className="ub-pin-marker"><NadeIcon type={iconType} size={14} /></span> : <span className="ub-pin-dot" />}
                 {s.lineups.length > 1 && <span className="ub-pin-count">{s.lineups.length}</span>}
                 <span className="ub-pin-pop">
-                  <strong>{s.target}</strong>
-                  <em>{s.lineups.length} lineup{s.lineups.length !== 1 ? "s" : ""}</em>
-                  <span className="ub-pin-poptypes">{types.map((tp) => <NadeIcon key={tp} type={tp} size={12} />)}</span>
+                  <span className="ub-pin-popicons">{types.map((tp) => <span key={tp} style={{ color: TYPE_META[tp].color }}><NadeIcon type={tp} size={13} /></span>)}</span>
+                  <span className="ub-pin-poptext">
+                    <strong>{s.target}</strong>
+                    <em>{s.lineups.length} lineup{s.lineups.length !== 1 ? "s" : ""}</em>
+                  </span>
                 </span>
               </button>
             );
