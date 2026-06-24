@@ -1,48 +1,33 @@
-// Stylized Counter-Strike utility icons. Stroke inherits currentColor.
+// Nade type GLYPH (inner cue + filter/legend icon). Per pin-language spec.
+// smoke=puff, flash=star, molotov=flame (filled); HE=frag grenade (stroked). viewBox 0 0 24 24.
 export default function NadeIcon({ type, size = 16, ...props }) {
-  const c = {
-    width: size, height: size, viewBox: "0 0 24 24", fill: "none",
-    stroke: "currentColor", strokeWidth: 1.9, strokeLinecap: "round", strokeLinejoin: "round",
-    ...props,
-  };
+  const base = { width: size, height: size, viewBox: "0 0 24 24", ...props };
   if (type === "smoke") {
-    // smoke grenade: canister + rising wisps
     return (
-      <svg {...c}>
-        <rect x="8" y="10" width="8" height="11" rx="3.5" />
-        <path d="M10 10V8.2A2 2 0 0 1 14 8.2V10" />
-        <path d="M9.5 5.6c1-.7 1-1.8 0-2.5" />
-        <path d="M14.5 5.6c-1-.7-1-1.8 0-2.5" />
+      <svg {...base} fill="currentColor">
+        <circle cx="8" cy="13.5" r="3" /><circle cx="12" cy="11" r="3.6" /><circle cx="16" cy="13.5" r="3" />
+        <rect x="6" y="13" width="12" height="3.3" rx="1.6" />
       </svg>
     );
   }
   if (type === "flash") {
-    // flashbang: canister + burst rays
     return (
-      <svg {...c}>
-        <rect x="9" y="11" width="6" height="9" rx="3" />
-        <path d="M10.5 11V9.2h3V11" />
-        <path d="M12 6V3.5" />
-        <path d="M8 7 6.4 5.4" />
-        <path d="M16 7l1.6-1.6" />
+      <svg {...base} fill="currentColor">
+        <polygon points="12,3.5 14.1,9.1 20.1,9.4 15.4,13.1 17,18.9 12,15.6 7,18.9 8.6,13.1 3.9,9.4 9.9,9.1" />
       </svg>
     );
   }
   if (type === "molly") {
-    // molotov: bottle + flame
     return (
-      <svg {...c}>
-        <path d="M10 10V7h4v3l1.2 2v8a1 1 0 0 1-1 1h-4.4a1 1 0 0 1-1-1v-8z" />
-        <path d="M12 7c1.2-1 .8-2.4-.2-3 .4 1.1-1 1.5-.5 2.6" />
+      <svg {...base} fill="currentColor">
+        <path d="M12 3c.5 3 2.4 4.3 3.5 6.1A5.5 5.5 0 1 1 6.6 9C7.8 7.8 8.6 6.8 8.6 5.2c1.2.9 1.7 2 1.7 3C11.2 6.6 11.7 4.7 12 3Z" />
       </svg>
     );
   }
-  // he grenade: round body + cap + lever
+  // he: frag grenade (stroked)
   return (
-    <svg {...c}>
-      <circle cx="11.5" cy="14.5" r="6" />
-      <path d="M9.5 8.5h4.2V6.8H9.5z" />
-      <path d="M13.7 7.4 16.4 6l1 1.7" />
+    <svg {...base} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="14" r="5.1" /><path d="M10.2 8.9h3.6V7.3h-3.6z" /><path d="M13.8 7.7 16.1 6.4l.9 1.5" />
     </svg>
   );
 }

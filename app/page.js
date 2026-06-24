@@ -9,6 +9,7 @@ import { LINEUPS } from "@/data/lineups";
 import { TYPE_META } from "@/lib/constants";
 import Logo from "@/components/Logo";
 import NadeIcon from "@/components/NadeIcon";
+import NadeShape from "@/components/NadeShape";
 import Landing from "@/components/Landing";
 import TacticalMap from "@/components/TacticalMap";
 import LineupCard from "@/components/LineupCard";
@@ -27,7 +28,7 @@ export default function Page() {
   const [activeMap, setActiveMap] = useState(ACTIVE_MAPS[0].id);
   const [view, setView] = useState("map");
   const [side, setSide] = useState("ALL");
-  const [type, setType] = useState("ALL");
+  const [types, setTypes] = useState(() => new Set(Object.keys(TYPE_META)));
   const [selected, setSelected] = useState(null);
   const [activeSpot, setActiveSpot] = useState(null);
   const [queue, setQueue] = useState(null);
@@ -71,10 +72,16 @@ export default function Page() {
     return lineups.filter((l) => {
       if (l.map !== activeMap) return false;
       if (side !== "ALL" && l.side !== side) return false;
-      if (type !== "ALL" && l.type !== type) return false;
+      if (!types.has(l.type)) return false;
       return true;
     });
-  }, [lineups, activeMap, side, type]);
+  }, [lineups, activeMap, side, types]);
+
+  const toggleType = (key) => setTypes((prev) => {
+    const next = new Set(prev);
+    if (next.has(key)) { if (next.size > 1) next.delete(key); } else next.add(key);
+    return next;
+  });
 
   // group lineups by landing spot (target); the pin sits on the landing point
   const spots = useMemo(() => {
@@ -192,7 +199,7 @@ export default function Page() {
     return () => { document.removeEventListener("mousedown", onDoc); document.removeEventListener("keydown", onEsc); };
   }, [profileOpen]);
 
-  useEffect(() => { setActiveSpot(null); }, [activeMap, side, type, screen]);
+  useEffect(() => { setActiveSpot(null); }, [activeMap, side, types, screen]);
 
   const formMapId = editing ? editing.map : activeMap;
   const formSpots = useMemo(() => {
@@ -210,8 +217,7 @@ export default function Page() {
     if (!stage) return;
     animate(stage, {
       opacity: [0, 1],
-      scale: [screen === "map" ? 1.06 : 0.98, 1],
-      duration: 380,
+      duration: 300,
       ease: "out(3)",
       onComplete: () => setTransitioning(false),
     });
@@ -224,8 +230,7 @@ export default function Page() {
     setTransitioning(true);
     animate(stage, {
       opacity: [1, 0],
-      scale: [1, next === "map" ? 1.08 : 0.96],
-      duration: 260,
+      duration: 200,
       ease: "in(2)",
       onComplete: finish,
     });
@@ -508,11 +513,11 @@ export default function Page() {
                 ))}
               </div>
               <div className="ub-filtergroup">
-                <button className={`ub-pill ${type === "ALL" ? "active" : ""}`} onClick={() => setType("ALL")}>All types</button>
                 {Object.entries(TYPE_META).map(([key, t]) => {
                   const n = lineups.filter((l) => l.map === activeMap && (side === "ALL" || l.side === side) && l.type === key).length;
+                  const on = types.has(key);
                   return (
-                    <button key={key} className={`ub-pill ub-pill-type ${type === key ? "active" : ""} ${n === 0 ? "zero" : ""}`} onClick={() => setType(key)} style={{ "--tc": t.color }}>
+                    <button key={key} className={`ub-pill ub-pill-type ${on ? "active" : "off"} ${n === 0 ? "zero" : ""}`} onClick={() => toggleType(key)} style={{ "--tc": t.color }}>
                       <NadeIcon type={key} size={14} />{t.label}{n > 0 && <span className="ub-pillcount">{n}</span>}
                     </button>
                   );
@@ -596,8 +601,7 @@ export default function Page() {
                         const n = filtered.filter((l) => l.type === key).length;
                         return (
                           <div key={key} className="ub-legend-row" style={{ opacity: n ? 1 : 0.35 }}>
-                            <span className="ub-legend-dot" style={{ background: t.color }} />
-                            <NadeIcon type={key} size={14} /> {t.label}
+                            <NadeShape type={key} size={15} fill="#c7c2ce" stroke="none" /> {t.label}
                             <span className="ub-legend-n">{n}</span>
                           </div>
                         );
@@ -615,7 +619,7 @@ export default function Page() {
                 {admin && <span>Click "Add lineup" to create one on {mapMeta.name}.</span>}
               </div>
             ) : (
-              <div className="ub-grid" key={`${side}-${type}`}>
+              <div className="ub-grid" key={`${side}-${[...types].sort().join("")}`}>
                 {filtered.map((l, i) => <LineupCard key={l.id} lineup={l} index={i} onClick={() => pickLineup(l)} fav={favs.includes(l.id)} onToggleFav={() => toggleFav(l.id)} learned={learned.includes(l.id)} onToggleLearned={() => toggleLearned(l.id)} loggedIn={loggedIn} />)}
               </div>
             )}

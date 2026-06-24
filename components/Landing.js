@@ -73,6 +73,7 @@ export default function Landing({ maps, lineups, learned = [], loggedIn, onPick,
           <span className="nl-display-line"><span>CS2 lineups.</span></span>
           <span className="nl-display-line"><span>Mapped.</span></span>
         </h1>
+        <div className="nl-ribbon" />
         <div className="nl-tally">
           {Object.entries(TYPE_META).map(([key, t]) => (
             <span key={key} className="nl-tallyitem" style={{ color: t.color }}>

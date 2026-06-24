@@ -86,6 +86,11 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 .ub-pin:hover .ub-pin-dot{transform:scale(1.3);}
 .ub-pin-marker{display:flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:50%;background:var(--pin,var(--accent));border:2.5px solid #16181b;box-shadow:0 1px 6px rgba(0,0,0,.55);color:#16181b;transition:transform .15s;}
 .ub-pin:hover .ub-pin-marker{transform:scale(1.16);}
+.ub-pin-shape{position:relative;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 1px 2px rgba(0,0,0,.55));transition:transform .15s;}
+.ub-pin:hover .ub-pin-shape{transform:scale(1.16);}
+.ub-pin.act .ub-pin-shape{filter:drop-shadow(0 0 5px var(--pin,var(--accent)));}
+.ub-pin-glyph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#16181b;pointer-events:none;}
+.ub-shape-flash .ub-pin-glyph{transform:translate(-50%,calc(-50% + 3px));}
 .ub-pin-draft{--pin:#ff5b00;pointer-events:none;animation:ubpulse 1.1s infinite;}
 @keyframes ubpulse{0%,100%{opacity:1;}50%{opacity:.45;}}
 .ub-maplegend{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;min-width:260px;flex:1 1 320px;}
@@ -175,7 +180,7 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 @media(max-width:680px){.ub-form-grid{grid-template-columns:1fr;}.ub-step-edit{grid-template-columns:1fr 1fr;}}
 
 /* two-screen stage + navigation */
-.nns-stage{transform-origin:center top;will-change:transform,opacity;}
+.nns-stage{transform-origin:center top;}
 .ub-logobtn{background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;}
 .ub-back{display:inline-flex;align-items:center;gap:6px;margin:10px 28px 2px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:8px 13px;font-size:13px;cursor:pointer;font-family:'Manrope',sans-serif;transition:all .15s;}
 .ub-back:hover{color:var(--text);border-color:#3b4046;}
@@ -327,7 +332,7 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 
 /* ---- cooler pack ---- */
 /* trajectory arcs */
-.ub-arc{fill:none;stroke:var(--ac,var(--accent));stroke-width:0.7;stroke-linecap:round;filter:drop-shadow(0 0 1px rgba(0,0,0,.55));}
+.ub-arc{fill:none;stroke:var(--ac,var(--accent));stroke-width:0.7;stroke-linecap:round;}
 .ub-arc.draft{stroke:var(--accent);stroke-dasharray:2 1.6;opacity:.75;}
 
 /* tactical HUD overlay */
@@ -393,7 +398,7 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 .ub-learnflag{display:inline-flex;color:var(--accent);}
 .ub-card.learned{border-color:rgba(255,91,0,.4);}
 
-.ub-proj{fill:var(--c,var(--accent));filter:drop-shadow(0 0 1.4px rgba(0,0,0,.6));}
+.ub-proj{fill:var(--c,var(--accent));}
 .ub-pin.act .ub-pin-marker{animation:ubpulsering 2.4s ease-out infinite;}
 @keyframes ubpulsering{0%{box-shadow:0 0 0 0 rgba(255,91,0,.55);}70%{box-shadow:0 0 0 13px rgba(255,91,0,0);}100%{box-shadow:0 0 0 0 rgba(255,91,0,0);}}
 
@@ -559,8 +564,8 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 .ub-detailpanel .ub-savecol-pop{right:auto;left:0;}
 
 /* selected-lineup emphasis on the map */
-.ub-arc.sel{stroke-width:1.15;filter:drop-shadow(0 0 2px var(--ac,var(--accent)));}
-.ub-proj.sel{filter:drop-shadow(0 0 2.5px var(--c,var(--accent)));}
+.ub-arc.sel{stroke-width:1.5;}
+.ub-proj.sel{fill:var(--c,var(--accent));}
 .ub-throwdot.sel{box-shadow:0 0 0 3px rgba(255,91,0,.22),0 1px 5px rgba(0,0,0,.55);animation:ubthrowpulse 2s ease-in-out infinite;}
 @keyframes ubthrowpulse{0%,100%{box-shadow:0 0 0 3px rgba(255,91,0,.22),0 1px 5px rgba(0,0,0,.55);}50%{box-shadow:0 0 0 6px rgba(255,91,0,.08),0 1px 5px rgba(0,0,0,.55);}}
 
@@ -675,7 +680,7 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 .ub-toolbtn,.ub-addbtn,.ub-btn-primary,.ub-btn-ghost,.ub-btn-danger,.ub-back,.ub-actbtn,.ub-learnbtn,.ub-sharebtn,.ub-close{border-radius:10px;}
 
 /* press feedback on interactive elements */
-.ub-pill,.ub-toolbtn,.ub-addbtn,.ub-btn-primary,.ub-btn-ghost,.ub-btn-danger,.ub-actbtn,.ub-mapcard,.ub-back,.ub-learnbtn,.ub-sharebtn{transition:all .16s ease;}
+.ub-pill,.ub-toolbtn,.ub-addbtn,.ub-btn-primary,.ub-btn-ghost,.ub-btn-danger,.ub-actbtn,.ub-mapcard,.ub-back,.ub-learnbtn,.ub-sharebtn{transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .16s ease;}
 .ub-pill:active,.ub-toolbtn:active,.ub-addbtn:active,.ub-btn-primary:active,.ub-btn-ghost:active,.ub-btn-danger:active,.ub-actbtn:active,.ub-mapcard:active,.ub-back:active{transform:translateY(1px) scale(.985);}
 
 /* primary buttons: gradient + warm glow */
@@ -696,13 +701,13 @@ body{font-family:'Manrope',sans-serif;background:radial-gradient(1100px 560px at
 
 /* ambient: solid bg + slow drifting glow + faint grain texture */
 body{background:var(--bg);}
-body::before{content:"";position:fixed;inset:-25%;z-index:-2;pointer-events:none;background:radial-gradient(820px 460px at 50% 6%, rgba(255,91,0,.07), transparent 62%),radial-gradient(720px 520px at 50% 3%, rgba(120,132,165,.09), transparent 60%);animation:ubglow 18s ease-in-out infinite alternate;}
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;transform:translateZ(0);background:radial-gradient(820px 460px at 50% 6%, rgba(255,91,0,.07), transparent 62%),radial-gradient(720px 520px at 50% 3%, rgba(120,132,165,.09), transparent 60%),repeating-linear-gradient(0deg, transparent 0 47px, rgba(255,255,255,.015) 47px 48px),repeating-linear-gradient(90deg, transparent 0 47px, rgba(255,255,255,.015) 47px 48px);}
 @keyframes ubglow{0%{transform:translate3d(-2%,0,0) scale(1);opacity:.8;}100%{transform:translate3d(2%,1%,0) scale(1.08);opacity:1;}}
-body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
 
 /* subtle brand pulse on the logo crosshair */
-.nns-cross{animation:ubcrossglow 3.4s ease-in-out infinite;}
-@keyframes ubcrossglow{0%,100%{filter:drop-shadow(0 0 0 rgba(255,91,0,0));}50%{filter:drop-shadow(0 0 5px rgba(255,91,0,.5));}}
+.nns-cross{filter:drop-shadow(0 0 3px rgba(255,91,0,.32));}
+
 
 html{scroll-behavior:smooth;}
 
@@ -735,7 +740,7 @@ html{scroll-behavior:smooth;}
 
 /* perf: drop continuous filter animation on the logo, make ambient glow translate-only */
 .nns-cross{animation:none;}
-body::before{will-change:transform;}
+
 @keyframes ubglow{from{transform:translate3d(-2%,0,0);}to{transform:translate3d(2%,0,0);}}
 
 @media (prefers-reduced-motion: reduce){ .ub-arc{animation:none!important;stroke-dasharray:none;} }
@@ -749,7 +754,7 @@ body::before{will-change:transform;}
 .ub-pin.dim{z-index:5;}
 
 /* perf: isolate the fixed ambient layers onto their own GPU layer so they don't repaint while scrolling */
-body::after{transform:translateZ(0);will-change:transform;backface-visibility:hidden;}
+
 body::before{backface-visibility:hidden;}
 
 /* perf: opaque sticky header (no per-frame blend) + drop backdrop-blur on zoom buttons */
@@ -905,6 +910,8 @@ body::before{background:radial-gradient(880px 500px at 50% 4%, rgba(255,121,40,.
 .ub-pill-type.active{color:var(--tc);border-color:var(--tc);background:color-mix(in srgb, var(--tc) 16%, var(--surface));font-weight:700;}
 .ub-pill-type .ub-pillcount{background:color-mix(in srgb, var(--tc,#888) 16%, var(--surface2));color:inherit;}
 .ub-pill-type.zero{opacity:.42;}
+.ub-pill-type.off{opacity:.4;filter:grayscale(.7);}
+.ub-pill-type.off:hover{opacity:.7;filter:grayscale(.3);}
 
 /* lineup cards: soft colour edge + glow in their nade colour */
 .ub-card{border-top:2px solid color-mix(in srgb, var(--tc,var(--accent)) 55%, transparent);}
@@ -967,12 +974,7 @@ body::before{background:radial-gradient(880px 500px at 50% 4%, rgba(255,121,40,.
 }
 
 /* tactical grid behind everything (scrolls naturally, cheap) */
-body{
-  background-color:var(--bg);
-  background-image:
-    repeating-linear-gradient(0deg, transparent 0 47px, rgba(255,255,255,.016) 47px 48px),
-    repeating-linear-gradient(90deg, transparent 0 47px, rgba(255,255,255,.016) 47px 48px);
-}
+body{ background-color:var(--bg); }
 
 /* HUD corner brackets on the key frames (scope vibe) */
 .nl-howrow-art,.ub-qs{position:relative;}
@@ -1054,3 +1056,110 @@ body{
 .ub-locktip svg{color:var(--accent);flex:0 0 auto;}
 .ub-locktip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--surface2);}
 .ub-locked-wrap:hover .ub-locktip{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* perf: don't paint heavy sections until they're near the viewport */
+.nl-how,.nl-recent,.nl-marquee{content-visibility:auto;contain-intrinsic-size:auto 500px;}
+.nl-marquee{contain-intrinsic-size:auto 60px;}
+
+/* ============ side = pin fill colour (T gold / CT blue); type shown by icon ============ */
+/* mixed-side spot: split fill so you can see both T and CT land here */
+.ub-spinpin.mix-side .ub-pin-marker,.ub-spinpin.mix-side .ub-pin-dot{
+  background:linear-gradient(135deg,#e0b341 0 50%,#5aa9e0 50% 100%);
+}
+/* on-map T/CT legend */
+.ub-hud-sides{position:absolute;top:13px;left:13px;display:flex;align-items:center;gap:4px;
+  font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;letter-spacing:1px;color:var(--muted);
+  background:rgba(10,12,15,.6);padding:3px 9px;border-radius:6px;pointer-events:none;}
+.ub-hud-sides i{width:8px;height:8px;border-radius:50%;}
+.ub-hud-sides i.s-t{background:#e0b341;}
+.ub-hud-sides i.s-ct{background:#5aa9e0;margin-left:7px;}
+
+/* ============================================================
+   VISUAL UPLIFT — pass 1 (Refined base, squared controls)
+   Appended override layer. No logic/markup dependencies.
+   ============================================================ */
+:root{
+  --on-accent:#1f0c04;
+  --border-strong:#423c4b;
+  --grad-accent:linear-gradient(180deg,#ff6f24,#ff5b00);
+  --grad-accent-hover:linear-gradient(180deg,#ff854a,#ff6a1a);
+  --glow-accent:0 4px 16px rgba(255,91,0,.22);
+  --glow-accent-hover:0 7px 22px rgba(255,91,0,.32);
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --ribbon:linear-gradient(90deg,#5d8ad8 0 25%,#e0b341 25% 50%,#cf4a3c 50% 75%,#ff5b00 75% 100%);
+  --shadow-card:0 6px 22px rgba(0,0,0,.26);
+  --shadow-lift:0 20px 44px rgba(0,0,0,.36);
+  --ctl-r:5px;
+}
+
+/* --- squared interactive controls (buttons, pills, toggles, search, tags, chips) --- */
+.ub-pill,.ub-viewtoggle,.ub-search,.nl-search,.nl-mapsearch,.nl-stat,.nl-tally,
+.ub-btn-primary,.ub-toolbtn,.ub-addbtn,.ub-select,.ub-lib-tabs button,
+.ub-mapcard-count,.nl-count,.ub-meta-chip,.ub-sidetag,.ub-adminflag,.ub-lib-count,
+.ub-colopen,.ub-recentchip,.nl-recentchip,.ub-queue,.dh-roomtag,.ub-pillcount,
+.ub-select,.ub-steps-head button{border-radius:var(--ctl-r) !important;}
+
+/* --- primary button: gradient + glow + hover lift --- */
+.ub-btn-primary,.ub-addbtn{background:var(--grad-accent);box-shadow:var(--glow-accent);color:var(--on-accent);transition:background .15s,box-shadow .15s,transform .15s;}
+.ub-btn-primary:hover,.ub-addbtn:hover{background:var(--grad-accent-hover);box-shadow:var(--glow-accent-hover);transform:translateY(-1px);}
+.ub-toolbtn{transition:all .15s;}
+.ub-toolbtn:hover{color:var(--text);border-color:var(--border-strong);}
+
+/* --- hero: bigger, calmer display + 4-hue ribbon divider --- */
+.nl-display{font-size:clamp(44px,5.6vw,80px);line-height:1.05;}
+.nl-ribbon{width:120px;height:5px;border-radius:3px;background:var(--ribbon);margin:24px auto 0;}
+
+/* --- map-view hero title a touch larger --- */
+.ub-hero-title{font-size:clamp(30px,3.8vw,48px);}
+
+/* --- card hover: lift + cushioned shadow --- */
+.ub-card{box-shadow:var(--shadow-card);transition:transform .18s var(--ease),border-color .18s,box-shadow .18s;}
+.ub-card:hover{box-shadow:var(--shadow-lift);transform:translateY(-4px);}
+.nl-card{box-shadow:var(--shadow-card);transition:transform .18s var(--ease),border-color .18s,box-shadow .18s;}
+.nl-card img{transition:transform .45s ease;}
+.nl-card:hover{box-shadow:var(--shadow-lift);transform:translateY(-5px);}
+.nl-card:hover img{transform:scale(1.06);}
+
+/* ============================================================
+   MOTION PASS — staggered reveals + microinteractions
+   Principles (from the 3 motion skills): 200–320ms, natural easing,
+   transform/opacity ONLY, full prefers-reduced-motion respect.
+   Deliberately NO scroll-linked parallax (protects scroll perf).
+   ============================================================ */
+:root{ --dur-1:.2s; --dur-2:.32s; }
+
+@keyframes nns-rise{ from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:none;} }
+
+/* staggered entrance for card/list grids (replays on mount + filter/map change) */
+.nl-grid > *, .ub-grid > *, .nl-recentgrid > *{ animation:nns-rise .42s var(--ease) both; }
+.nl-grid > *:nth-child(2),.ub-grid > *:nth-child(2),.nl-recentgrid > *:nth-child(2){animation-delay:.04s}
+.nl-grid > *:nth-child(3),.ub-grid > *:nth-child(3),.nl-recentgrid > *:nth-child(3){animation-delay:.08s}
+.nl-grid > *:nth-child(4),.ub-grid > *:nth-child(4),.nl-recentgrid > *:nth-child(4){animation-delay:.12s}
+.nl-grid > *:nth-child(5),.ub-grid > *:nth-child(5),.nl-recentgrid > *:nth-child(5){animation-delay:.16s}
+.nl-grid > *:nth-child(6),.ub-grid > *:nth-child(6),.nl-recentgrid > *:nth-child(6){animation-delay:.2s}
+.nl-grid > *:nth-child(7),.ub-grid > *:nth-child(7),.nl-recentgrid > *:nth-child(7){animation-delay:.24s}
+.nl-grid > *:nth-child(n+8),.ub-grid > *:nth-child(n+8),.nl-recentgrid > *:nth-child(n+8){animation-delay:.28s}
+
+/* hero tally: gentle staggered rise */
+.nl-tallyitem{animation:nns-rise .4s var(--ease) both;}
+.nl-tallyitem:nth-child(2){animation-delay:.05s}
+.nl-tallyitem:nth-child(3){animation-delay:.1s}
+.nl-tallyitem:nth-child(4){animation-delay:.15s}
+
+/* microinteractions: press feedback (transform only) */
+.ub-btn-primary:active,.ub-addbtn:active,.ub-toolbtn:active,.ub-pill:active,
+.ub-viewtoggle button:active{transform:scale(.96);}
+.nl-card:active{transform:translateY(-2px) scale(.992);}
+.ub-card:active{transform:translateY(-2px) scale(.995);}
+.nl-recentchip:active,.ub-recentchip:active{transform:scale(.98);}
+
+/* accessible keyboard focus ring */
+:where(button,a,input,select,[tabindex]):focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+/* honour reduced-motion: disable all of the above */
+@media (prefers-reduced-motion: reduce){
+  .nl-grid > *,.ub-grid > *,.nl-recentgrid > *,.nl-tallyitem{animation:none!important;}
+  .ub-btn-primary:active,.ub-addbtn:active,.ub-toolbtn:active,.ub-pill:active,
+  .ub-viewtoggle button:active,.nl-card:active,.ub-card:active,
+  .nl-recentchip:active,.ub-recentchip:active{transform:none!important;}
+}

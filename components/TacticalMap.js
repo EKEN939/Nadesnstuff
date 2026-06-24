@@ -5,6 +5,7 @@ import { animate, stagger } from "animejs";
 import { TYPE_META } from "@/lib/constants";
 import { MAP_ZONES } from "@/data/radars";
 import NadeIcon from "./NadeIcon";
+import NadeShape from "./NadeShape";
 
 export default function TacticalMap({
   map, spots = [], activeSpot, onSelectSpot, onPin, selected,
@@ -16,6 +17,7 @@ export default function TacticalMap({
   const zones = MAP_ZONES[map.id] || [];
   const radarSrc = map.radar || "/radars/" + map.id + ".png";
   const active = spots.find((s) => s.target === activeSpot) || null;
+  const bothSides = new Set(spots.flatMap((s) => s.lineups.map((l) => l.side))).size > 1;
   useEffect(() => { setImgOk(true); }, [map.id]);
 
   const scrollRef = useRef(null);
@@ -64,6 +66,11 @@ export default function TacticalMap({
 
   return (
     <div className="ub-mapouter">
+      <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true"><defs>
+        <linearGradient id="nns-sidemix" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="50%" stopColor="#e0b341" /><stop offset="50%" stopColor="#5aa9e0" />
+        </linearGradient>
+      </defs></svg>
       {zoomable && (
         <div className="ub-zoom">
           <button type="button" aria-label="Zoom in" onClick={() => setZoom((z) => Math.min(3, +(z + 0.5).toFixed(1)))}><Plus size={15} /></button>
@@ -74,7 +81,7 @@ export default function TacticalMap({
         onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={endDrag} onPointerLeave={endDrag} onClickCapture={onClickCapture}>
         <div ref={ref} className={`ub-map ${addMode ? "addmode" : ""} ${imgOk ? "has-img" : ""}`} style={{ width: `${zoom * 100}%` }} onClick={handleClick}>
           {imgOk ? (
-            <img className="ub-map-img" src={radarSrc} alt={`${map.name} radar`} draggable={false} onError={() => setImgOk(false)} />
+            <img className="ub-map-img" src={radarSrc} alt={`${map.name} radar`} draggable={false} decoding="async" onError={() => setImgOk(false)} />
           ) : (
             <div className="ub-map-schema">
               {zones.map((z, i) => (
@@ -103,13 +110,16 @@ export default function TacticalMap({
             const types = [...new Set(s.lineups.map((l) => l.type))];
             const iconType = types.length === 1 ? types[0] : null;
             const color = iconType ? TYPE_META[iconType].color : "#ececec";
+            const sides = [...new Set(s.lineups.map((l) => l.side))];
+            const sideClass = sides.length > 1 ? "mix-side" : sides[0] === "T" ? "t-side" : "ct-side";
+            const sideColor = sides[0] === "T" ? "#e0b341" : "#5aa9e0";
             const focus = selected ? selected.target : activeSpot;
             const dim = focus && s.target !== focus;
             return (
-              <button key={s.target} className={`ub-pin ub-spinpin ${dim ? "dim" : ""} ${focus && s.target === focus ? "act" : ""}`} style={{ left: `${s.x}%`, top: `${s.y}%`, "--pin": color }}
+              <button key={s.target} className={`ub-pin ub-spinpin ${sideClass} ${dim ? "dim" : ""} ${focus && s.target === focus ? "act" : ""}`} style={{ left: `${s.x}%`, top: `${s.y}%`, "--pin": sideColor }}
                 onClick={(e) => { e.stopPropagation(); s.lineups.length > 1 ? onSelectSpot(s.target) : onPin(s.lineups[0]); }}
                 title={`${s.target} (${s.lineups.length})`}>
-                {iconType ? <span className="ub-pin-marker"><NadeIcon type={iconType} size={14} /></span> : <span className="ub-pin-dot" />}
+                {iconType ? <span className={`ub-pin-shape ub-shape-${iconType}`}><NadeShape type={iconType} size={29} fill={sides.length > 1 ? "url(#nns-sidemix)" : sideColor} /><NadeIcon type={iconType} size={13} className="ub-pin-glyph" style={{ color: sides.length > 1 ? "#16181b" : sides[0] === "T" ? "#241a02" : "#06223a" }} /></span> : <span className="ub-pin-dot" />}
                 {s.lineups.length > 1 && <span className="ub-pin-count">{s.lineups.length}</span>}
                 <span className="ub-pin-pop">
                   <span className="ub-pin-popicons">{types.map((tp) => <span key={tp} style={{ color: TYPE_META[tp].color }}><NadeIcon type={tp} size={13} /></span>)}</span>
@@ -124,13 +134,13 @@ export default function TacticalMap({
 
           {/* browse: throw spots for the active landing spot */}
           {!addMode && active && active.lineups.map((l) => l.fromX != null && (
-            <button key={"t" + l.id} className="ub-throwdot" style={{ left: `${l.fromX}%`, top: `${l.fromY}%`, "--pin": TYPE_META[l.type].color }}
+            <button key={"t" + l.id} className="ub-throwdot" style={{ left: `${l.fromX}%`, top: `${l.fromY}%`, "--pin": l.side === "T" ? "#e0b341" : "#5aa9e0" }}
               onClick={(e) => { e.stopPropagation(); onPin(l); }} title={l.spawn || l.from} />
           ))}
 
           {/* browse: throw spot for a single selected lineup */}
           {!addMode && selected && !active && selected.fromX != null && (
-            <span className="ub-throwdot sel" style={{ left: `${selected.fromX}%`, top: `${selected.fromY}%`, "--pin": TYPE_META[selected.type].color }} title={selected.spawn || selected.from} />
+            <span className="ub-throwdot sel" style={{ left: `${selected.fromX}%`, top: `${selected.fromY}%`, "--pin": selected.side === "T" ? "#e0b341" : "#5aa9e0" }} title={selected.spawn || selected.from} />
           )}
 
           {/* add mode: landing + throw drafts */}
@@ -146,6 +156,7 @@ export default function TacticalMap({
         <div className="ub-hud" aria-hidden="true">
           <i /><i /><i /><i />
           <span className="ub-hud-label">{map.name} · {spots.length} spot{spots.length !== 1 ? "s" : ""}</span>
+          <span className="ub-hud-sides"><i className="s-t" />T<i className="s-ct" />CT</span>
         </div>
       )}
     </div>

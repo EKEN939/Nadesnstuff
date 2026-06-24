@@ -159,7 +159,7 @@ export default function AddLineupForm({ map, onClose, onSave, initial, existingS
               <div className="ub-field-row">
                 <label className="ub-field"><span>Throw</span>
                   <select value={f.throwType} onChange={(e) => up("throwType", e.target.value)}>
-                    <option>Left-click</option><option>Jump-throw</option><option>Run + jump-throw</option><option>Right-click</option></select></label>
+                    <option>Left-click</option><option>Jump-throw</option><option>Run + jump-throw</option><option>Crouch + jump-throw</option><option>Right-click</option><option>Right + Left-click</option></select></label>
                 <label className="ub-field"><span>Difficulty</span>
                   <select value={f.difficulty} onChange={(e) => up("difficulty", e.target.value)}><option>Easy</option><option>Medium</option><option>Hard</option></select></label>
               </div>
